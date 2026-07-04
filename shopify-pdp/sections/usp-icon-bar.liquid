@@ -1,13 +1,14 @@
 {%- comment -%} Full-width USP icon row, e.g. "Free From Worry, Full of Flavor" {%- endcomment -%}
 {%- render 'theme-fonts' -%}
+{%- render 'scroll-reveal' -%}
 <section class="usp-bar" id="usp-bar-{{ section.id }}" style="background-color: {{ section.settings.background_color }}; color: {{ section.settings.text_color }};">
   <div class="usp-bar__wrap">
     {%- if section.settings.heading != blank -%}
-      <h2 class="usp-bar__heading">{{ section.settings.heading }}</h2>
+      <h2 class="usp-bar__heading reveal">{{ section.settings.heading }}</h2>
     {%- endif -%}
     <ul class="usp-bar__list">
       {%- for block in section.blocks -%}
-        <li class="usp-bar__item" {{ block.shopify_attributes }}>
+        <li class="usp-bar__item reveal" style="transition-delay: {{ forloop.index0 | times: 60 }}ms;" {{ block.shopify_attributes }}>
           {%- if block.settings.icon != blank -%}
             {{ block.settings.icon | image_url: width: 80 | image_tag: loading: 'lazy' }}
           {%- endif -%}
@@ -19,7 +20,7 @@
 </section>
 
 {%- style -%}
-#usp-bar-{{ section.id }} { padding: 40px 5vw; text-align: center; }
+#usp-bar-{{ section.id }} { padding: 40px 5vw; text-align: {{ section.settings.text_alignment }}; }
 #usp-bar-{{ section.id }} .usp-bar__wrap { max-width: 1240px; margin: 0 auto; }
 #usp-bar-{{ section.id }} .usp-bar__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(20px, 3vw, 26px); margin: 0 0 24px; letter-spacing: .02em; }
 #usp-bar-{{ section.id }} .usp-bar__list { list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; padding: 0; margin: 0; }
@@ -36,6 +37,7 @@
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Free From Worry, Full of Flavor" },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#f3edd6" },
+    { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
   ],
   "blocks": [

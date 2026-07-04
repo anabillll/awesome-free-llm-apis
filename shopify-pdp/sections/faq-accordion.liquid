@@ -1,11 +1,12 @@
 {%- comment -%} Dark "In Case You Were Wondering..." FAQ accordion {%- endcomment -%}
 {%- render 'theme-fonts' -%}
+{%- render 'scroll-reveal' -%}
 <section class="faq" id="faq-{{ section.id }}">
   <div class="faq__wrap">
-    <h2 class="faq__heading">{{ section.settings.heading }}</h2>
+    <h2 class="faq__heading reveal">{{ section.settings.heading }}</h2>
     <div class="faq__list">
       {%- for block in section.blocks -%}
-        <details class="faq__item" {{ block.shopify_attributes }}{% if forloop.first %} open{% endif %}>
+        <details class="faq__item reveal" style="transition-delay: {{ forloop.index0 | times: 70 }}ms;" {{ block.shopify_attributes }}{% if forloop.first %} open{% endif %}>
           <summary class="faq__question">
             <span>{{ block.settings.question }}</span>
             <span class="faq__icon" aria-hidden="true"></span>
@@ -20,7 +21,7 @@
 {%- style -%}
 #faq-{{ section.id }} { background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; padding: 56px 5vw; }
 #faq-{{ section.id }} .faq__wrap { max-width: 820px; margin: 0 auto; }
-#faq-{{ section.id }} .faq__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: center; font-size: clamp(22px, 3vw, 30px); margin: 0 0 28px; }
+#faq-{{ section.id }} .faq__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(22px, 3vw, 30px); margin: 0 0 28px; }
 #faq-{{ section.id }} .faq__item { border-bottom: 1px solid rgba(255,255,255,.15); }
 #faq-{{ section.id }} .faq__item:first-child { border-top: 1px solid rgba(255,255,255,.15); }
 #faq-{{ section.id }} .faq__question { display: flex; justify-content: space-between; align-items: center; padding: 18px 4px; cursor: pointer; font-weight: 600; list-style: none; }
@@ -28,6 +29,9 @@
 #faq-{{ section.id }} .faq__icon::before { content: '+'; font-size: 20px; }
 #faq-{{ section.id }} .faq__item[open] .faq__icon::before { content: '\2212'; }
 #faq-{{ section.id }} .faq__answer { padding: 0 4px 20px; opacity: .8; line-height: 1.7; font-size: 14px; }
+@keyframes faq-answer-fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+#faq-{{ section.id }} .faq__item[open] .faq__answer { animation: faq-answer-fade .25s ease; }
+@media (prefers-reduced-motion: reduce) { #faq-{{ section.id }} .faq__item[open] .faq__answer { animation: none; } }
 {%- endstyle -%}
 
 <script>
@@ -50,6 +54,7 @@
   "name": "FAQ accordion",
   "tag": "section",
   "settings": [
+    { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "In Case You Were Wondering..." },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#17110b" },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#ffffff" }

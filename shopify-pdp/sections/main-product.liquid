@@ -1,5 +1,6 @@
 {%- comment -%} Main PDP section: gallery, buy box, tiered pricing, accordions, pickup availability, cross-sell {%- endcomment -%}
 {%- render 'theme-fonts' -%}
+{%- render 'scroll-reveal' -%}
 {%- assign product = product -%}
 
 <section class="pdp-main" id="pdp-main-{{ section.id }}">
@@ -215,11 +216,11 @@
   -%}
   {%- if cross_sell_blocks.size > 0 -%}
   <div class="pdp-also-consider">
-    <h2 class="pdp-also-consider__heading">{{ section.settings.also_consider_heading }}</h2>
+    <h2 class="pdp-also-consider__heading reveal">{{ section.settings.also_consider_heading }}</h2>
     <div class="pdp-also-consider__grid">
       {%- for block in cross_sell_blocks -%}
         {%- assign cs_product = block.settings.product -%}
-        <label class="pdp-cross-sell" {{ block.shopify_attributes }}>
+        <label class="pdp-cross-sell reveal" style="transition-delay: {{ forloop.index0 | times: 80 }}ms;" {{ block.shopify_attributes }}>
           <input type="checkbox" class="pdp-cross-sell__check" data-cross-sell-check value="{{ cs_product.selected_or_first_available_variant.id }}">
           {{ cs_product.featured_image | image_url: width: 120 | image_tag: loading: 'lazy' }}
           <span class="pdp-cross-sell__title">{{ cs_product.title | default: block.settings.fallback_title }}</span>
@@ -271,6 +272,7 @@
 #pdp-main-{{ section.id }} .pdp-gallery__thumb.is-active { border-color: var(--pdp-brown); }
 
 /* Info column */
+#pdp-main-{{ section.id }} .pdp-main__info { text-align: {{ section.settings.text_alignment }}; }
 #pdp-main-{{ section.id }} .pdp-badges { display: flex; gap: 8px; margin-bottom: 8px; }
 #pdp-main-{{ section.id }} .pdp-badge { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; font-weight: 600; }
 #pdp-main-{{ section.id }} .pdp-badge--new { background: var(--pdp-ink); color: #fff; }
@@ -310,7 +312,8 @@
 #pdp-main-{{ section.id }} .pdp-tier__price { font-weight: 700; }
 #pdp-main-{{ section.id }} .pdp-tier__save { background: var(--pdp-green); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
 
-#pdp-main-{{ section.id }} .pdp-atc { width: 100%; background: var(--pdp-ink); color: #fff; border: none; padding: 16px; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; letter-spacing: .03em; text-transform: uppercase; border-radius: 6px; cursor: pointer; }
+#pdp-main-{{ section.id }} .pdp-atc { width: 100%; background: var(--pdp-ink); color: #fff; border: none; padding: 16px; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; letter-spacing: .03em; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: background .15s, transform .1s; }
+#pdp-main-{{ section.id }} .pdp-atc:active { transform: scale(.97); }
 #pdp-main-{{ section.id }} .pdp-atc:disabled { opacity: .5; cursor: not-allowed; }
 #pdp-main-{{ section.id }} .pdp-atc:not(:disabled):hover { background: var(--pdp-brown); }
 #pdp-main-{{ section.id }} .pdp-share { display: flex; gap: 12px; justify-content: center; margin: 14px 0; }
@@ -322,6 +325,9 @@
 #pdp-main-{{ section.id }} .pdp-accordion__icon::before { content: '+'; font-size: 18px; }
 #pdp-main-{{ section.id }} .pdp-accordion[open] .pdp-accordion__icon::before { content: '\2212'; }
 #pdp-main-{{ section.id }} .pdp-accordion__body { padding: 0 2px 16px; opacity: .8; font-size: 14px; line-height: 1.6; }
+@keyframes pdp-accordion-fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+#pdp-main-{{ section.id }} .pdp-accordion[open] .pdp-accordion__body { animation: pdp-accordion-fade .25s ease; }
+@media (prefers-reduced-motion: reduce) { #pdp-main-{{ section.id }} .pdp-accordion[open] .pdp-accordion__body { animation: none; } }
 
 #pdp-main-{{ section.id }} .pdp-trust-icons { list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; padding: 20px 0 0; border-top: 1px solid var(--pdp-line); }
 @media (min-width: 480px) { #pdp-main-{{ section.id }} .pdp-trust-icons { grid-template-columns: repeat(4, 1fr); } }
@@ -335,12 +341,14 @@
 #pdp-main-{{ section.id }} .pdp-also-consider__heading { text-align: center; font-size: 20px; margin-bottom: 20px; }
 #pdp-main-{{ section.id }} .pdp-also-consider__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 @media (min-width: 700px) { #pdp-main-{{ section.id }} .pdp-also-consider__grid { grid-template-columns: repeat(4, 1fr); } }
-#pdp-main-{{ section.id }} .pdp-cross-sell { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; border: 1px solid var(--pdp-line); border-radius: 10px; padding: 16px 10px; cursor: pointer; font-size: 13px; }
+#pdp-main-{{ section.id }} .pdp-cross-sell { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; border: 1px solid var(--pdp-line); border-radius: 10px; padding: 16px 10px; cursor: pointer; font-size: 13px; transition: transform .15s, box-shadow .15s; }
+#pdp-main-{{ section.id }} .pdp-cross-sell:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(23,17,11,.12); }
 #pdp-main-{{ section.id }} .pdp-cross-sell img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; }
 #pdp-main-{{ section.id }} .pdp-cross-sell__title { font-weight: 600; }
 #pdp-main-{{ section.id }} .pdp-cross-sell__meta { opacity: .6; font-size: 11px; }
 #pdp-main-{{ section.id }} .pdp-cross-sell__price { font-weight: 700; }
-#pdp-main-{{ section.id }} .pdp-cross-sell__cta { display: block; margin: 20px auto 0; background: var(--pdp-ink); color: #fff; border: none; padding: 14px 32px; border-radius: 6px; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; text-transform: uppercase; letter-spacing: .03em; cursor: pointer; }
+#pdp-main-{{ section.id }} .pdp-cross-sell__cta { display: block; margin: 20px auto 0; background: var(--pdp-ink); color: #fff; border: none; padding: 14px 32px; border-radius: 6px; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; text-transform: uppercase; letter-spacing: .03em; cursor: pointer; transition: transform .1s; }
+#pdp-main-{{ section.id }} .pdp-cross-sell__cta:active { transform: scale(.97); }
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 {%- endstyle -%}
 
@@ -466,6 +474,7 @@
   "tag": "section",
   "class": "shopify-section--main-product",
   "settings": [
+    { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "left" },
     { "type": "checkbox", "id": "show_rating", "label": "Show star rating", "default": true },
     { "type": "range", "id": "rating_value", "label": "Rating value", "min": 0, "max": 5, "step": 1, "default": 5 },
     { "type": "text", "id": "rating_count", "label": "Rating count", "default": "128" },

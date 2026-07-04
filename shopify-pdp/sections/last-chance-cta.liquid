@@ -1,8 +1,9 @@
 {%- comment -%} Centered "Last Chance CTA" banner with configurable buttons {%- endcomment -%}
 {%- render 'theme-fonts' -%}
+{%- render 'scroll-reveal' -%}
 <section class="final-cta" id="final-cta-{{ section.id }}">
   <div class="final-cta__wrap">
-    <h2 class="final-cta__heading">{{ section.settings.heading }}</h2>
+    <h2 class="final-cta__heading reveal">{{ section.settings.heading }}</h2>
     {%- if section.settings.body != blank -%}
       <p class="final-cta__body">{{ section.settings.body }}</p>
     {%- endif -%}
@@ -17,12 +18,13 @@
 </section>
 
 {%- style -%}
-#final-cta-{{ section.id }} { padding: 56px 5vw; text-align: center; background: #fff; }
+#final-cta-{{ section.id }} { padding: 56px 5vw; text-align: {{ section.settings.text_alignment }}; background: #fff; }
 #final-cta-{{ section.id }} .final-cta__wrap { max-width: 640px; margin: 0 auto; }
 #final-cta-{{ section.id }} .final-cta__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(22px, 3vw, 30px); margin: 0 0 12px; }
 #final-cta-{{ section.id }} .final-cta__body { opacity: .75; line-height: 1.7; margin: 0 0 24px; }
 #final-cta-{{ section.id }} .final-cta__actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-#final-cta-{{ section.id }} .final-cta__button { padding: 13px 30px; border-radius: 6px; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; text-decoration: none; text-transform: uppercase; letter-spacing: .03em; }
+#final-cta-{{ section.id }} .final-cta__button { padding: 13px 30px; border-radius: 6px; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; text-decoration: none; text-transform: uppercase; letter-spacing: .03em; transition: transform .1s; display: inline-block; }
+#final-cta-{{ section.id }} .final-cta__button:active { transform: scale(.97); }
 #final-cta-{{ section.id }} .final-cta__button--solid { background: #17110b; color: #fff; }
 #final-cta-{{ section.id }} .final-cta__button--outline { border: 1px solid #17110b; color: #17110b; }
 {%- endstyle -%}
@@ -33,6 +35,7 @@
   "tag": "section",
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Last Chance CTA" },
+    { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
     { "type": "text", "id": "body", "label": "Body text", "default": "Add up personal to grab this before you go. Order now to lock in your deal today." }
   ],
   "blocks": [

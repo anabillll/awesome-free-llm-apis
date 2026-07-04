@@ -1,9 +1,10 @@
 {%- comment -%} Dark "Ingredients That Make A Difference" section with icon rows + progress bars {%- endcomment -%}
 {%- render 'theme-fonts' -%}
+{%- render 'scroll-reveal' -%}
 <section class="ingredients" id="ingredients-{{ section.id }}">
   <div class="ingredients__wrap">
     <div class="ingredients__intro">
-      <h2 class="ingredients__heading">{{ section.settings.heading }}</h2>
+      <h2 class="ingredients__heading reveal">{{ section.settings.heading }}</h2>
       <div class="ingredients__body">{{ section.settings.body }}</div>
       {%- if section.settings.button_label != blank -%}
         <a href="{{ section.settings.button_link | default: '#' }}" class="ingredients__button">{{ section.settings.button_label }}</a>
@@ -12,7 +13,7 @@
 
     <div class="ingredients__list" data-ingredients-list>
       {%- for block in section.blocks -%}
-        <div class="ingredients__row" {{ block.shopify_attributes }}>
+        <div class="ingredients__row reveal" style="transition-delay: {{ forloop.index0 | times: 80 }}ms;" {{ block.shopify_attributes }}>
           <span class="ingredients__icon">
             {%- if block.settings.icon != blank -%}
               {{ block.settings.icon | image_url: width: 80 | image_tag: loading: 'lazy' }}
@@ -42,6 +43,7 @@
 #ingredients-{{ section.id }} { background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; padding: 56px 5vw; }
 #ingredients-{{ section.id }} .ingredients__wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; }
 @media (min-width: 860px) { #ingredients-{{ section.id }} .ingredients__wrap { grid-template-columns: 1fr 1.1fr; align-items: center; } }
+#ingredients-{{ section.id }} .ingredients__intro { text-align: {{ section.settings.text_alignment }}; }
 #ingredients-{{ section.id }} .ingredients__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(24px, 3vw, 32px); margin: 0 0 16px; }
 #ingredients-{{ section.id }} .ingredients__body { opacity: .8; line-height: 1.7; margin-bottom: 22px; }
 #ingredients-{{ section.id }} .ingredients__button { display: inline-block; background: #fff; color: {{ section.settings.background_color }}; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; }
@@ -81,6 +83,7 @@
   "name": "Ingredients showcase",
   "tag": "section",
   "settings": [
+    { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "left" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Ingredients That Make A Difference" },
     { "type": "richtext", "id": "body", "label": "Body text", "default": "<p>Ingredients: Cacao, Cocoa Butter, Coconut Sugar, Vanilla, and Salt. Nothing artificial, ever.</p>" },
     { "type": "text", "id": "button_label", "label": "Button label", "default": "Learn More" },

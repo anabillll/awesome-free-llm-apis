@@ -41,3 +41,14 @@ Every repeatable piece of content is a schema **block**, not a hardcoded loop, s
 | `media-with-text` | none — it's a single image+text pairing; use two separate section instances (as the template does for Benefit 1/2) and drag the *sections* themselves to reorder |
 
 Known limitation: `comparison-table`'s competitor columns (Competitor 1/2/3) are fixed at three and set via section settings, not blocks — Shopify schema can't dynamically add matrix columns that every row block then references, so the row *content* is fully block-driven (draggable/addable/removable) but the column *count* isn't. If you need a variable number of competitors, that requires a metafield- or app-driven table instead of static blocks.
+
+## Text alignment
+
+Every section has a `text_alignment` setting (Left / Center / Right) in the theme editor. It's scoped to that section's actual prose — headings, intros, body copy — not to things where centering would break the UI (table cell data stays centered/start regardless, FAQ answers and footer nav columns stay left-aligned, forms and buttons keep their own layout). Defaults match the original design: centered for the marketing sections (USP bar, gallery grid heading, comparison/FAQ/recommendations headings, final CTA, newsletter block), left-aligned for the buy box, benefit blocks, and ingredients intro.
+
+## Animations
+
+- `snippets/scroll-reveal.liquid` is rendered once per section (like `theme-fonts`) and is idempotent — it defines a `.reveal` class (fade + rise on scroll, via `IntersectionObserver`) and re-runs itself on `shopify:section:load` so it keeps working while editing in the theme customizer. Fully disabled (content shown immediately, no motion) under `prefers-reduced-motion: reduce`.
+- Headings and repeated blocks (USP icons, gallery images, ingredient rows, FAQ questions, recommendation cards, cross-sell cards) use `.reveal` with a small per-item `transition-delay` (via `forloop.index0`) for a staggered entrance instead of everything fading in at once.
+- Buttons get a tactile `:active { transform: scale(.97) }` press; cards (cross-sell, recommendations) lift slightly on hover.
+- Accordion/FAQ content fades in on open instead of the native `<details>` hard-cut, via a short CSS keyframe scoped to `[open]`.
