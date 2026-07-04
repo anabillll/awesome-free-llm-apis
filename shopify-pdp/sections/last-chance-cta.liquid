@@ -1,4 +1,4 @@
-{%- comment -%} Centered "Last Chance CTA" banner with two buttons {%- endcomment -%}
+{%- comment -%} Centered "Last Chance CTA" banner with configurable buttons {%- endcomment -%}
 {%- render 'theme-fonts' -%}
 <section class="final-cta" id="final-cta-{{ section.id }}">
   <div class="final-cta__wrap">
@@ -6,14 +6,13 @@
     {%- if section.settings.body != blank -%}
       <p class="final-cta__body">{{ section.settings.body }}</p>
     {%- endif -%}
+    {%- if section.blocks.size > 0 -%}
     <div class="final-cta__actions">
-      {%- if section.settings.primary_label != blank -%}
-        <a href="{{ section.settings.primary_link | default: '#' }}" class="final-cta__button final-cta__button--solid">{{ section.settings.primary_label }}</a>
-      {%- endif -%}
-      {%- if section.settings.secondary_label != blank -%}
-        <a href="{{ section.settings.secondary_link | default: '#' }}" class="final-cta__button final-cta__button--outline">{{ section.settings.secondary_label }}</a>
-      {%- endif -%}
+      {%- for block in section.blocks -%}
+        <a href="{{ block.settings.link | default: '#' }}" class="final-cta__button final-cta__button--{{ block.settings.style }}" {{ block.shopify_attributes }}>{{ block.settings.label }}</a>
+      {%- endfor -%}
     </div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -34,14 +33,27 @@
   "tag": "section",
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Last Chance CTA" },
-    { "type": "text", "id": "body", "label": "Body text", "default": "Add up personal to grab this before you go. Order now to lock in your deal today." },
-    { "type": "text", "id": "primary_label", "label": "Primary button label", "default": "Shop Now" },
-    { "type": "url", "id": "primary_link", "label": "Primary button link" },
-    { "type": "text", "id": "secondary_label", "label": "Secondary button label", "default": "Learn More" },
-    { "type": "url", "id": "secondary_link", "label": "Secondary button link" }
+    { "type": "text", "id": "body", "label": "Body text", "default": "Add up personal to grab this before you go. Order now to lock in your deal today." }
+  ],
+  "blocks": [
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Shop Now" },
+        { "type": "url", "id": "link", "label": "Link" },
+        { "type": "select", "id": "style", "label": "Style", "options": [ { "value": "solid", "label": "Solid" }, { "value": "outline", "label": "Outline" } ], "default": "solid" }
+      ]
+    }
   ],
   "presets": [
-    { "name": "Last chance CTA" }
+    {
+      "name": "Last chance CTA",
+      "blocks": [
+        { "type": "button", "settings": { "label": "Shop Now", "style": "solid" } },
+        { "type": "button", "settings": { "label": "Learn More", "style": "outline" } }
+      ]
+    }
   ]
 }
 {% endschema %}

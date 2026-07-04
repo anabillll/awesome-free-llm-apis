@@ -22,3 +22,22 @@ Drop-in Online Store 2.0 sections that reproduce the product page mockup: galler
 - All layout CSS uses logical properties (`inset-inline-start/end`, `margin-inline-start`, `text-align: start`) instead of physical `left`/`right`, so the sections mirror correctly under `dir="rtl"` with no section-specific overrides needed.
 - `dir`/`lang` themselves are set at the theme layout level, not per-section — add `<html lang="{{ request.locale.iso_code }}" dir="{{ request.locale.iso_code | rtl_locale_list }}">` in `layout/theme.liquid` (or hardcode a small RTL locale list, e.g. `{% assign rtl_locales = 'ar,he,fa,ur' | split: ',' %}`) if this drop-in package isn't going into a theme that already handles it.
 - For full Arabic copy, add an `ar.json` locale file with the same keys as `en.default.json` — the existing `| t` filters pick it up automatically; no section code changes needed.
+
+## Drag-and-drop customization
+
+Every repeatable piece of content is a schema **block**, not a hardcoded loop, so merchants can add, remove, and drag-reorder it from the theme editor's block list — and every section has a `presets` entry so it shows up in "Add section":
+
+| Section | Block type(s) |
+|---|---|
+| `main-product` | `pricing_tier` (quantity tiers), `accordion`, `trust_icon`, `cross_sell_item` |
+| `usp-icon-bar` | `icon` |
+| `image-gallery-grid` | `image` |
+| `ingredients-showcase` | `ingredient` |
+| `comparison-table` | `feature_row` |
+| `faq-accordion` | `question` |
+| `product-recommendations` | `product` |
+| `last-chance-cta` | `button` |
+| `newsletter-footer` | `link_column`, `app_badges` |
+| `media-with-text` | none — it's a single image+text pairing; use two separate section instances (as the template does for Benefit 1/2) and drag the *sections* themselves to reorder |
+
+Known limitation: `comparison-table`'s competitor columns (Competitor 1/2/3) are fixed at three and set via section settings, not blocks — Shopify schema can't dynamically add matrix columns that every row block then references, so the row *content* is fully block-driven (draggable/addable/removable) but the column *count* isn't. If you need a variable number of competitors, that requires a metafield- or app-driven table instead of static blocks.

@@ -135,32 +135,30 @@
           {%- endif -%}
         </p>
 
+        {%- liquid
+          assign tier_blocks = section.blocks | where: 'type', 'pricing_tier'
+        -%}
+        {%- if tier_blocks.size > 0 -%}
         <div class="pdp-tiers" data-pdp-tiers>
-          <div class="pdp-tier" data-tier data-tier-qty="1">
-            <div class="pdp-tier__radio"><input type="radio" name="tier" value="1" checked></div>
-            <div class="pdp-tier__label">{{ 'products.product.buy_x' | t: count: 1 }}</div>
-            <div class="pdp-tier__price">{{ section.settings.tier_1_price | default: 900 | money }}</div>
-          </div>
-
-          <div class="pdp-tier pdp-tier--popular" data-tier data-tier-qty="2">
-            <span class="pdp-tier__ribbon">{{ 'products.product.best_popular' | t }}</span>
-            <div class="pdp-tier__radio"><input type="radio" name="tier" value="2"></div>
-            <div class="pdp-tier__label">{{ 'products.product.buy_x' | t: count: 2 }}</div>
-            <select class="pdp-select pdp-select--tier" data-tier-flavor>
-              <option>{{ 'products.product.single_flavor' | t }}</option>
-              <option>{{ 'products.product.two_flavors' | t }}</option>
-            </select>
-            <div class="pdp-tier__price">{{ section.settings.tier_2_price | default: 1642 | money }}</div>
-            <span class="pdp-tier__save">{{ 'products.product.save_percent' | t: percent: 10 }}</span>
-          </div>
-
-          <div class="pdp-tier" data-tier data-tier-qty="3">
-            <div class="pdp-tier__radio"><input type="radio" name="tier" value="3"></div>
-            <div class="pdp-tier__label">{{ 'products.product.buy_x' | t: count: 3 }}</div>
-            <div class="pdp-tier__price">{{ section.settings.tier_3_price | default: 2400 | money }}</div>
-            <span class="pdp-tier__save">{{ 'products.product.save_percent' | t: percent: 15 }}</span>
-          </div>
+          {%- for block in tier_blocks -%}
+            <div class="pdp-tier{% if block.settings.is_popular %} pdp-tier--popular{% endif %}" data-tier data-tier-qty="{{ block.settings.quantity }}" {{ block.shopify_attributes }}>
+              {%- if block.settings.is_popular -%}<span class="pdp-tier__ribbon">{{ block.settings.popular_label }}</span>{%- endif -%}
+              <div class="pdp-tier__radio"><input type="radio" name="tier" value="{{ block.settings.quantity }}" {% if forloop.first %}checked{% endif %}></div>
+              <div class="pdp-tier__label">{{ 'products.product.buy_x' | t: count: block.settings.quantity }}</div>
+              {%- if block.settings.show_flavor_select -%}
+                <select class="pdp-select pdp-select--tier" data-tier-flavor>
+                  <option>{{ 'products.product.single_flavor' | t }}</option>
+                  <option>{{ 'products.product.two_flavors' | t }}</option>
+                </select>
+              {%- endif -%}
+              <div class="pdp-tier__price">{{ block.settings.price | default: 900 | money }}</div>
+              {%- if block.settings.save_percent > 0 -%}
+                <span class="pdp-tier__save">{{ 'products.product.save_percent' | t: percent: block.settings.save_percent }}</span>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
         </div>
+        {%- endif -%}
 
         <input type="number" name="quantity" data-pdp-quantity value="1" min="1" hidden>
 
@@ -304,9 +302,10 @@
 #pdp-main-{{ section.id }} .pdp-stock { font-size: 12px; opacity: .65; margin: 0 0 14px; }
 
 #pdp-main-{{ section.id }} .pdp-tiers { border: 1px solid var(--pdp-line); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
-#pdp-main-{{ section.id }} .pdp-tier { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 14px; border-bottom: 1px solid var(--pdp-line); }
+#pdp-main-{{ section.id }} .pdp-tier { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px; border-bottom: 1px solid var(--pdp-line); }
 #pdp-main-{{ section.id }} .pdp-tier:last-child { border-bottom: none; }
-#pdp-main-{{ section.id }} .pdp-tier--popular { background: var(--pdp-cream); grid-template-columns: auto 1fr auto auto; }
+#pdp-main-{{ section.id }} .pdp-tier__label { flex: 1 1 auto; }
+#pdp-main-{{ section.id }} .pdp-tier--popular { background: var(--pdp-cream); }
 #pdp-main-{{ section.id }} .pdp-tier__ribbon { position: absolute; top: -1px; inset-inline-end: 12px; background: var(--pdp-ink); color: #fff; font-size: 10px; text-transform: uppercase; padding: 3px 8px; border-radius: 0 0 4px 4px; }
 #pdp-main-{{ section.id }} .pdp-tier__price { font-weight: 700; }
 #pdp-main-{{ section.id }} .pdp-tier__save { background: var(--pdp-green); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
@@ -471,9 +470,6 @@
     { "type": "range", "id": "rating_value", "label": "Rating value", "min": 0, "max": 5, "step": 1, "default": 5 },
     { "type": "text", "id": "rating_count", "label": "Rating count", "default": "128" },
     { "type": "range", "id": "subscribe_save_percent", "label": "Subscribe & save percent", "min": 0, "max": 50, "step": 5, "default": 15 },
-    { "type": "text", "id": "tier_1_price", "label": "Tier 1 price (cents)", "default": "900" },
-    { "type": "text", "id": "tier_2_price", "label": "Tier 2 price (cents)", "default": "1642" },
-    { "type": "text", "id": "tier_3_price", "label": "Tier 3 price (cents)", "default": "2400" },
     { "type": "checkbox", "id": "show_pickup", "label": "Show pickup availability", "default": true },
     { "type": "text", "id": "guarantee_text", "label": "Guarantee bar text", "default": "Don't settle for less. Free shipping on orders over $50 & satisfaction guaranteed." },
     { "type": "text", "id": "also_consider_heading", "label": "Cross-sell heading", "default": "Also Consider" },
@@ -504,12 +500,27 @@
         { "type": "text", "id": "fallback_title", "label": "Fallback title", "default": "Product title" },
         { "type": "text", "id": "meta_text", "label": "Meta text", "default": "150 cal" }
       ]
+    },
+    {
+      "type": "pricing_tier",
+      "name": "Pricing tier",
+      "settings": [
+        { "type": "number", "id": "quantity", "label": "Quantity", "default": 1 },
+        { "type": "text", "id": "price", "label": "Price (cents)", "default": "900" },
+        { "type": "checkbox", "id": "show_flavor_select", "label": "Show flavor picker", "default": false },
+        { "type": "range", "id": "save_percent", "label": "Save percent badge (0 to hide)", "min": 0, "max": 50, "step": 5, "default": 0 },
+        { "type": "checkbox", "id": "is_popular", "label": "Highlight as most popular", "default": false },
+        { "type": "text", "id": "popular_label", "label": "Highlight ribbon text", "default": "Best Popular" }
+      ]
     }
   ],
   "presets": [
     {
       "name": "Main product",
       "blocks": [
+        { "type": "pricing_tier", "settings": { "quantity": 1, "price": "900" } },
+        { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1642", "show_flavor_select": true, "save_percent": 10, "is_popular": true } },
+        { "type": "pricing_tier", "settings": { "quantity": 3, "price": "2400", "save_percent": 15 } },
         { "type": "accordion", "settings": { "heading": "Details" } },
         { "type": "accordion", "settings": { "heading": "Shipping & Returns" } },
         { "type": "accordion", "settings": { "heading": "Our Guarantee" } }

@@ -3,6 +3,9 @@
     "main": {
       "type": "main-product",
       "blocks": {
+        "tier-1": { "type": "pricing_tier", "settings": { "quantity": 1, "price": "900" } },
+        "tier-2": { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1642", "show_flavor_select": true, "save_percent": 10, "is_popular": true } },
+        "tier-3": { "type": "pricing_tier", "settings": { "quantity": 3, "price": "2400", "save_percent": 15 } },
         "accordion-details": { "type": "accordion", "settings": { "heading": "Details" } },
         "accordion-shipping": { "type": "accordion", "settings": { "heading": "Shipping & Returns" } },
         "accordion-guarantee": { "type": "accordion", "settings": { "heading": "Our Guarantee" } },
@@ -11,7 +14,7 @@
         "trust-3": { "type": "trust_icon", "settings": { "label": "Handcrafted Quality" } },
         "trust-4": { "type": "trust_icon", "settings": { "label": "Free Shipping" } }
       },
-      "block_order": ["accordion-details", "accordion-shipping", "accordion-guarantee", "trust-1", "trust-2", "trust-3", "trust-4"],
+      "block_order": ["tier-1", "tier-2", "tier-3", "accordion-details", "accordion-shipping", "accordion-guarantee", "trust-1", "trust-2", "trust-3", "trust-4"],
       "settings": {}
     },
     "usp-bar": {
@@ -93,6 +96,11 @@
     },
     "final-cta": {
       "type": "last-chance-cta",
+      "blocks": {
+        "shop-now": { "type": "button", "settings": { "label": "Shop Now", "style": "solid" } },
+        "learn-more": { "type": "button", "settings": { "label": "Learn More", "style": "outline" } }
+      },
+      "block_order": ["shop-now", "learn-more"],
       "settings": {}
     },
     "footer": {
