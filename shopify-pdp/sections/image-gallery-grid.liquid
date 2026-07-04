@@ -21,7 +21,7 @@
 </section>
 
 {%- style -%}
-#img-grid-{{ section.id }} { padding: 48px 5vw; background: #fff; }
+#img-grid-{{ section.id }} { padding: 48px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
 #img-grid-{{ section.id }} .img-grid__wrap { max-width: 1240px; margin: 0 auto; }
 #img-grid-{{ section.id }} .img-grid__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(22px, 3vw, 30px); margin: 0 0 28px; }
 #img-grid-{{ section.id }} .img-grid__images { display: grid; grid-template-columns: 1fr; gap: 12px; }
@@ -36,7 +36,9 @@
   "tag": "section",
   "settings": [
     { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
-    { "type": "text", "id": "heading", "label": "Heading", "default": "Our Guilt-Free Chocolates" }
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Our Guilt-Free Chocolates" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
   ],
   "blocks": [
     {

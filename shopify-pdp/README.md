@@ -52,3 +52,12 @@ Every section has a `text_alignment` setting (Left / Center / Right) in the them
 - Headings and repeated blocks (USP icons, gallery images, ingredient rows, FAQ questions, recommendation cards, cross-sell cards) use `.reveal` with a small per-item `transition-delay` (via `forloop.index0`) for a staggered entrance instead of everything fading in at once.
 - Buttons get a tactile `:active { transform: scale(.97) }` press; cards (cross-sell, recommendations) lift slightly on hover.
 - Accordion/FAQ content fades in on open instead of the native `<details>` hard-cut, via a short CSS keyframe scoped to `[open]`.
+
+## Background / text color
+
+Every section has `background_color` and `text_color` color pickers in the theme editor — no code editing needed to change the look. All ten now default to white background / near-black text (previously three sections — ingredients, FAQ, footer — defaulted to a dark/black band; that's just the starting value now, still changeable per section).
+
+How it's wired so a color change doesn't quietly break contrast elsewhere:
+- "Inverted" elements that sit on top of the section (solid buttons, badges, the popular-tier ribbon) use `text_color` as their own background and `background_color` as their own text, so a solid black button on a white section automatically becomes a solid white button if you flip the section to a black background — it always contrasts against whatever you pick, instead of assuming white-on-black.
+- Subtle dividers/borders/track-fills that used to be hardcoded `rgba(255,255,255,.15)` (which would vanish if the background ever went light) now use Shopify's built-in `color_modify: 'alpha', 0.15` filter on `text_color`, so they stay visibly faint against *any* background/text combination.
+- Data/status colors (sale red, save green, star-rating gold) are intentionally left as fixed accents, not tied to `background_color`/`text_color` — they're semantic, not brand palette.

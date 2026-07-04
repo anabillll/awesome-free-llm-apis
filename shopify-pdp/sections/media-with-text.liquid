@@ -21,7 +21,7 @@
 </section>
 
 {%- style -%}
-#media-text-{{ section.id }} { padding: 32px 5vw; background: #fff; }
+#media-text-{{ section.id }} { padding: 32px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
 #media-text-{{ section.id }} .media-text__wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 28px; align-items: center; }
 @media (min-width: 800px) { #media-text-{{ section.id }} .media-text__wrap { grid-template-columns: 1fr 1fr; gap: 56px; } }
 #media-text-{{ section.id }}.media-text--reverse .media-text__media { order: 2; }
@@ -34,7 +34,7 @@
 #media-text-{{ section.id }} .media-text__media svg { width: 100%; height: auto; border-radius: 8px; display: block; }
 #media-text-{{ section.id }} .media-text__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(22px, 3vw, 30px); margin: 0 0 14px; }
 #media-text-{{ section.id }} .media-text__body { font-size: 15px; line-height: 1.7; opacity: .8; margin-bottom: 20px; }
-#media-text-{{ section.id }} .media-text__button { display: inline-block; background: #17110b; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; }
+#media-text-{{ section.id }} .media-text__button { display: inline-block; background: {{ section.settings.text_color }}; color: {{ section.settings.background_color }}; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; }
 {%- endstyle -%}
 
 {% schema %}
@@ -48,7 +48,9 @@
     { "type": "text", "id": "heading", "label": "Heading", "default": "Media with text Benefit 1" },
     { "type": "richtext", "id": "body", "label": "Body text", "default": "<p>Put longer text with images or gifs here to give a fuller picture, reflection, or blog post. Add details or credibility, style, or even product details.</p>" },
     { "type": "text", "id": "button_label", "label": "Button label" },
-    { "type": "url", "id": "button_link", "label": "Button link" }
+    { "type": "url", "id": "button_link", "label": "Button link" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
   ],
   "presets": [
     { "name": "Media with text" }

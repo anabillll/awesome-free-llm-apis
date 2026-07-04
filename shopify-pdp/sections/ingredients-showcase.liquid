@@ -46,18 +46,18 @@
 #ingredients-{{ section.id }} .ingredients__intro { text-align: {{ section.settings.text_alignment }}; }
 #ingredients-{{ section.id }} .ingredients__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(24px, 3vw, 32px); margin: 0 0 16px; }
 #ingredients-{{ section.id }} .ingredients__body { opacity: .8; line-height: 1.7; margin-bottom: 22px; }
-#ingredients-{{ section.id }} .ingredients__button { display: inline-block; background: #fff; color: {{ section.settings.background_color }}; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; }
+#ingredients-{{ section.id }} .ingredients__button { display: inline-block; background: {{ section.settings.text_color }}; color: {{ section.settings.background_color }}; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; }
 #ingredients-{{ section.id }} .ingredients__list { display: flex; flex-direction: column; gap: 18px; }
 #ingredients-{{ section.id }} .ingredients__row { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 16px; }
 #ingredients-{{ section.id }} .ingredients__icon img,
 #ingredients-{{ section.id }} .ingredients__icon svg { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
 #ingredients-{{ section.id }} .ingredients__name { font-size: 14px; font-weight: 600; min-width: 90px; }
-#ingredients-{{ section.id }} .ingredients__bar-track { height: 6px; border-radius: 3px; background: rgba(255,255,255,.15); overflow: hidden; }
+#ingredients-{{ section.id }} .ingredients__bar-track { height: 6px; border-radius: 3px; background: {{ section.settings.text_color | color_modify: 'alpha', 0.15 }}; overflow: hidden; }
 #ingredients-{{ section.id }} .ingredients__bar-fill { display: block; height: 100%; background: currentColor; border-radius: 3px; }
 #ingredients-{{ section.id }} .ingredients__dots { display: flex; gap: 8px; justify-content: center; margin-top: 8px; grid-column: 1 / -1; }
 @media (min-width: 860px) { #ingredients-{{ section.id }} .ingredients__dots { justify-content: flex-end; } }
-#ingredients-{{ section.id }} .ingredients__dot { width: 8px; height: 8px; border-radius: 50%; border: none; background: rgba(255,255,255,.3); padding: 0; cursor: pointer; }
-#ingredients-{{ section.id }} .ingredients__dot.is-active { background: #fff; }
+#ingredients-{{ section.id }} .ingredients__dot { width: 8px; height: 8px; border-radius: 50%; border: none; background: {{ section.settings.text_color | color_modify: 'alpha', 0.3 }}; padding: 0; cursor: pointer; }
+#ingredients-{{ section.id }} .ingredients__dot.is-active { background: {{ section.settings.text_color }}; }
 {%- endstyle -%}
 
 <script>
@@ -88,8 +88,8 @@
     { "type": "richtext", "id": "body", "label": "Body text", "default": "<p>Ingredients: Cacao, Cocoa Butter, Coconut Sugar, Vanilla, and Salt. Nothing artificial, ever.</p>" },
     { "type": "text", "id": "button_label", "label": "Button label", "default": "Learn More" },
     { "type": "url", "id": "button_link", "label": "Button link" },
-    { "type": "color", "id": "background_color", "label": "Background color", "default": "#17110b" },
-    { "type": "color", "id": "text_color", "label": "Text color", "default": "#ffffff" }
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
   ],
   "blocks": [
     {
