@@ -1,0 +1,11 @@
+{%- comment -%} Renders share links for the current product {%- endcomment -%}
+{%- assign share_url = product.url | default: request.origin | append: '' -%}
+<a class="pdp-share__link" href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url }}{{ product.url }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.share_on_facebook' | t }}">
+  {%- render 'icon-facebook' -%}
+</a>
+<a class="pdp-share__link" href="https://twitter.com/intent/tweet?url={{ shop.url }}{{ product.url }}&text={{ product.title | url_param_escape }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.share_on_twitter' | t }}">
+  {%- render 'icon-twitter' -%}
+</a>
+<a class="pdp-share__link" href="mailto:?subject={{ product.title | url_param_escape }}&body={{ shop.url }}{{ product.url }}" aria-label="{{ 'general.social.share_by_email' | t }}">
+  {%- render 'icon-email' -%}
+</a>

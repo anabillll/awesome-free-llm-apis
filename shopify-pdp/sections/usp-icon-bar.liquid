@@ -1,0 +1,64 @@
+{%- comment -%} Full-width USP icon row, e.g. "Free From Worry, Full of Flavor" {%- endcomment -%}
+<section class="usp-bar" id="usp-bar-{{ section.id }}" style="background-color: {{ section.settings.background_color }}; color: {{ section.settings.text_color }};">
+  <div class="usp-bar__wrap">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="usp-bar__heading">{{ section.settings.heading }}</h2>
+    {%- endif -%}
+    <ul class="usp-bar__list">
+      {%- for block in section.blocks -%}
+        <li class="usp-bar__item" {{ block.shopify_attributes }}>
+          {%- if block.settings.icon != blank -%}
+            {{ block.settings.icon | image_url: width: 80 | image_tag: loading: 'lazy' }}
+          {%- endif -%}
+          <span>{{ block.settings.label }}</span>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{%- style -%}
+#usp-bar-{{ section.id }} { padding: 40px 5vw; text-align: center; }
+#usp-bar-{{ section.id }} .usp-bar__wrap { max-width: 1240px; margin: 0 auto; }
+#usp-bar-{{ section.id }} .usp-bar__heading { font-size: clamp(20px, 3vw, 26px); margin: 0 0 24px; letter-spacing: .02em; }
+#usp-bar-{{ section.id }} .usp-bar__list { list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; padding: 0; margin: 0; }
+@media (min-width: 640px) { #usp-bar-{{ section.id }} .usp-bar__list { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) { #usp-bar-{{ section.id }} .usp-bar__list { grid-template-columns: repeat(6, 1fr); } }
+#usp-bar-{{ section.id }} .usp-bar__item { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
+#usp-bar-{{ section.id }} .usp-bar__item img { width: 44px; height: 44px; }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "USP icon bar",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Free From Worry, Full of Flavor" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#f7f1e6" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#2c1f17" }
+  ],
+  "blocks": [
+    {
+      "type": "icon",
+      "name": "Icon",
+      "settings": [
+        { "type": "image_picker", "id": "icon", "label": "Icon" },
+        { "type": "text", "id": "label", "label": "Label", "default": "No Dairy" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "USP icon bar",
+      "blocks": [
+        { "type": "icon", "settings": { "label": "No Dairy" } },
+        { "type": "icon", "settings": { "label": "No Wheat" } },
+        { "type": "icon", "settings": { "label": "No Nut" } },
+        { "type": "icon", "settings": { "label": "No Corn" } },
+        { "type": "icon", "settings": { "label": "No Soy" } },
+        { "type": "icon", "settings": { "label": "No GMO" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

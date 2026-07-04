@@ -1,0 +1,123 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "accordion-details": { "type": "accordion", "settings": { "heading": "Details" } },
+        "accordion-shipping": { "type": "accordion", "settings": { "heading": "Shipping & Returns" } },
+        "accordion-guarantee": { "type": "accordion", "settings": { "heading": "Our Guarantee" } },
+        "trust-1": { "type": "trust_icon", "settings": { "label": "Free Shipping Over $50" } },
+        "trust-2": { "type": "trust_icon", "settings": { "label": "30-Day Guarantee" } },
+        "trust-3": { "type": "trust_icon", "settings": { "label": "Handcrafted Quality" } },
+        "trust-4": { "type": "trust_icon", "settings": { "label": "Free Shipping" } }
+      },
+      "block_order": ["accordion-details", "accordion-shipping", "accordion-guarantee", "trust-1", "trust-2", "trust-3", "trust-4"],
+      "settings": {}
+    },
+    "usp-bar": {
+      "type": "usp-icon-bar",
+      "blocks": {
+        "no-dairy": { "type": "icon", "settings": { "label": "No Dairy" } },
+        "no-wheat": { "type": "icon", "settings": { "label": "No Wheat" } },
+        "no-nut": { "type": "icon", "settings": { "label": "No Nut" } },
+        "no-corn": { "type": "icon", "settings": { "label": "No Corn" } },
+        "no-soy": { "type": "icon", "settings": { "label": "No Soy" } },
+        "no-gmo": { "type": "icon", "settings": { "label": "No GMO" } }
+      },
+      "block_order": ["no-dairy", "no-wheat", "no-nut", "no-corn", "no-soy", "no-gmo"],
+      "settings": {}
+    },
+    "gallery-grid": {
+      "type": "image-gallery-grid",
+      "blocks": {
+        "image-1": { "type": "image" },
+        "image-2": { "type": "image" },
+        "image-3": { "type": "image" }
+      },
+      "block_order": ["image-1", "image-2", "image-3"],
+      "settings": {}
+    },
+    "benefit-1": {
+      "type": "media-with-text",
+      "settings": { "heading": "Media with text Benefit 1", "image_position": "left" }
+    },
+    "benefit-2": {
+      "type": "media-with-text",
+      "settings": { "heading": "Media with text Benefit 2", "image_position": "right" }
+    },
+    "ingredients": {
+      "type": "ingredients-showcase",
+      "blocks": {
+        "cacao": { "type": "ingredient", "settings": { "name": "Cacao", "percent": 90 } },
+        "sugar": { "type": "ingredient", "settings": { "name": "Coconut Sugar", "percent": 70 } },
+        "vanilla": { "type": "ingredient", "settings": { "name": "Vanilla", "percent": 60 } }
+      },
+      "block_order": ["cacao", "sugar", "vanilla"],
+      "settings": {}
+    },
+    "compare": {
+      "type": "comparison-table",
+      "blocks": {
+        "row-1": { "type": "feature_row", "settings": { "feature": "Premium Ingredients", "us": true } },
+        "row-2": { "type": "feature_row", "settings": { "feature": "Unique Flavors", "us": true, "competitor_1": true } },
+        "row-3": { "type": "feature_row", "settings": { "feature": "Handcrafted Quality", "us": true, "competitor_1": true, "competitor_2": true } },
+        "row-4": { "type": "feature_row", "settings": { "feature": "Eco-Friendly Packaging", "us": true, "competitor_2": true } },
+        "row-5": { "type": "feature_row", "settings": { "feature": "Instant Satisfaction", "us": true, "competitor_1": true, "competitor_2": true, "competitor_3": true } },
+        "row-6": { "type": "feature_row", "settings": { "feature": "Vegan Options", "us": true, "competitor_2": true } }
+      },
+      "block_order": ["row-1", "row-2", "row-3", "row-4", "row-5", "row-6"],
+      "settings": {}
+    },
+    "faq": {
+      "type": "faq-accordion",
+      "blocks": {
+        "q1": { "type": "question", "settings": { "question": "Where are your chocolates made?" } },
+        "q2": { "type": "question", "settings": { "question": "What ingredients are in your chocolate bars?" } },
+        "q3": { "type": "question", "settings": { "question": "Are your products vegan?" } },
+        "q4": { "type": "question", "settings": { "question": "Do your chocolate bars contain nuts?" } },
+        "q5": { "type": "question", "settings": { "question": "What sweeteners do you use?" } }
+      },
+      "block_order": ["q1", "q2", "q3", "q4", "q5"],
+      "settings": {}
+    },
+    "recommendations": {
+      "type": "product-recommendations",
+      "blocks": {
+        "rec-1": { "type": "product" },
+        "rec-2": { "type": "product" },
+        "rec-3": { "type": "product" },
+        "rec-4": { "type": "product" }
+      },
+      "block_order": ["rec-1", "rec-2", "rec-3", "rec-4"],
+      "settings": {}
+    },
+    "final-cta": {
+      "type": "last-chance-cta",
+      "settings": {}
+    },
+    "footer": {
+      "type": "newsletter-footer",
+      "blocks": {
+        "shop": { "type": "link_column", "settings": { "heading": "Shop" } },
+        "company": { "type": "link_column", "settings": { "heading": "Company" } },
+        "local": { "type": "link_column", "settings": { "heading": "Local" } },
+        "app": { "type": "app_badges", "settings": { "heading": "Get The App" } }
+      },
+      "block_order": ["shop", "company", "local", "app"],
+      "settings": {}
+    }
+  },
+  "order": [
+    "main",
+    "usp-bar",
+    "gallery-grid",
+    "benefit-1",
+    "benefit-2",
+    "ingredients",
+    "compare",
+    "faq",
+    "recommendations",
+    "final-cta",
+    "footer"
+  ]
+}

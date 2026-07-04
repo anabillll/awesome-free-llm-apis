@@ -1,0 +1,94 @@
+{%- comment -%} "Discover the Difference" feature comparison table {%- endcomment -%}
+<section class="compare" id="compare-{{ section.id }}">
+  <div class="compare__wrap">
+    <h2 class="compare__heading">{{ section.settings.heading }}</h2>
+
+    <div class="compare__scroll">
+      <table class="compare__table">
+        <thead>
+          <tr>
+            <th class="compare__feature-col">{{ section.settings.feature_column_label }}</th>
+            <th class="compare__brand-col compare__brand-col--us">{{ section.settings.our_product_label }}</th>
+            {%- for i in (1..3) -%}
+              {%- assign label_key = 'competitor_' | append: i | append: '_label' -%}
+              <th class="compare__brand-col">{{ section.settings[label_key] }}</th>
+            {%- endfor -%}
+          </tr>
+        </thead>
+        <tbody>
+          {%- for block in section.blocks -%}
+            <tr {{ block.shopify_attributes }}>
+              <td class="compare__feature-col">{{ block.settings.feature }}</td>
+              <td class="compare__brand-col compare__brand-col--us">
+                {%- if block.settings.us %}<span class="compare__check" aria-label="{{ 'general.compare.yes' | t }}">✓</span>{%- else -%}<span class="compare__cross" aria-label="{{ 'general.compare.no' | t }}">✕</span>{%- endif -%}
+              </td>
+              {%- for i in (1..3) -%}
+                {%- assign key = 'competitor_' | append: i -%}
+                <td class="compare__brand-col">
+                  {%- if block.settings[key] %}<span class="compare__check" aria-label="{{ 'general.compare.yes' | t }}">✓</span>{%- else -%}<span class="compare__cross" aria-label="{{ 'general.compare.no' | t }}">✕</span>{%- endif -%}
+                </td>
+              {%- endfor -%}
+            </tr>
+          {%- endfor -%}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{%- style -%}
+#compare-{{ section.id }} { padding: 48px 5vw; background: #fff; }
+#compare-{{ section.id }} .compare__wrap { max-width: 1000px; margin: 0 auto; }
+#compare-{{ section.id }} .compare__heading { text-align: center; font-size: clamp(22px, 3vw, 30px); margin: 0 0 28px; }
+#compare-{{ section.id }} .compare__scroll { overflow-x: auto; border: 1px solid #e4dccd; border-radius: 10px; -webkit-overflow-scrolling: touch; }
+#compare-{{ section.id }} .compare__table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+#compare-{{ section.id }} .compare__table th, #compare-{{ section.id }} .compare__table td { padding: 14px 12px; text-align: center; border-bottom: 1px solid #e4dccd; }
+#compare-{{ section.id }} .compare__table tr:last-child td { border-bottom: none; }
+#compare-{{ section.id }} .compare__feature-col { text-align: left; font-weight: 600; position: sticky; left: 0; background: #fff; min-width: 180px; }
+#compare-{{ section.id }} .compare__brand-col--us { background: #f7f1e6; font-weight: 700; }
+#compare-{{ section.id }} thead .compare__feature-col { background: #fff; }
+#compare-{{ section.id }} thead .compare__brand-col--us { background: #f0e6d3; }
+#compare-{{ section.id }} .compare__check { color: #2f6d3f; font-weight: 700; }
+#compare-{{ section.id }} .compare__cross { color: #b03a2e; font-weight: 700; }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Comparison table",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Discover the Difference: Taste the Best" },
+    { "type": "text", "id": "feature_column_label", "label": "Feature column label", "default": "Features" },
+    { "type": "text", "id": "our_product_label", "label": "Our product label", "default": "Our Product" },
+    { "type": "text", "id": "competitor_1_label", "label": "Competitor 1 label", "default": "Competitor 1" },
+    { "type": "text", "id": "competitor_2_label", "label": "Competitor 2 label", "default": "Competitor 2" },
+    { "type": "text", "id": "competitor_3_label", "label": "Competitor 3 label", "default": "Competitor 3" }
+  ],
+  "blocks": [
+    {
+      "type": "feature_row",
+      "name": "Feature row",
+      "settings": [
+        { "type": "text", "id": "feature", "label": "Feature", "default": "Premium Ingredients" },
+        { "type": "checkbox", "id": "us", "label": "Our product", "default": true },
+        { "type": "checkbox", "id": "competitor_1", "label": "Competitor 1", "default": false },
+        { "type": "checkbox", "id": "competitor_2", "label": "Competitor 2", "default": false },
+        { "type": "checkbox", "id": "competitor_3", "label": "Competitor 3", "default": false }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Comparison table",
+      "blocks": [
+        { "type": "feature_row", "settings": { "feature": "Premium Ingredients", "us": true, "competitor_1": false, "competitor_2": false, "competitor_3": false } },
+        { "type": "feature_row", "settings": { "feature": "Unique Flavors", "us": true, "competitor_1": true, "competitor_2": false, "competitor_3": false } },
+        { "type": "feature_row", "settings": { "feature": "Handcrafted Quality", "us": true, "competitor_1": true, "competitor_2": true, "competitor_3": false } },
+        { "type": "feature_row", "settings": { "feature": "Eco-Friendly Packaging", "us": true, "competitor_1": false, "competitor_2": true, "competitor_3": false } },
+        { "type": "feature_row", "settings": { "feature": "Instant Satisfaction", "us": true, "competitor_1": true, "competitor_2": true, "competitor_3": true } },
+        { "type": "feature_row", "settings": { "feature": "Vegan Options", "us": true, "competitor_1": false, "competitor_2": true, "competitor_3": false } }
+      ]
+    }
+  ]
+}
+{% endschema %}

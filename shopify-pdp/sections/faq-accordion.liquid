@@ -1,0 +1,79 @@
+{%- comment -%} Dark "In Case You Were Wondering..." FAQ accordion {%- endcomment -%}
+<section class="faq" id="faq-{{ section.id }}">
+  <div class="faq__wrap">
+    <h2 class="faq__heading">{{ section.settings.heading }}</h2>
+    <div class="faq__list">
+      {%- for block in section.blocks -%}
+        <details class="faq__item" {{ block.shopify_attributes }}{% if forloop.first %} open{% endif %}>
+          <summary class="faq__question">
+            <span>{{ block.settings.question }}</span>
+            <span class="faq__icon" aria-hidden="true"></span>
+          </summary>
+          <div class="faq__answer">{{ block.settings.answer }}</div>
+        </details>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{%- style -%}
+#faq-{{ section.id }} { background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; padding: 56px 5vw; }
+#faq-{{ section.id }} .faq__wrap { max-width: 820px; margin: 0 auto; }
+#faq-{{ section.id }} .faq__heading { text-align: center; font-size: clamp(22px, 3vw, 30px); margin: 0 0 28px; }
+#faq-{{ section.id }} .faq__item { border-bottom: 1px solid rgba(255,255,255,.15); }
+#faq-{{ section.id }} .faq__item:first-child { border-top: 1px solid rgba(255,255,255,.15); }
+#faq-{{ section.id }} .faq__question { display: flex; justify-content: space-between; align-items: center; padding: 18px 4px; cursor: pointer; font-weight: 600; list-style: none; }
+#faq-{{ section.id }} .faq__question::-webkit-details-marker { display: none; }
+#faq-{{ section.id }} .faq__icon::before { content: '+'; font-size: 20px; }
+#faq-{{ section.id }} .faq__item[open] .faq__icon::before { content: '\2212'; }
+#faq-{{ section.id }} .faq__answer { padding: 0 4px 20px; opacity: .8; line-height: 1.7; font-size: 14px; }
+{%- endstyle -%}
+
+<script>
+(function () {
+  var root = document.getElementById('faq-{{ section.id }}');
+  if (!root) return;
+  var items = root.querySelectorAll('.faq__item');
+  items.forEach(function (item) {
+    item.addEventListener('toggle', function () {
+      if (item.open) {
+        items.forEach(function (other) { if (other !== item) other.open = false; });
+      }
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "FAQ accordion",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "In Case You Were Wondering..." },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#1e1712" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#ffffff" }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question", "default": "Where are your chocolates made?" },
+        { "type": "richtext", "id": "answer", "label": "Answer", "default": "<p>Our chocolates are crafted in small batches with a dedicated team who specializes in perfecting each and every quality and taste, ensuring the highest standards of safety and quality, ensuring premium ingredients are used.</p>" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ accordion",
+      "blocks": [
+        { "type": "question", "settings": { "question": "Where are your chocolates made?" } },
+        { "type": "question", "settings": { "question": "What ingredients are in your chocolate bars?" } },
+        { "type": "question", "settings": { "question": "Are your products vegan?" } },
+        { "type": "question", "settings": { "question": "Do your chocolate bars contain nuts?" } },
+        { "type": "question", "settings": { "question": "What sweeteners do you use?" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

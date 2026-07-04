@@ -1,0 +1,118 @@
+{%- comment -%} "You May Also Like" product grid with quick add-to-cart {%- endcomment -%}
+<section class="also-like" id="also-like-{{ section.id }}">
+  <div class="also-like__wrap">
+    <h2 class="also-like__heading">{{ section.settings.heading }}</h2>
+    {%- if section.settings.subheading != blank -%}
+      <p class="also-like__subheading">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+
+    <div class="also-like__grid">
+      {%- for block in section.blocks -%}
+        {%- assign rec_product = block.settings.product -%}
+        <div class="also-like__card" {{ block.shopify_attributes }}>
+          {%- if rec_product.compare_at_price > rec_product.price -%}
+            <span class="also-like__badge also-like__badge--sale">{{ 'products.product.sale' | t }}</span>
+          {%- elsif rec_product.tags contains 'new' -%}
+            <span class="also-like__badge also-like__badge--new">{{ 'products.product.new' | t }}</span>
+          {%- endif -%}
+
+          <a href="{{ rec_product.url | default: '#' }}" class="also-like__image">
+            {%- if rec_product.featured_image -%}
+              {{ rec_product.featured_image | image_url: width: 500 | image_tag: loading: 'lazy', sizes: '(min-width: 700px) 25vw, 50vw', widths: '250,375,500' }}
+            {%- else -%}
+              {{ 'product-1' | placeholder_svg_tag: 'also-like__placeholder' }}
+            {%- endif -%}
+          </a>
+
+          <a href="{{ rec_product.url | default: '#' }}" class="also-like__title">{{ rec_product.title | default: block.settings.fallback_title }}</a>
+
+          <div class="also-like__price">
+            {%- if rec_product.compare_at_price > rec_product.price -%}
+              <span class="also-like__price-compare">{{ rec_product.compare_at_price | money }}</span>
+            {%- endif -%}
+            <span class="also-like__price-current">{{ rec_product.price | default: 1200 | money }}</span>
+          </div>
+
+          <form method="post" action="/cart/add" class="also-like__form">
+            <input type="hidden" name="id" value="{{ rec_product.selected_or_first_available_variant.id }}">
+            <button type="submit" class="also-like__atc" {% if rec_product.selected_or_first_available_variant.available == false %}disabled{% endif %}>
+              {%- if rec_product.selected_or_first_available_variant.available == false -%}
+                {{ 'products.product.sold_out' | t }}
+              {%- else -%}
+                {{ 'products.product.add_to_cart' | t }}
+              {%- endif -%}
+            </button>
+          </form>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{%- style -%}
+#also-like-{{ section.id }} { padding: 48px 5vw; background: #fff; }
+#also-like-{{ section.id }} .also-like__wrap { max-width: 1240px; margin: 0 auto; }
+#also-like-{{ section.id }} .also-like__heading { text-align: center; font-size: clamp(22px, 3vw, 30px); margin: 0 0 8px; }
+#also-like-{{ section.id }} .also-like__subheading { text-align: center; opacity: .7; margin: 0 0 28px; }
+#also-like-{{ section.id }} .also-like__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+@media (min-width: 700px) { #also-like-{{ section.id }} .also-like__grid { grid-template-columns: repeat(4, 1fr); } }
+#also-like-{{ section.id }} .also-like__card { position: relative; display: flex; flex-direction: column; }
+#also-like-{{ section.id }} .also-like__badge { position: absolute; top: 10px; left: 10px; font-size: 10px; text-transform: uppercase; font-weight: 700; padding: 3px 8px; border-radius: 4px; z-index: 1; }
+#also-like-{{ section.id }} .also-like__badge--sale { background: #b03a2e; color: #fff; }
+#also-like-{{ section.id }} .also-like__badge--new { background: #2c1f17; color: #fff; }
+#also-like-{{ section.id }} .also-like__image img,
+#also-like-{{ section.id }} .also-like__image svg { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 12px; }
+#also-like-{{ section.id }} .also-like__title { font-size: 14px; font-weight: 600; text-decoration: none; color: inherit; margin-bottom: 6px; }
+#also-like-{{ section.id }} .also-like__price { display: flex; gap: 8px; align-items: baseline; margin-bottom: 12px; font-size: 14px; }
+#also-like-{{ section.id }} .also-like__price-compare { text-decoration: line-through; opacity: .5; font-size: 12px; }
+#also-like-{{ section.id }} .also-like__price-current { font-weight: 700; }
+#also-like-{{ section.id }} .also-like__atc { width: 100%; background: #2c1f17; color: #fff; border: none; padding: 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; border-radius: 6px; cursor: pointer; }
+#also-like-{{ section.id }} .also-like__atc:disabled { opacity: .5; cursor: not-allowed; }
+{%- endstyle -%}
+
+<script>
+(function () {
+  var root = document.getElementById('also-like-{{ section.id }}');
+  if (!root) return;
+  root.querySelectorAll('.also-like__form').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var formData = new FormData(form);
+      fetch('/cart/add.js', { method: 'POST', body: formData })
+        .then(function () { document.dispatchEvent(new CustomEvent('cart:updated')); });
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Product recommendations",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "You May Also Like" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "You might also enjoy which similar chocolates" }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "text", "id": "fallback_title", "label": "Fallback title", "default": "Product title" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product recommendations",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}
