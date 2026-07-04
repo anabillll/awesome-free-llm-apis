@@ -1,4 +1,5 @@
 {%- comment -%} Dark "Ingredients That Make A Difference" section with icon rows + progress bars {%- endcomment -%}
+{%- render 'theme-fonts' -%}
 <section class="ingredients" id="ingredients-{{ section.id }}">
   <div class="ingredients__wrap">
     <div class="ingredients__intro">
@@ -41,7 +42,7 @@
 #ingredients-{{ section.id }} { background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; padding: 56px 5vw; }
 #ingredients-{{ section.id }} .ingredients__wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; }
 @media (min-width: 860px) { #ingredients-{{ section.id }} .ingredients__wrap { grid-template-columns: 1fr 1.1fr; align-items: center; } }
-#ingredients-{{ section.id }} .ingredients__heading { font-size: clamp(24px, 3vw, 32px); margin: 0 0 16px; }
+#ingredients-{{ section.id }} .ingredients__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(24px, 3vw, 32px); margin: 0 0 16px; }
 #ingredients-{{ section.id }} .ingredients__body { opacity: .8; line-height: 1.7; margin-bottom: 22px; }
 #ingredients-{{ section.id }} .ingredients__button { display: inline-block; background: #fff; color: {{ section.settings.background_color }}; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: 600; }
 #ingredients-{{ section.id }} .ingredients__list { display: flex; flex-direction: column; gap: 18px; }

@@ -1,4 +1,5 @@
 {%- comment -%} Newsletter subscribe bar + footer columns + bottom bar {%- endcomment -%}
+{%- render 'theme-fonts' -%}
 <section class="site-footer" id="site-footer-{{ section.id }}">
   <div class="site-footer__newsletter">
     <div class="site-footer__newsletter-wrap">
@@ -86,7 +87,7 @@
 {%- style -%}
 #site-footer-{{ section.id }} { background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
 #site-footer-{{ section.id }} .site-footer__newsletter { padding: 40px 5vw; text-align: center; border-bottom: 1px solid rgba(255,255,255,.12); }
-#site-footer-{{ section.id }} .site-footer__newsletter-heading { font-size: clamp(20px, 3vw, 26px); margin: 0 0 10px; }
+#site-footer-{{ section.id }} .site-footer__newsletter-heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(20px, 3vw, 26px); margin: 0 0 10px; }
 #site-footer-{{ section.id }} .site-footer__newsletter-body { opacity: .75; margin: 0 0 18px; }
 #site-footer-{{ section.id }} .site-footer__newsletter-form { display: flex; gap: 8px; max-width: 420px; margin: 0 auto; flex-wrap: wrap; justify-content: center; }
 #site-footer-{{ section.id }} .site-footer__newsletter-form input { flex: 1 1 240px; padding: 12px 14px; border-radius: 6px; border: none; }
