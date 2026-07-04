@@ -55,7 +55,7 @@ Every section has a `text_alignment` setting (Left / Center / Right) in the them
 
 ## Background / text color
 
-Every section has `background_color` and `text_color` color pickers in the theme editor — no code editing needed to change the look. All ten now default to white background / near-black text (previously three sections — ingredients, FAQ, footer — defaulted to a dark/black band; that's just the starting value now, still changeable per section).
+Every section has `background_color` and `text_color` color pickers in the theme editor — no code editing needed to change the look. Seven default to white background / near-black text; `ingredients-showcase`, `faq-accordion`, and `newsletter-footer` default to black background / white text, giving the page an alternating light/dark rhythm out of the box. Any section can be flipped either way from the theme editor — these are just starting values.
 
 How it's wired so a color change doesn't quietly break contrast elsewhere:
 - "Inverted" elements that sit on top of the section (solid buttons, badges, the popular-tier ribbon) use `text_color` as their own background and `background_color` as their own text, so a solid black button on a white section automatically becomes a solid white button if you flip the section to a black background — it always contrasts against whatever you pick, instead of assuming white-on-black.
