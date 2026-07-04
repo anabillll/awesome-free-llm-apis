@@ -1,4 +1,4 @@
-{%- comment -%} Display font (Latin) + Arabic fallback, self-hosted from theme assets. Safe to render in every section: browsers dedupe identical @font-face src URLs. {%- endcomment -%}
+{%- comment -%} Display font (Latin) + button font (Latin) + Arabic fallback, self-hosted from theme assets. Safe to render in every section: browsers dedupe identical @font-face src URLs. {%- endcomment -%}
 <style>
   @font-face {
     font-family: 'Caprasimo';
@@ -6,6 +6,13 @@
     font-weight: 400;
     font-display: swap;
     src: url({{ 'caprasimo.woff2' | asset_url }}) format('woff2');
+  }
+  @font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url({{ 'poppins.woff2' | asset_url }}) format('woff2');
   }
   @font-face {
     font-family: 'Cairo';
