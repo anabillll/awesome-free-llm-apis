@@ -1,6 +1,6 @@
 # Shopify PDP + Homepage (Liquid)
 
-Drop-in Online Store 2.0 sections for a product page and a homepage, sharing one design system: gallery, buy box with variant/subscription/tiered pricing, cross-sell, hero banner, featured collections, USP bar, benefit blocks, ingredients showcase, comparison table, testimonials, FAQ, recommendations, CTA, and a newsletter/footer.
+Drop-in Online Store 2.0 sections for a product page and a homepage, sharing one design system: announcement bar, gallery, buy box with variant/subscription/tiered pricing, cross-sell, hero banner, featured collections, USP bar, an "as featured on" logo marquee, benefit blocks, ingredients showcase, comparison table, testimonials, FAQ, recommendations, CTA, and a newsletter/footer.
 
 ## Install
 
@@ -11,7 +11,7 @@ Drop-in Online Store 2.0 sections for a product page and a homepage, sharing one
 
 ## Homepage composition
 
-`templates/index.json` wires together, in order: `hero-banner` → `usp-icon-bar` → `featured-collections` ("Shop By Flavor") → `product-recommendations` (relabeled "Bestsellers" — same section as the PDP's cross-sell, it just takes a heading/product blocks like any other instance) → `media-with-text` (Brand Story) → `ingredients-showcase` → `testimonials` → `faq-accordion` → `last-chance-cta` → `newsletter-footer`. Everything except `hero-banner`, `featured-collections`, and `testimonials` is the exact same section file used on the product page — add/remove/reorder sections in the homepage template the same way you would anywhere else.
+`templates/index.json` wires together, in order: `announcement-bar` → `hero-banner` → `usp-icon-bar` → `featured-on` ("As Featured On") → `featured-collections` ("Shop By Flavor") → `product-recommendations` (relabeled "Bestsellers" — same section as the PDP's cross-sell, it just takes a heading/product blocks like any other instance) → `media-with-text` (Brand Story) → `ingredients-showcase` → `testimonials` → `faq-accordion` → `last-chance-cta` → `newsletter-footer`. Everything except `hero-banner`, `featured-collections`, and `testimonials` is the exact same section file used on the product page — add/remove/reorder sections in the homepage template the same way you would anywhere else. `product.pdp.json` wires the same `announcement-bar` and `featured-on` sections in near the top too, right after the buy box's USP bar.
 
 `featured-collections` blocks reference real Shopify collections (`type: "collection"`) with a `fallback_title`/`fallback_image` pair used only until a merchant picks an actual collection — same pattern as the cross-sell/recommendation blocks elsewhere in this package.
 
@@ -21,6 +21,13 @@ Drop-in Online Store 2.0 sections for a product page and a homepage, sharing one
 - Buy-box tier pricing, subscription toggle, and cross-sell "Add Selected to Cart" are wired to `/cart/add.js` via fetch; no page reload.
 - All sections are self-contained (scoped styles/JS keyed by `section.id`), so they can be reordered or reused elsewhere (e.g. `media-with-text` for both benefit blocks).
 - Translated strings use `| t` filters (e.g. `products.product.add_to_cart`); add matching keys to your theme's `locales/en.default.json` or they'll fall back to the key name.
+
+## Announcement bar & "As Featured On"
+
+- `announcement-bar.liquid` is an infinite-scrolling message ticker; each message is its own `message` block (text + optional link), so merchants can add/remove/reorder messages from the theme editor. `speed` (seconds per loop) and `pause_on_hover` are also editable.
+- `featured-on.liquid` is a press-logo marquee. Each `logo` block has an `image_picker` — merchants upload their own logo per block from the theme editor, same pattern as every other image field in this package. Until a logo is uploaded, the block falls back to a styled text pill using its `fallback_label` setting, so the section never renders empty/broken.
+- Both marquees duplicate their content once (the copy is `aria-hidden="true"` and its links are `tabindex="-1"`) to create a seamless infinite CSS `animation` loop — no JavaScript needed for the scroll itself.
+- **Direction follows reading order, not a fixed left/right**: both sections check `request.locale.rtl?` in Liquid and set `dir="ltr"`/`dir="rtl"` on their own wrapper, then flip the animation with `animation-direction: reverse` under `[dir="rtl"]`. In an LTR storefront the ticker moves left → right; switch the store to an RTL locale (Arabic, Hebrew, etc.) and it automatically reverses to move right → left — no per-locale settings to configure. Both respect `prefers-reduced-motion: reduce` (animation is disabled, content stays static).
 
 ## Arabic / RTL support
 
@@ -35,6 +42,8 @@ Every repeatable piece of content is a schema **block**, not a hardcoded loop, s
 
 | Section | Block type(s) |
 |---|---|
+| `announcement-bar` | `message` |
+| `featured-on` | `logo` |
 | `main-product` | `pricing_tier` (quantity tiers), `accordion`, `trust_icon`, `cross_sell_item` |
 | `hero-banner` | `button` |
 | `usp-icon-bar` | `icon` |
@@ -64,7 +73,7 @@ Every section has a `text_alignment` setting (Left / Center / Right) in the them
 
 ## Background / text color
 
-Every section has `background_color` and `text_color` color pickers in the theme editor — no code editing needed to change the look. Seven default to white background / near-black text; `ingredients-showcase`, `faq-accordion`, and `newsletter-footer` default to black background / white text, giving the page an alternating light/dark rhythm out of the box. Any section can be flipped either way from the theme editor — these are just starting values.
+Every section has `background_color` and `text_color` color pickers in the theme editor — no code editing needed to change the look. Seven default to white background / near-black text; `ingredients-showcase`, `faq-accordion`, `newsletter-footer`, and `announcement-bar` default to black background / white text, giving the page an alternating light/dark rhythm out of the box. Any section can be flipped either way from the theme editor — these are just starting values.
 
 How it's wired so a color change doesn't quietly break contrast elsewhere:
 - "Inverted" elements that sit on top of the section (solid buttons, badges, the popular-tier ribbon) use `text_color` as their own background and `background_color` as their own text, so a solid black button on a white section automatically becomes a solid white button if you flip the section to a black background — it always contrasts against whatever you pick, instead of assuming white-on-black.

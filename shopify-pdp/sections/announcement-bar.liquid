@@ -1,0 +1,103 @@
+{%- comment -%} Site-wide announcement ticker: infinite marquee, direction follows reading order (scrolls left-to-right for LTR locales, right-to-left for RTL/Arabic locales). Add to any template near the top, or wire into layout/theme.liquid as a static section for a true site-wide bar. {%- endcomment -%}
+{%- render 'theme-fonts' -%}
+{%- liquid
+  assign message_blocks = section.blocks | where: 'type', 'message'
+  assign bar_dir = 'ltr'
+  if request.locale.rtl?
+    assign bar_dir = 'rtl'
+  endif
+-%}
+{%- if message_blocks.size > 0 -%}
+<div class="announce-bar" id="announce-bar-{{ section.id }}" dir="{{ bar_dir }}">
+  <div class="announce-bar__track">
+    <div class="announce-bar__group">
+      {%- for block in message_blocks -%}
+        <span class="announce-bar__item" {{ block.shopify_attributes }}>
+          {%- if block.settings.link != blank -%}
+            <a href="{{ block.settings.link }}">{{ block.settings.text }}</a>
+          {%- else -%}
+            {{ block.settings.text }}
+          {%- endif -%}
+        </span>
+      {%- endfor -%}
+    </div>
+    <div class="announce-bar__group" aria-hidden="true">
+      {%- for block in message_blocks -%}
+        <span class="announce-bar__item">
+          {%- if block.settings.link != blank -%}
+            <a href="{{ block.settings.link }}" tabindex="-1">{{ block.settings.text }}</a>
+          {%- else -%}
+            {{ block.settings.text }}
+          {%- endif -%}
+        </span>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+{%- endif -%}
+
+{%- style -%}
+#announce-bar-{{ section.id }} {
+  background: {{ section.settings.background_color }};
+  color: {{ section.settings.text_color }};
+  overflow: hidden;
+  padding: 10px 0;
+  font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+#announce-bar-{{ section.id }} .announce-bar__track {
+  display: flex;
+  width: max-content;
+  animation: announce-bar-scroll-{{ section.id }} {{ section.settings.speed }}s linear infinite;
+}
+#announce-bar-{{ section.id }}[dir="rtl"] .announce-bar__track { animation-direction: reverse; }
+#announce-bar-{{ section.id }} .announce-bar__group { display: flex; flex-shrink: 0; }
+#announce-bar-{{ section.id }} .announce-bar__item { padding-inline-end: 48px; white-space: nowrap; }
+#announce-bar-{{ section.id }} .announce-bar__item a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+@keyframes announce-bar-scroll-{{ section.id }} {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0%); }
+}
+{%- if section.settings.pause_on_hover -%}
+#announce-bar-{{ section.id }}:hover .announce-bar__track { animation-play-state: paused; }
+{%- endif -%}
+@media (prefers-reduced-motion: reduce) {
+  #announce-bar-{{ section.id }} .announce-bar__track { animation: none; }
+}
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "tag": "section",
+  "settings": [
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#17110b" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#ffffff" },
+    { "type": "range", "id": "speed", "label": "Scroll speed (seconds per loop)", "min": 8, "max": 60, "step": 1, "default": 22 },
+    { "type": "checkbox", "id": "pause_on_hover", "label": "Pause on hover", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Message",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text", "default": "Free shipping on orders over $50" },
+        { "type": "url", "id": "link", "label": "Link (optional)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement bar",
+      "blocks": [
+        { "type": "message", "settings": { "text": "Free shipping on orders over $50" } },
+        { "type": "message", "settings": { "text": "Subscribe & save 15% on every order" } },
+        { "type": "message", "settings": { "text": "30-day guarantee, no questions asked" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

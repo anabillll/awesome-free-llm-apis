@@ -1,5 +1,15 @@
 {
   "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "blocks": {
+        "msg-1": { "type": "message", "settings": { "text": "Free shipping on orders over $50" } },
+        "msg-2": { "type": "message", "settings": { "text": "Subscribe & save 15% on every order" } },
+        "msg-3": { "type": "message", "settings": { "text": "30-day guarantee, no questions asked" } }
+      },
+      "block_order": ["msg-1", "msg-2", "msg-3"],
+      "settings": {}
+    },
     "hero": {
       "type": "hero-banner",
       "blocks": {
@@ -27,6 +37,18 @@
       },
       "block_order": ["no-dairy", "no-wheat", "no-nut", "no-corn", "no-soy", "no-gmo"],
       "settings": {}
+    },
+    "featured-on": {
+      "type": "featured-on",
+      "blocks": {
+        "logo-1": { "type": "logo", "settings": { "fallback_label": "Bon Appétit" } },
+        "logo-2": { "type": "logo", "settings": { "fallback_label": "Forbes" } },
+        "logo-3": { "type": "logo", "settings": { "fallback_label": "Vogue" } },
+        "logo-4": { "type": "logo", "settings": { "fallback_label": "TechCrunch" } },
+        "logo-5": { "type": "logo", "settings": { "fallback_label": "Well+Good" } }
+      },
+      "block_order": ["logo-1", "logo-2", "logo-3", "logo-4", "logo-5"],
+      "settings": { "heading": "As Featured On" }
     },
     "shop-by-flavor": {
       "type": "featured-collections",
@@ -112,8 +134,10 @@
     }
   },
   "order": [
+    "announcement-bar",
     "hero",
     "usp-bar",
+    "featured-on",
     "shop-by-flavor",
     "bestsellers",
     "brand-story",
