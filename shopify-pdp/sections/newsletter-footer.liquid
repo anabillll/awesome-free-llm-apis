@@ -105,6 +105,8 @@
 #site-footer-{{ section.id }} .site-footer__column-list a { color: inherit; text-decoration: none; opacity: .75; font-size: 14px; }
 #site-footer-{{ section.id }} .site-footer__column-list a:hover { opacity: 1; }
 #site-footer-{{ section.id }} .site-footer__app-badges { display: flex; flex-direction: column; gap: 8px; }
+#site-footer-{{ section.id }} .site-footer__app-badges a { display: block; width: fit-content; transition: transform .15s ease, opacity .15s ease; }
+#site-footer-{{ section.id }} .site-footer__app-badges a:hover { transform: translateY(-2px); opacity: .85; }
 #site-footer-{{ section.id }} .site-footer__app-badges img { max-width: 140px; }
 #site-footer-{{ section.id }} .site-footer__bottom { border-top: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.12 }}; padding: 20px 5vw; }
 #site-footer-{{ section.id }} .site-footer__bottom-wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; font-size: 12px; opacity: .75; }

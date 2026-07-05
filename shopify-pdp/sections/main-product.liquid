@@ -265,7 +265,9 @@
 #pdp-main-{{ section.id }} .pdp-gallery__stage { position: relative; border-radius: 10px; overflow: hidden; background: var(--pdp-cream); }
 #pdp-main-{{ section.id }} .pdp-gallery__slide { display: none; }
 #pdp-main-{{ section.id }} .pdp-gallery__slide.is-active { display: block; }
-#pdp-main-{{ section.id }} .pdp-gallery__slide img { width: 100%; height: auto; display: block; }
+#pdp-main-{{ section.id }} .pdp-gallery__slide img { width: 100%; height: auto; display: block; transition: transform .5s ease; }
+#pdp-main-{{ section.id }} .pdp-gallery__stage:hover img { transform: scale(1.04); }
+@media (prefers-reduced-motion: reduce) { #pdp-main-{{ section.id }} .pdp-gallery__slide img { transition: none; } }
 #pdp-main-{{ section.id }} .pdp-gallery__thumbs { display: flex; gap: 10px; margin-top: 12px; overflow-x: auto; padding-bottom: 4px; }
 #pdp-main-{{ section.id }} .pdp-gallery__thumb { flex: 0 0 auto; width: 64px; height: 64px; border: 2px solid transparent; border-radius: 8px; overflow: hidden; padding: 0; cursor: pointer; background: none; }
 #pdp-main-{{ section.id }} .pdp-gallery__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -332,7 +334,9 @@
 #pdp-main-{{ section.id }} .pdp-trust-icons { list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 20px 0; padding: 20px 0 0; border-top: 1px solid var(--pdp-line); }
 @media (min-width: 480px) { #pdp-main-{{ section.id }} .pdp-trust-icons { grid-template-columns: repeat(4, 1fr); } }
 #pdp-main-{{ section.id }} .pdp-trust-icons__item { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; font-size: 11px; opacity: .8; }
-#pdp-main-{{ section.id }} .pdp-trust-icons__item img { width: 36px; height: 36px; }
+#pdp-main-{{ section.id }} .pdp-trust-icons__item img { width: 36px; height: 36px; transition: transform .25s ease; }
+#pdp-main-{{ section.id }} .pdp-trust-icons__item:hover img { transform: translateY(-3px) scale(1.08); }
+@media (prefers-reduced-motion: reduce) { #pdp-main-{{ section.id }} .pdp-trust-icons__item img { transition: none; } }
 
 #pdp-main-{{ section.id }} .pdp-pickup { border: 1px solid var(--pdp-line); border-radius: 8px; padding: 14px; margin-bottom: 14px; font-size: 14px; }
 #pdp-main-{{ section.id }} .pdp-guarantee-bar { text-align: center; background: var(--pdp-cream); padding: 12px; border-radius: 8px; font-size: 13px; }

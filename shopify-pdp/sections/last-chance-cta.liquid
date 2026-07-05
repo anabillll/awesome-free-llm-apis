@@ -26,7 +26,9 @@
 #final-cta-{{ section.id }} .final-cta__button { padding: 13px 30px; border-radius: 6px; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; text-decoration: none; text-transform: uppercase; letter-spacing: .03em; transition: transform .1s; display: inline-block; }
 #final-cta-{{ section.id }} .final-cta__button:active { transform: scale(.97); }
 #final-cta-{{ section.id }} .final-cta__button--solid { background: {{ section.settings.text_color }}; color: {{ section.settings.background_color }}; }
+#final-cta-{{ section.id }} .final-cta__button--solid:hover { opacity: .85; }
 #final-cta-{{ section.id }} .final-cta__button--outline { border: 1px solid {{ section.settings.text_color }}; color: {{ section.settings.text_color }}; }
+#final-cta-{{ section.id }} .final-cta__button--outline:hover { background: {{ section.settings.text_color | color_modify: 'alpha', 0.08 }}; }
 {%- endstyle -%}
 
 {% schema %}

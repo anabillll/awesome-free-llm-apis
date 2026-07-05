@@ -63,8 +63,12 @@
 #also-like-{{ section.id }} .also-like__badge { position: absolute; top: 10px; inset-inline-start: 10px; font-size: 10px; text-transform: uppercase; font-weight: 700; padding: 3px 8px; border-radius: 4px; z-index: 1; }
 #also-like-{{ section.id }} .also-like__badge--sale { background: #7a2436; color: #fff; }
 #also-like-{{ section.id }} .also-like__badge--new { background: {{ section.settings.text_color }}; color: {{ section.settings.background_color }}; }
+#also-like-{{ section.id }} .also-like__image { display: block; overflow: hidden; border-radius: 8px; margin-bottom: 12px; }
 #also-like-{{ section.id }} .also-like__image img,
-#also-like-{{ section.id }} .also-like__image svg { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 12px; }
+#also-like-{{ section.id }} .also-like__image svg { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; transition: transform .5s ease; }
+#also-like-{{ section.id }} .also-like__card:hover .also-like__image img,
+#also-like-{{ section.id }} .also-like__card:hover .also-like__image svg { transform: scale(1.06); }
+@media (prefers-reduced-motion: reduce) { #also-like-{{ section.id }} .also-like__image img, #also-like-{{ section.id }} .also-like__image svg { transition: none; } }
 #also-like-{{ section.id }} .also-like__title { font-size: 14px; font-weight: 600; text-decoration: none; color: inherit; margin-bottom: 6px; }
 #also-like-{{ section.id }} .also-like__price { display: flex; gap: 8px; align-items: baseline; margin-bottom: 12px; font-size: 14px; }
 #also-like-{{ section.id }} .also-like__price-compare { text-decoration: line-through; opacity: .5; font-size: 12px; }

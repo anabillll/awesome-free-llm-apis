@@ -37,7 +37,9 @@
 #testi-{{ section.id }} .testi__subheading { text-align: {{ section.settings.text_alignment }}; opacity: .7; margin: 0 0 28px; font-size: 14px; }
 #testi-{{ section.id }} .testi__grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
 @media (min-width: 700px) { #testi-{{ section.id }} .testi__grid { grid-template-columns: repeat(3, 1fr); } }
-#testi-{{ section.id }} .testi__card { border: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.15 }}; border-radius: 8px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+#testi-{{ section.id }} .testi__card { border: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.15 }}; border-radius: 8px; padding: 22px; display: flex; flex-direction: column; gap: 14px; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+#testi-{{ section.id }} .testi__card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px {{ section.settings.text_color | color_modify: 'alpha', 0.12 }}; border-color: {{ section.settings.text_color | color_modify: 'alpha', 0.3 }}; }
+@media (prefers-reduced-motion: reduce) { #testi-{{ section.id }} .testi__card { transition: none; } }
 #testi-{{ section.id }} .testi__rating { letter-spacing: 2px; }
 #testi-{{ section.id }} .testi__star { opacity: .25; }
 #testi-{{ section.id }} .testi__star.is-filled { opacity: 1; }

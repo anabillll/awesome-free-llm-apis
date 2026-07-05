@@ -26,8 +26,12 @@
 #img-grid-{{ section.id }} .img-grid__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(22px, 3vw, 30px); margin: 0 0 28px; }
 #img-grid-{{ section.id }} .img-grid__images { display: grid; grid-template-columns: 1fr; gap: 12px; }
 @media (min-width: 640px) { #img-grid-{{ section.id }} .img-grid__images { grid-template-columns: repeat(3, 1fr); } }
+#img-grid-{{ section.id }} .img-grid__item { overflow: hidden; border-radius: 6px; }
 #img-grid-{{ section.id }} .img-grid__item img,
-#img-grid-{{ section.id }} .img-grid__item svg { width: 100%; height: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; border-radius: 6px; }
+#img-grid-{{ section.id }} .img-grid__item svg { width: 100%; height: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; transition: transform .5s ease; }
+#img-grid-{{ section.id }} .img-grid__item:hover img,
+#img-grid-{{ section.id }} .img-grid__item:hover svg { transform: scale(1.06); }
+@media (prefers-reduced-motion: reduce) { #img-grid-{{ section.id }} .img-grid__item img, #img-grid-{{ section.id }} .img-grid__item svg { transition: none; } }
 {%- endstyle -%}
 
 {% schema %}

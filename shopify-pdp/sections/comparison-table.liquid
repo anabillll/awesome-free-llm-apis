@@ -46,6 +46,8 @@
 #compare-{{ section.id }} .compare__table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
 #compare-{{ section.id }} .compare__table th, #compare-{{ section.id }} .compare__table td { padding: 14px 12px; text-align: center; border-bottom: 1px solid #ddd4b4; }
 #compare-{{ section.id }} .compare__table tr:last-child td { border-bottom: none; }
+#compare-{{ section.id }} .compare__table tbody tr { transition: background .15s ease; }
+#compare-{{ section.id }} .compare__table tbody tr:hover { background: {{ section.settings.text_color | color_modify: 'alpha', 0.05 }}; }
 #compare-{{ section.id }} .compare__feature-col { text-align: start; font-weight: 600; position: sticky; inset-inline-start: 0; background: {{ section.settings.background_color }}; min-width: 180px; }
 #compare-{{ section.id }} .compare__brand-col--us { background: #f3edd6; font-weight: 700; }
 #compare-{{ section.id }} thead .compare__feature-col { background: {{ section.settings.background_color }}; }

@@ -27,7 +27,9 @@
 @media (min-width: 640px) { #usp-bar-{{ section.id }} .usp-bar__list { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 900px) { #usp-bar-{{ section.id }} .usp-bar__list { grid-template-columns: repeat(6, 1fr); } }
 #usp-bar-{{ section.id }} .usp-bar__item { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
-#usp-bar-{{ section.id }} .usp-bar__item img { width: 44px; height: 44px; }
+#usp-bar-{{ section.id }} .usp-bar__item img { width: 44px; height: 44px; transition: transform .25s ease; }
+#usp-bar-{{ section.id }} .usp-bar__item:hover img { transform: translateY(-4px) scale(1.08); }
+@media (prefers-reduced-motion: reduce) { #usp-bar-{{ section.id }} .usp-bar__item img { transition: none; } }
 {%- endstyle -%}
 
 {% schema %}

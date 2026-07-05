@@ -24,7 +24,8 @@
 #faq-{{ section.id }} .faq__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(22px, 3vw, 30px); margin: 0 0 28px; }
 #faq-{{ section.id }} .faq__item { border-bottom: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.15 }}; }
 #faq-{{ section.id }} .faq__item:first-child { border-top: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.15 }}; }
-#faq-{{ section.id }} .faq__question { display: flex; justify-content: space-between; align-items: center; padding: 18px 4px; cursor: pointer; font-weight: 600; list-style: none; }
+#faq-{{ section.id }} .faq__question { display: flex; justify-content: space-between; align-items: center; padding: 18px 4px; cursor: pointer; font-weight: 600; list-style: none; transition: opacity .15s ease, padding-inline-start .2s ease; }
+#faq-{{ section.id }} .faq__question:hover { opacity: .65; padding-inline-start: 6px; }
 #faq-{{ section.id }} .faq__question::-webkit-details-marker { display: none; }
 #faq-{{ section.id }} .faq__icon::before { content: '+'; font-size: 20px; }
 #faq-{{ section.id }} .faq__item[open] .faq__icon::before { content: '\2212'; }

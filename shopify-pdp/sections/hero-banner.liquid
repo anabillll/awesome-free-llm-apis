@@ -51,7 +51,9 @@
 #hero-{{ section.id }} .hero__button { display: inline-block; padding: 15px 32px; border-radius: 6px; text-decoration: none; text-transform: uppercase; letter-spacing: .04em; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; transition: transform .1s; }
 #hero-{{ section.id }} .hero__button:active { transform: scale(.97); }
 #hero-{{ section.id }} .hero__button--solid { background: {{ section.settings.text_color }}; color: {{ section.settings.background_color }}; }
+#hero-{{ section.id }} .hero__button--solid:hover { opacity: .85; }
 #hero-{{ section.id }} .hero__button--outline { border: 1px solid {{ section.settings.text_color }}; color: {{ section.settings.text_color }}; }
+#hero-{{ section.id }} .hero__button--outline:hover { background: {{ section.settings.text_color | color_modify: 'alpha', 0.08 }}; }
 {%- endstyle -%}
 
 {% schema %}

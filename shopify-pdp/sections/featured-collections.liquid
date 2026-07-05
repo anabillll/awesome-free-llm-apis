@@ -39,7 +39,10 @@
 #fcol-{{ section.id }} .fcol__tile:hover { transform: translateY(-3px); }
 #fcol-{{ section.id }} .fcol__image { display: block; width: 100%; border-radius: 8px; overflow: hidden; }
 #fcol-{{ section.id }} .fcol__image img,
-#fcol-{{ section.id }} .fcol__image svg { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; }
+#fcol-{{ section.id }} .fcol__image svg { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; transition: transform .5s ease; }
+#fcol-{{ section.id }} .fcol__tile:hover .fcol__image img,
+#fcol-{{ section.id }} .fcol__tile:hover .fcol__image svg { transform: scale(1.08); }
+@media (prefers-reduced-motion: reduce) { #fcol-{{ section.id }} .fcol__image img, #fcol-{{ section.id }} .fcol__image svg { transition: none; } }
 #fcol-{{ section.id }} .fcol__title { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
 {%- endstyle -%}
 

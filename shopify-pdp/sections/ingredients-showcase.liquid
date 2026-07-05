@@ -48,7 +48,8 @@
 #ingredients-{{ section.id }} .ingredients__body { opacity: .8; line-height: 1.7; margin-bottom: 22px; }
 #ingredients-{{ section.id }} .ingredients__button { display: inline-block; background: {{ section.settings.text_color }}; color: {{ section.settings.background_color }}; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; }
 #ingredients-{{ section.id }} .ingredients__list { display: flex; flex-direction: column; gap: 18px; }
-#ingredients-{{ section.id }} .ingredients__row { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 16px; }
+#ingredients-{{ section.id }} .ingredients__row { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 16px; padding: 6px 8px; margin: 0 -8px; border-radius: 6px; transition: background .15s ease; }
+#ingredients-{{ section.id }} .ingredients__row:hover { background: {{ section.settings.text_color | color_modify: 'alpha', 0.08 }}; }
 #ingredients-{{ section.id }} .ingredients__icon img,
 #ingredients-{{ section.id }} .ingredients__icon svg { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
 #ingredients-{{ section.id }} .ingredients__name { font-size: 14px; font-weight: 600; min-width: 90px; }
