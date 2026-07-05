@@ -1,0 +1,80 @@
+{%- comment -%} "Shop By Flavor" collection tile grid {%- endcomment -%}
+{%- render 'theme-fonts' -%}
+{%- render 'scroll-reveal' -%}
+<section class="fcol" id="fcol-{{ section.id }}">
+  <div class="fcol__wrap">
+    <h2 class="fcol__heading reveal">{{ section.settings.heading }}</h2>
+    {%- if section.settings.subheading != blank -%}
+      <p class="fcol__subheading reveal">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+
+    <div class="fcol__grid">
+      {%- for block in section.blocks -%}
+        {%- assign col = block.settings.collection -%}
+        <a href="{{ col.url | default: '#' }}" class="fcol__tile reveal" style="transition-delay: {{ forloop.index0 | times: 70 }}ms;" {{ block.shopify_attributes }}>
+          <span class="fcol__image">
+            {%- if col.featured_image -%}
+              {{ col.featured_image | image_url: width: 500 | image_tag: loading: 'lazy', sizes: '(min-width: 700px) 25vw, 50vw', widths: '250,375,500' }}
+            {%- elsif block.settings.fallback_image != blank -%}
+              {{ block.settings.fallback_image | image_url: width: 500 | image_tag: loading: 'lazy', sizes: '(min-width: 700px) 25vw, 50vw', widths: '250,375,500' }}
+            {%- else -%}
+              {{ 'collection-1' | placeholder_svg_tag: 'fcol__placeholder' }}
+            {%- endif -%}
+          </span>
+          <span class="fcol__title">{{ col.title | default: block.settings.fallback_title }}</span>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{%- style -%}
+#fcol-{{ section.id }} { padding: 52px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
+#fcol-{{ section.id }} .fcol__wrap { max-width: 1240px; margin: 0 auto; }
+#fcol-{{ section.id }} .fcol__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(28px, 4vw, 40px); margin: 0 0 8px; }
+#fcol-{{ section.id }} .fcol__subheading { text-align: {{ section.settings.text_alignment }}; opacity: .7; margin: 0 0 28px; font-size: 14px; }
+#fcol-{{ section.id }} .fcol__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+@media (min-width: 700px) { #fcol-{{ section.id }} .fcol__grid { grid-template-columns: repeat(4, 1fr); } }
+#fcol-{{ section.id }} .fcol__tile { display: flex; flex-direction: column; align-items: center; gap: 12px; text-decoration: none; color: inherit; text-align: center; transition: transform .15s; }
+#fcol-{{ section.id }} .fcol__tile:hover { transform: translateY(-3px); }
+#fcol-{{ section.id }} .fcol__image { display: block; width: 100%; border-radius: 8px; overflow: hidden; }
+#fcol-{{ section.id }} .fcol__image img,
+#fcol-{{ section.id }} .fcol__image svg { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; }
+#fcol-{{ section.id }} .fcol__title { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Featured collections",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop By Flavor" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "" },
+    { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
+  ],
+  "blocks": [
+    {
+      "type": "collection_tile",
+      "name": "Collection tile",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "text", "id": "fallback_title", "label": "Fallback title", "default": "Collection" },
+        { "type": "image_picker", "id": "fallback_image", "label": "Fallback image" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collections",
+      "blocks": [
+        { "type": "collection_tile", "settings": { "fallback_title": "Banana" } },
+        { "type": "collection_tile", "settings": { "fallback_title": "Caramel" } },
+        { "type": "collection_tile", "settings": { "fallback_title": "Cherry" } },
+        { "type": "collection_tile", "settings": { "fallback_title": "Coconut" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

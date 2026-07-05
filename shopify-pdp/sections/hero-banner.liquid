@@ -1,0 +1,94 @@
+{%- comment -%} Full-width homepage hero: eyebrow, heading, body, configurable buttons, optional background image {%- endcomment -%}
+{%- render 'theme-fonts' -%}
+{%- render 'scroll-reveal' -%}
+<section class="hero hero--{{ section.settings.height }}" id="hero-{{ section.id }}">
+  <div class="hero__media">
+    {%- if section.settings.background_image != blank -%}
+      {{ section.settings.background_image | image_url: width: 1800 | image_tag: loading: 'eager', sizes: '100vw', widths: '750,1100,1500,1800' }}
+    {%- else -%}
+      {{ 'lifestyle-1' | placeholder_svg_tag: 'hero__placeholder' }}
+    {%- endif -%}
+    {%- if section.settings.show_overlay -%}
+      <div class="hero__overlay" style="opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"></div>
+    {%- endif -%}
+  </div>
+
+  <div class="hero__content reveal">
+    {%- if section.settings.eyebrow != blank -%}
+      <p class="hero__eyebrow">{{ section.settings.eyebrow }}</p>
+    {%- endif -%}
+    {%- if section.settings.heading != blank -%}
+      <h1 class="hero__heading">{{ section.settings.heading }}</h1>
+    {%- endif -%}
+    {%- if section.settings.body != blank -%}
+      <div class="hero__body">{{ section.settings.body }}</div>
+    {%- endif -%}
+    {%- if section.blocks.size > 0 -%}
+      <div class="hero__actions">
+        {%- for block in section.blocks -%}
+          <a href="{{ block.settings.link | default: '#' }}" class="hero__button hero__button--{{ block.settings.style }}" {{ block.shopify_attributes }}>{{ block.settings.label }}</a>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{%- style -%}
+#hero-{{ section.id }} { position: relative; overflow: hidden; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; display: flex; align-items: center; }
+#hero-{{ section.id }}.hero--small { min-height: 320px; }
+#hero-{{ section.id }}.hero--medium { min-height: 460px; }
+#hero-{{ section.id }}.hero--large { min-height: 600px; }
+#hero-{{ section.id }}.hero--full { min-height: 100svh; }
+#hero-{{ section.id }} .hero__media { position: absolute; inset: 0; z-index: 0; }
+#hero-{{ section.id }} .hero__media img,
+#hero-{{ section.id }} .hero__media svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+#hero-{{ section.id }} .hero__overlay { position: absolute; inset: 0; background: {{ section.settings.text_color }}; }
+#hero-{{ section.id }} .hero__content { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 64px 5vw; text-align: {{ section.settings.text_alignment }}; }
+#hero-{{ section.id }} .hero__eyebrow { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; margin: 0 0 14px; }
+#hero-{{ section.id }} .hero__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(32px, 5vw, 56px); line-height: 1.1; margin: 0 0 18px; }
+#hero-{{ section.id }} .hero__body { font-size: 16px; line-height: 1.7; opacity: .85; margin: 0 0 28px; }
+#hero-{{ section.id }} .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: {% if section.settings.text_alignment == 'center' %}center{% elsif section.settings.text_alignment == 'right' %}flex-end{% else %}flex-start{% endif %}; }
+#hero-{{ section.id }} .hero__button { display: inline-block; padding: 15px 32px; border-radius: 6px; text-decoration: none; text-transform: uppercase; letter-spacing: .04em; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; transition: transform .1s; }
+#hero-{{ section.id }} .hero__button:active { transform: scale(.97); }
+#hero-{{ section.id }} .hero__button--solid { background: {{ section.settings.text_color }}; color: {{ section.settings.background_color }}; }
+#hero-{{ section.id }} .hero__button--outline { border: 1px solid {{ section.settings.text_color }}; color: {{ section.settings.text_color }}; }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Hero banner",
+  "tag": "section",
+  "settings": [
+    { "type": "select", "id": "height", "label": "Height", "options": [ { "value": "small", "label": "Small" }, { "value": "medium", "label": "Medium" }, { "value": "large", "label": "Large" }, { "value": "full", "label": "Full screen" } ], "default": "large" },
+    { "type": "image_picker", "id": "background_image", "label": "Background image" },
+    { "type": "checkbox", "id": "show_overlay", "label": "Show overlay on image", "default": true },
+    { "type": "range", "id": "overlay_opacity", "label": "Overlay opacity", "min": 0, "max": 80, "step": 5, "default": 35 },
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow", "default": "Guilt-Free Collection" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Chocolate That Loves You Back" },
+    { "type": "richtext", "id": "body", "label": "Body text", "default": "<p>Real cacao, clean ingredients, and five things on the label you can actually pronounce.</p>" },
+    { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "left" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
+  ],
+  "blocks": [
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Label", "default": "Shop Now" },
+        { "type": "url", "id": "link", "label": "Link" },
+        { "type": "select", "id": "style", "label": "Style", "options": [ { "value": "solid", "label": "Solid" }, { "value": "outline", "label": "Outline" } ], "default": "solid" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero banner",
+      "blocks": [
+        { "type": "button", "settings": { "label": "Shop Now", "style": "solid" } },
+        { "type": "button", "settings": { "label": "Our Story", "style": "outline" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

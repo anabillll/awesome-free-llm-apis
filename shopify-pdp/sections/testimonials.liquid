@@ -1,0 +1,87 @@
+{%- comment -%} Customer testimonials / reviews grid {%- endcomment -%}
+{%- render 'theme-fonts' -%}
+{%- render 'scroll-reveal' -%}
+<section class="testi" id="testi-{{ section.id }}">
+  <div class="testi__wrap">
+    <h2 class="testi__heading reveal">{{ section.settings.heading }}</h2>
+    {%- if section.settings.subheading != blank -%}
+      <p class="testi__subheading reveal">{{ section.settings.subheading }}</p>
+    {%- endif -%}
+
+    <div class="testi__grid">
+      {%- for block in section.blocks -%}
+        <div class="testi__card reveal" style="transition-delay: {{ forloop.index0 | times: 80 }}ms;" {{ block.shopify_attributes }}>
+          <div class="testi__rating" aria-label="{{ 'general.testimonials.rating' | t }}">
+            {%- for i in (1..5) -%}<span class="testi__star{% if i <= block.settings.rating %} is-filled{% endif %}">★</span>{%- endfor -%}
+          </div>
+          <blockquote class="testi__quote">{{ block.settings.quote }}</blockquote>
+          <div class="testi__author">
+            {%- if block.settings.avatar != blank -%}
+              <span class="testi__avatar">{{ block.settings.avatar | image_url: width: 80 | image_tag: loading: 'lazy' }}</span>
+            {%- endif -%}
+            <span class="testi__author-text">
+              <span class="testi__name">{{ block.settings.name }}</span>
+              {%- if block.settings.detail != blank -%}<span class="testi__detail">{{ block.settings.detail }}</span>{%- endif -%}
+            </span>
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{%- style -%}
+#testi-{{ section.id }} { padding: 52px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
+#testi-{{ section.id }} .testi__wrap { max-width: 1240px; margin: 0 auto; }
+#testi-{{ section.id }} .testi__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(28px, 4vw, 40px); margin: 0 0 8px; }
+#testi-{{ section.id }} .testi__subheading { text-align: {{ section.settings.text_alignment }}; opacity: .7; margin: 0 0 28px; font-size: 14px; }
+#testi-{{ section.id }} .testi__grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 700px) { #testi-{{ section.id }} .testi__grid { grid-template-columns: repeat(3, 1fr); } }
+#testi-{{ section.id }} .testi__card { border: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.15 }}; border-radius: 8px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+#testi-{{ section.id }} .testi__rating { letter-spacing: 2px; }
+#testi-{{ section.id }} .testi__star { opacity: .25; }
+#testi-{{ section.id }} .testi__star.is-filled { opacity: 1; }
+#testi-{{ section.id }} .testi__quote { margin: 0; font-size: 15px; line-height: 1.7; }
+#testi-{{ section.id }} .testi__author { display: flex; align-items: center; gap: 10px; margin-top: auto; }
+#testi-{{ section.id }} .testi__avatar img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block; }
+#testi-{{ section.id }} .testi__author-text { display: flex; flex-direction: column; font-size: 13px; }
+#testi-{{ section.id }} .testi__name { font-weight: 700; }
+#testi-{{ section.id }} .testi__detail { opacity: .65; font-size: 12px; }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Loved By Chocolate People" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "" },
+    { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        { "type": "richtext", "id": "quote", "label": "Quote", "default": "<p>Genuinely didn't expect a 'healthy' chocolate bar to taste this good.</p>" },
+        { "type": "range", "id": "rating", "label": "Rating", "min": 0, "max": 5, "step": 1, "default": 5 },
+        { "type": "text", "id": "name", "label": "Name", "default": "Happy Customer" },
+        { "type": "text", "id": "detail", "label": "Detail", "default": "Verified Buyer" },
+        { "type": "image_picker", "id": "avatar", "label": "Avatar" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        { "type": "testimonial", "settings": { "name": "Priya S.", "detail": "Verified Buyer", "rating": 5 } },
+        { "type": "testimonial", "settings": { "name": "Marcus T.", "detail": "Verified Buyer", "rating": 5 } },
+        { "type": "testimonial", "settings": { "name": "Elena R.", "detail": "Verified Buyer", "rating": 4 } }
+      ]
+    }
+  ]
+}
+{% endschema %}

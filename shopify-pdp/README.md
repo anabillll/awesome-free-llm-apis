@@ -1,13 +1,19 @@
-# Shopify PDP (Liquid)
+# Shopify PDP + Homepage (Liquid)
 
-Drop-in Online Store 2.0 sections that reproduce the product page mockup: gallery, buy box with variant/subscription/tiered pricing, cross-sell, USP bar, benefit blocks, ingredients showcase, comparison table, FAQ, recommendations, CTA, and a newsletter/footer.
+Drop-in Online Store 2.0 sections for a product page and a homepage, sharing one design system: gallery, buy box with variant/subscription/tiered pricing, cross-sell, hero banner, featured collections, USP bar, benefit blocks, ingredients showcase, comparison table, testimonials, FAQ, recommendations, CTA, and a newsletter/footer.
 
 ## Install
 
-1. Copy `sections/`, `snippets/`, and `assets/` (if any) into your theme's matching folders.
-2. Copy `templates/product.pdp.json` into your theme's `templates/` folder, or merge its `sections`/`order` into an existing product template.
-3. In Shopify admin, assign the `pdp` template to any product via **Product > Theme template**.
+1. Copy `sections/`, `snippets/`, and `assets/` into your theme's matching folders.
+2. **Product page**: copy `templates/product.pdp.json` into your theme's `templates/` folder (or merge its `sections`/`order` into an existing product template), then assign it to any product via **Product > Theme template** in Shopify admin.
+3. **Homepage**: copy `templates/index.json` into your theme's `templates/` folder — Shopify uses `index.json` as the homepage automatically, no assignment step needed. If your theme already has a homepage template you want to keep, merge the `sections`/`order` instead of overwriting the file.
 4. Every section ships with schema settings/blocks, so merchants can edit copy, images, prices, and FAQ/comparison rows from the theme editor without touching code.
+
+## Homepage composition
+
+`templates/index.json` wires together, in order: `hero-banner` → `usp-icon-bar` → `featured-collections` ("Shop By Flavor") → `product-recommendations` (relabeled "Bestsellers" — same section as the PDP's cross-sell, it just takes a heading/product blocks like any other instance) → `media-with-text` (Brand Story) → `ingredients-showcase` → `testimonials` → `faq-accordion` → `last-chance-cta` → `newsletter-footer`. Everything except `hero-banner`, `featured-collections`, and `testimonials` is the exact same section file used on the product page — add/remove/reorder sections in the homepage template the same way you would anywhere else.
+
+`featured-collections` blocks reference real Shopify collections (`type: "collection"`) with a `fallback_title`/`fallback_image` pair used only until a merchant picks an actual collection — same pattern as the cross-sell/recommendation blocks elsewhere in this package.
 
 ## Notes
 
@@ -30,15 +36,18 @@ Every repeatable piece of content is a schema **block**, not a hardcoded loop, s
 | Section | Block type(s) |
 |---|---|
 | `main-product` | `pricing_tier` (quantity tiers), `accordion`, `trust_icon`, `cross_sell_item` |
+| `hero-banner` | `button` |
 | `usp-icon-bar` | `icon` |
+| `featured-collections` | `collection_tile` |
 | `image-gallery-grid` | `image` |
 | `ingredients-showcase` | `ingredient` |
 | `comparison-table` | `feature_row` |
+| `testimonials` | `testimonial` |
 | `faq-accordion` | `question` |
 | `product-recommendations` | `product` |
 | `last-chance-cta` | `button` |
 | `newsletter-footer` | `link_column`, `app_badges` |
-| `media-with-text` | none — it's a single image+text pairing; use two separate section instances (as the template does for Benefit 1/2) and drag the *sections* themselves to reorder |
+| `media-with-text` | none — it's a single image+text pairing; use two separate section instances (as the template does for Benefit 1/2, or Brand Story on the homepage) and drag the *sections* themselves to reorder |
 
 Known limitation: `comparison-table`'s competitor columns (Competitor 1/2/3) are fixed at three and set via section settings, not blocks — Shopify schema can't dynamically add matrix columns that every row block then references, so the row *content* is fully block-driven (draggable/addable/removable) but the column *count* isn't. If you need a variable number of competitors, that requires a metafield- or app-driven table instead of static blocks.
 

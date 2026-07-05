@@ -1,0 +1,126 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero-banner",
+      "blocks": {
+        "shop-now": { "type": "button", "settings": { "label": "Shop Now", "style": "solid" } },
+        "our-story": { "type": "button", "settings": { "label": "Our Story", "style": "outline" } }
+      },
+      "block_order": ["shop-now", "our-story"],
+      "settings": {
+        "height": "large",
+        "eyebrow": "Guilt-Free Collection",
+        "heading": "Chocolate That Loves You Back",
+        "body": "<p>Real cacao, clean ingredients, and five things on the label you can actually pronounce.</p>",
+        "text_alignment": "left"
+      }
+    },
+    "usp-bar": {
+      "type": "usp-icon-bar",
+      "blocks": {
+        "no-dairy": { "type": "icon", "settings": { "label": "No Dairy" } },
+        "no-wheat": { "type": "icon", "settings": { "label": "No Wheat" } },
+        "no-nut": { "type": "icon", "settings": { "label": "No Nut" } },
+        "no-corn": { "type": "icon", "settings": { "label": "No Corn" } },
+        "no-soy": { "type": "icon", "settings": { "label": "No Soy" } },
+        "no-gmo": { "type": "icon", "settings": { "label": "No GMO" } }
+      },
+      "block_order": ["no-dairy", "no-wheat", "no-nut", "no-corn", "no-soy", "no-gmo"],
+      "settings": {}
+    },
+    "shop-by-flavor": {
+      "type": "featured-collections",
+      "blocks": {
+        "col-banana": { "type": "collection_tile", "settings": { "fallback_title": "Banana" } },
+        "col-caramel": { "type": "collection_tile", "settings": { "fallback_title": "Caramel" } },
+        "col-cherry": { "type": "collection_tile", "settings": { "fallback_title": "Cherry" } },
+        "col-coconut": { "type": "collection_tile", "settings": { "fallback_title": "Coconut" } }
+      },
+      "block_order": ["col-banana", "col-caramel", "col-cherry", "col-coconut"],
+      "settings": { "heading": "Shop By Flavor" }
+    },
+    "bestsellers": {
+      "type": "product-recommendations",
+      "blocks": {
+        "rec-1": { "type": "product" },
+        "rec-2": { "type": "product" },
+        "rec-3": { "type": "product" },
+        "rec-4": { "type": "product" }
+      },
+      "block_order": ["rec-1", "rec-2", "rec-3", "rec-4"],
+      "settings": { "heading": "Bestsellers", "subheading": "The bars people keep coming back for" }
+    },
+    "brand-story": {
+      "type": "media-with-text",
+      "settings": {
+        "heading": "Made By People Who Actually Eat Chocolate",
+        "body": "<p>We started Ecomfy because every \"healthy\" chocolate bar we tried tasted like a compromise. Ours doesn't — small batches, real cacao, and nothing you can't pronounce.</p>",
+        "image_position": "left",
+        "button_label": "Our Story",
+        "text_alignment": "left"
+      }
+    },
+    "ingredients": {
+      "type": "ingredients-showcase",
+      "blocks": {
+        "cacao": { "type": "ingredient", "settings": { "name": "Cacao", "percent": 90 } },
+        "sugar": { "type": "ingredient", "settings": { "name": "Coconut Sugar", "percent": 70 } },
+        "vanilla": { "type": "ingredient", "settings": { "name": "Vanilla", "percent": 60 } }
+      },
+      "block_order": ["cacao", "sugar", "vanilla"],
+      "settings": {}
+    },
+    "testimonials": {
+      "type": "testimonials",
+      "blocks": {
+        "t1": { "type": "testimonial", "settings": { "name": "Priya S.", "detail": "Verified Buyer", "rating": 5, "quote": "<p>Genuinely didn't expect a “healthy” chocolate bar to taste this good.</p>" } },
+        "t2": { "type": "testimonial", "settings": { "name": "Marcus T.", "detail": "Verified Buyer", "rating": 5, "quote": "<p>Subscribed after the first bite. The banana one is unreal.</p>" } },
+        "t3": { "type": "testimonial", "settings": { "name": "Elena R.", "detail": "Verified Buyer", "rating": 4, "quote": "<p>My kid can't tell it's not “regular” chocolate. Winning.</p>" } }
+      },
+      "block_order": ["t1", "t2", "t3"],
+      "settings": {}
+    },
+    "faq": {
+      "type": "faq-accordion",
+      "blocks": {
+        "q1": { "type": "question", "settings": { "question": "Where are your chocolates made?" } },
+        "q2": { "type": "question", "settings": { "question": "What ingredients are in your chocolate bars?" } },
+        "q3": { "type": "question", "settings": { "question": "Are your products vegan?" } },
+        "q4": { "type": "question", "settings": { "question": "Do your chocolate bars contain nuts?" } }
+      },
+      "block_order": ["q1", "q2", "q3", "q4"],
+      "settings": {}
+    },
+    "final-cta": {
+      "type": "last-chance-cta",
+      "blocks": {
+        "shop-now": { "type": "button", "settings": { "label": "Shop Now", "style": "solid" } },
+        "learn-more": { "type": "button", "settings": { "label": "Learn More", "style": "outline" } }
+      },
+      "block_order": ["shop-now", "learn-more"],
+      "settings": { "heading": "Ready When You Are", "body": "Free shipping over $50. Cancel a subscription any time, no questions asked." }
+    },
+    "footer": {
+      "type": "newsletter-footer",
+      "blocks": {
+        "shop": { "type": "link_column", "settings": { "heading": "Shop" } },
+        "company": { "type": "link_column", "settings": { "heading": "Company" } },
+        "app": { "type": "app_badges", "settings": { "heading": "Get The App" } }
+      },
+      "block_order": ["shop", "company", "app"],
+      "settings": {}
+    }
+  },
+  "order": [
+    "hero",
+    "usp-bar",
+    "shop-by-flavor",
+    "bestsellers",
+    "brand-story",
+    "ingredients",
+    "testimonials",
+    "faq",
+    "final-cta",
+    "footer"
+  ]
+}
