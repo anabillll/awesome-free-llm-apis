@@ -277,11 +277,11 @@
 #pdp-main-{{ section.id }} .pdp-badge { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; font-weight: 600; }
 #pdp-main-{{ section.id }} .pdp-badge--new { background: var(--pdp-ink); color: {{ section.settings.background_color | default: '#ffffff' }}; }
 #pdp-main-{{ section.id }} .pdp-badge--sale { background: var(--pdp-red); color: #fff; }
-#pdp-main-{{ section.id }} .pdp-title { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(22px, 3vw, 30px); margin: 0 0 8px; line-height: 1.2; }
-#pdp-main-{{ section.id }} .pdp-price { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
-#pdp-main-{{ section.id }} .pdp-price__compare { text-decoration: line-through; opacity: .5; font-size: 15px; }
-#pdp-main-{{ section.id }} .pdp-price__current { font-size: 20px; font-weight: 700; }
-#pdp-main-{{ section.id }} .pdp-rating { display: flex; align-items: center; gap: 4px; margin-bottom: 18px; color: var(--pdp-gold); font-size: 14px; }
+#pdp-main-{{ section.id }} .pdp-title { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(22px, 3vw, 30px); margin: 0 0 12px; line-height: 1.2; }
+#pdp-main-{{ section.id }} .pdp-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 12px; margin: 0 0 16px; }
+#pdp-main-{{ section.id }} .pdp-price__compare { text-decoration: line-through; opacity: .5; font-size: clamp(13px, 3vw, 15px); }
+#pdp-main-{{ section.id }} .pdp-price__current { font-size: clamp(18px, 4vw, 21px); font-weight: 700; }
+#pdp-main-{{ section.id }} .pdp-rating { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0 0 20px; color: var(--pdp-gold); font-size: 14px; }
 #pdp-main-{{ section.id }} .pdp-rating__star { opacity: .3; }
 #pdp-main-{{ section.id }} .pdp-rating__star.is-filled { opacity: 1; }
 #pdp-main-{{ section.id }} .pdp-rating__count { color: var(--pdp-ink); opacity: .6; margin-inline-start: 4px; }
