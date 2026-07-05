@@ -152,10 +152,12 @@
                   <option>{{ 'products.product.two_flavors' | t }}</option>
                 </select>
               {%- endif -%}
-              <div class="pdp-tier__price">{{ block.settings.price | default: 900 | money }}</div>
-              {%- if block.settings.save_percent > 0 -%}
-                <span class="pdp-tier__save">{{ 'products.product.save_percent' | t: percent: block.settings.save_percent }}</span>
-              {%- endif -%}
+              <div class="pdp-tier__price-wrap">
+                <div class="pdp-tier__price">{{ block.settings.price | default: 900 | money }}</div>
+                {%- if block.settings.save_percent > 0 -%}
+                  <span class="pdp-tier__save">{{ 'products.product.save_percent' | t: percent: block.settings.save_percent }}</span>
+                {%- endif -%}
+              </div>
             </div>
           {%- endfor -%}
         </div>
@@ -311,6 +313,8 @@
 #pdp-main-{{ section.id }} .pdp-tier__label { flex: 1 1 auto; }
 #pdp-main-{{ section.id }} .pdp-tier--popular { background: var(--pdp-cream); }
 #pdp-main-{{ section.id }} .pdp-tier__ribbon { position: absolute; top: -1px; inset-inline-end: 12px; background: var(--pdp-ink); color: {{ section.settings.background_color | default: '#ffffff' }}; font-size: 10px; text-transform: uppercase; padding: 3px 8px; border-radius: 0 0 4px 4px; }
+#pdp-main-{{ section.id }} .pdp-select--tier { width: auto; flex: 0 1 150px; }
+#pdp-main-{{ section.id }} .pdp-tier__price-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-inline-start: auto; }
 #pdp-main-{{ section.id }} .pdp-tier__price { font-weight: 700; }
 #pdp-main-{{ section.id }} .pdp-tier__save { background: var(--pdp-green); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
 
@@ -534,8 +538,8 @@
       "name": "Main product",
       "blocks": [
         { "type": "pricing_tier", "settings": { "quantity": 1, "price": "900" } },
-        { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1642", "show_flavor_select": true, "save_percent": 10, "is_popular": true } },
-        { "type": "pricing_tier", "settings": { "quantity": 3, "price": "2400", "save_percent": 15 } },
+        { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1620", "show_flavor_select": true, "save_percent": 10, "is_popular": true } },
+        { "type": "pricing_tier", "settings": { "quantity": 3, "price": "2295", "save_percent": 15 } },
         { "type": "accordion", "settings": { "heading": "Details" } },
         { "type": "accordion", "settings": { "heading": "Shipping & Returns" } },
         { "type": "accordion", "settings": { "heading": "Our Guarantee" } }
