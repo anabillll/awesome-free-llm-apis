@@ -102,6 +102,33 @@
           {%- endfor -%}
         </select>
 
+        {%- liquid
+          assign tier_blocks = section.blocks | where: 'type', 'pricing_tier'
+        -%}
+        {%- if tier_blocks.size > 0 -%}
+        <div class="pdp-tiers" data-pdp-tiers>
+          {%- for block in tier_blocks -%}
+            <div class="pdp-tier{% if block.settings.is_popular %} pdp-tier--popular{% endif %}" data-tier data-tier-qty="{{ block.settings.quantity }}" {{ block.shopify_attributes }}>
+              {%- if block.settings.is_popular -%}<span class="pdp-tier__ribbon">{{ block.settings.popular_label }}</span>{%- endif -%}
+              <div class="pdp-tier__radio"><input type="radio" name="tier" value="{{ block.settings.quantity }}" {% if forloop.first %}checked{% endif %}></div>
+              <div class="pdp-tier__label">{{ 'products.product.buy_x' | t: count: block.settings.quantity }}</div>
+              {%- if block.settings.show_flavor_select -%}
+                <select class="pdp-select pdp-select--tier" data-tier-flavor>
+                  <option>{{ 'products.product.single_flavor' | t }}</option>
+                  <option>{{ 'products.product.two_flavors' | t }}</option>
+                </select>
+              {%- endif -%}
+              <div class="pdp-tier__price-wrap">
+                <div class="pdp-tier__price">{{ block.settings.price | default: 900 | money }}</div>
+                {%- if block.settings.save_percent > 0 -%}
+                  <span class="pdp-tier__save">{{ 'products.product.save_percent' | t: percent: block.settings.save_percent }}</span>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+        {%- endif -%}
+
         <fieldset class="pdp-purchase-options" data-pdp-purchase-options>
           <legend class="visually-hidden">{{ 'products.product.purchase_options' | t }}</legend>
 
@@ -136,33 +163,6 @@
             {{ 'products.product.in_stock' | t }}
           {%- endif -%}
         </p>
-
-        {%- liquid
-          assign tier_blocks = section.blocks | where: 'type', 'pricing_tier'
-        -%}
-        {%- if tier_blocks.size > 0 -%}
-        <div class="pdp-tiers" data-pdp-tiers>
-          {%- for block in tier_blocks -%}
-            <div class="pdp-tier{% if block.settings.is_popular %} pdp-tier--popular{% endif %}" data-tier data-tier-qty="{{ block.settings.quantity }}" {{ block.shopify_attributes }}>
-              {%- if block.settings.is_popular -%}<span class="pdp-tier__ribbon">{{ block.settings.popular_label }}</span>{%- endif -%}
-              <div class="pdp-tier__radio"><input type="radio" name="tier" value="{{ block.settings.quantity }}" {% if forloop.first %}checked{% endif %}></div>
-              <div class="pdp-tier__label">{{ 'products.product.buy_x' | t: count: block.settings.quantity }}</div>
-              {%- if block.settings.show_flavor_select -%}
-                <select class="pdp-select pdp-select--tier" data-tier-flavor>
-                  <option>{{ 'products.product.single_flavor' | t }}</option>
-                  <option>{{ 'products.product.two_flavors' | t }}</option>
-                </select>
-              {%- endif -%}
-              <div class="pdp-tier__price-wrap">
-                <div class="pdp-tier__price">{{ block.settings.price | default: 900 | money }}</div>
-                {%- if block.settings.save_percent > 0 -%}
-                  <span class="pdp-tier__save">{{ 'products.product.save_percent' | t: percent: block.settings.save_percent }}</span>
-                {%- endif -%}
-              </div>
-            </div>
-          {%- endfor -%}
-        </div>
-        {%- endif -%}
 
         <input type="number" name="quantity" data-pdp-quantity value="1" min="1" hidden>
 
