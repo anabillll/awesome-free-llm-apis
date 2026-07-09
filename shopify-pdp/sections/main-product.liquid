@@ -106,7 +106,7 @@
           assign tier_blocks = section.blocks | where: 'type', 'pricing_tier'
         -%}
         {%- if tier_blocks.size > 0 -%}
-        <div class="pdp-tiers" data-pdp-tiers>
+        <div class="pdp-tiers pdp-tiers--{{ section.settings.tier_layout }}" data-pdp-tiers>
           {%- for block in tier_blocks -%}
             <div class="pdp-tier{% if block.settings.is_popular %} pdp-tier--popular{% endif %}" data-tier data-tier-qty="{{ block.settings.quantity }}" {{ block.shopify_attributes }}>
               {%- if block.settings.is_popular -%}<span class="pdp-tier__ribbon">{{ block.settings.popular_label }}</span>{%- endif -%}
@@ -322,6 +322,18 @@
 #pdp-main-{{ section.id }} .pdp-tier__price { font-weight: 700; }
 #pdp-main-{{ section.id }} .pdp-tier__save { background: var(--pdp-green); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
 
+/* Bundle layout: horizontal (cards side by side) */
+#pdp-main-{{ section.id }} .pdp-tiers--horizontal { border: none; border-radius: 0; overflow: visible; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+#pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier { flex-direction: column; align-items: center; text-align: center; gap: 8px; border: 1px solid var(--pdp-line); border-radius: 10px; padding: 20px 10px 16px; }
+#pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__radio { order: 1; }
+#pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__label { order: 2; flex: none; font-weight: 700; }
+#pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-select--tier { order: 3; flex: none; width: 100%; padding: 7px 6px; font-size: 12px; text-overflow: ellipsis; }
+#pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__price-wrap { order: 4; align-items: center; margin-inline-start: 0; }
+#pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__ribbon { top: -11px; inset-inline-end: auto; inset-inline-start: 50%; transform: translateX(-50%); border-radius: 4px; white-space: nowrap; }
+@media (max-width: 480px) {
+  #pdp-main-{{ section.id }} .pdp-tiers--horizontal { grid-template-columns: 1fr; }
+}
+
 #pdp-main-{{ section.id }} .pdp-atc { width: 100%; background: var(--pdp-ink); color: {{ section.settings.background_color | default: '#ffffff' }}; border: none; padding: 16px; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; letter-spacing: .03em; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: background .15s, transform .1s; }
 #pdp-main-{{ section.id }} .pdp-atc:active { transform: scale(.97); }
 #pdp-main-{{ section.id }} .pdp-atc:disabled { opacity: .5; cursor: not-allowed; }
@@ -495,6 +507,7 @@
     { "type": "checkbox", "id": "show_rating", "label": "Show star rating", "default": true },
     { "type": "range", "id": "rating_value", "label": "Rating value", "min": 0, "max": 5, "step": 1, "default": 5 },
     { "type": "text", "id": "rating_count", "label": "Rating count", "default": "128" },
+    { "type": "select", "id": "tier_layout", "label": "Bundle layout", "options": [ { "value": "horizontal", "label": "Horizontal" }, { "value": "vertical", "label": "Vertical" } ], "default": "horizontal" },
     { "type": "range", "id": "subscribe_save_percent", "label": "Subscribe & save percent", "min": 0, "max": 50, "step": 5, "default": 15 },
     { "type": "checkbox", "id": "show_pickup", "label": "Show pickup availability", "default": true },
     { "type": "text", "id": "guarantee_text", "label": "Guarantee bar text", "default": "Don't settle for less. Free shipping on orders over $50 & satisfaction guaranteed." },
