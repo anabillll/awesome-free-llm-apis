@@ -2,6 +2,8 @@
 {%- render 'theme-fonts' -%}
 {%- render 'scroll-reveal' -%}
 <section class="faq" id="faq-{{ section.id }}">
+{%- if section.settings.wave_top -%}{%- render 'wave-divider', color: section.settings.background_color -%}{%- endif -%}
+
   <div class="faq__wrap">
     <h2 class="faq__heading reveal">{{ section.settings.heading }}</h2>
     <div class="faq__list">
@@ -19,7 +21,7 @@
 </section>
 
 {%- style -%}
-#faq-{{ section.id }} { background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; padding: 56px 5vw; }
+#faq-{{ section.id }} { position: relative; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; padding: 56px 5vw; }
 #faq-{{ section.id }} .faq__wrap { max-width: 820px; margin: 0 auto; }
 #faq-{{ section.id }} .faq__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(22px, 3vw, 30px); margin: 0 0 28px; }
 #faq-{{ section.id }} .faq__item { border-bottom: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.15 }}; }
@@ -58,6 +60,7 @@
     { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "In Case You Were Wondering..." },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#17110b" },
+        { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#ffffff" }
   ],
   "blocks": [

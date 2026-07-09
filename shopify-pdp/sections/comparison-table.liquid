@@ -2,6 +2,8 @@
 {%- render 'theme-fonts' -%}
 {%- render 'scroll-reveal' -%}
 <section class="compare" id="compare-{{ section.id }}">
+{%- if section.settings.wave_top -%}{%- render 'wave-divider', color: section.settings.background_color -%}{%- endif -%}
+
   <div class="compare__wrap">
     <h2 class="compare__heading reveal">{{ section.settings.heading }}</h2>
 
@@ -39,7 +41,7 @@
 </section>
 
 {%- style -%}
-#compare-{{ section.id }} { padding: 48px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
+#compare-{{ section.id }} { position: relative; padding: 48px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
 #compare-{{ section.id }} .compare__wrap { max-width: 1000px; margin: 0 auto; }
 #compare-{{ section.id }} .compare__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(22px, 3vw, 30px); margin: 0 0 28px; }
 #compare-{{ section.id }} .compare__scroll { overflow-x: auto; border: 1px solid #ddd4b4; border-radius: 10px; -webkit-overflow-scrolling: touch; }
@@ -63,6 +65,7 @@
   "settings": [
     { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+        { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Discover the Difference: Taste the Best" },
     { "type": "text", "id": "feature_column_label", "label": "Feature column label", "default": "Features" },

@@ -2,6 +2,8 @@
 {%- render 'theme-fonts' -%}
 {%- render 'scroll-reveal' -%}
 <section class="ingredients" id="ingredients-{{ section.id }}">
+{%- if section.settings.wave_top -%}{%- render 'wave-divider', color: section.settings.background_color -%}{%- endif -%}
+
   <div class="ingredients__wrap">
     <div class="ingredients__intro">
       <h2 class="ingredients__heading reveal">{{ section.settings.heading }}</h2>
@@ -40,7 +42,7 @@
 </section>
 
 {%- style -%}
-#ingredients-{{ section.id }} { background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; padding: 56px 5vw; }
+#ingredients-{{ section.id }} { position: relative; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; padding: 56px 5vw; }
 #ingredients-{{ section.id }} .ingredients__wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 32px; }
 @media (min-width: 860px) { #ingredients-{{ section.id }} .ingredients__wrap { grid-template-columns: 1fr 1.1fr; align-items: center; } }
 #ingredients-{{ section.id }} .ingredients__intro { text-align: {{ section.settings.text_alignment }}; }
@@ -90,6 +92,7 @@
     { "type": "text", "id": "button_label", "label": "Button label", "default": "Learn More" },
     { "type": "url", "id": "button_link", "label": "Button link" },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#17110b" },
+        { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#ffffff" }
   ],
   "blocks": [

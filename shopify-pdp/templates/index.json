@@ -90,7 +90,7 @@
         "vanilla": { "type": "ingredient", "settings": { "name": "Vanilla", "percent": 60 } }
       },
       "block_order": ["cacao", "sugar", "vanilla"],
-      "settings": {}
+      "settings": { "wave_top": true }
     },
     "testimonials": {
       "type": "testimonials",
@@ -100,7 +100,7 @@
         "t3": { "type": "testimonial", "settings": { "name": "Elena R.", "detail": "Verified Buyer", "rating": 4, "quote": "<p>My kid can't tell it's not “regular” chocolate. Winning.</p>" } }
       },
       "block_order": ["t1", "t2", "t3"],
-      "settings": {}
+      "settings": { "wave_top": true }
     },
     "faq": {
       "type": "faq-accordion",
@@ -111,7 +111,7 @@
         "q4": { "type": "question", "settings": { "question": "Do your chocolate bars contain nuts?" } }
       },
       "block_order": ["q1", "q2", "q3", "q4"],
-      "settings": {}
+      "settings": { "wave_top": true }
     },
     "final-cta": {
       "type": "last-chance-cta",
@@ -120,7 +120,7 @@
         "learn-more": { "type": "button", "settings": { "label": "Learn More", "style": "outline" } }
       },
       "block_order": ["shop-now", "learn-more"],
-      "settings": { "heading": "Ready When You Are", "body": "Free shipping over $50. Cancel a subscription any time, no questions asked." }
+      "settings": { "heading": "Ready When You Are", "body": "Free shipping over $50. Cancel a subscription any time, no questions asked.", "wave_top": true }
     },
     "footer": {
       "type": "newsletter-footer",
@@ -130,7 +130,7 @@
         "app": { "type": "app_badges", "settings": { "heading": "Get The App" } }
       },
       "block_order": ["shop", "company", "app"],
-      "settings": {}
+      "settings": { "wave_top": true }
     }
   },
   "order": [

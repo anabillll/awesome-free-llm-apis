@@ -2,6 +2,8 @@
 {%- render 'theme-fonts' -%}
 {%- render 'scroll-reveal' -%}
 <section class="site-footer" id="site-footer-{{ section.id }}">
+{%- if section.settings.wave_top -%}{%- render 'wave-divider', color: section.settings.background_color -%}{%- endif -%}
+
   <div class="site-footer__newsletter">
     <div class="site-footer__newsletter-wrap">
       <h2 class="site-footer__newsletter-heading reveal">{{ section.settings.newsletter_heading }}</h2>
@@ -86,7 +88,7 @@
 </section>
 
 {%- style -%}
-#site-footer-{{ section.id }} { background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
+#site-footer-{{ section.id }} { position: relative; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
 #site-footer-{{ section.id }} .site-footer__newsletter { padding: 40px 5vw; text-align: {{ section.settings.text_alignment }}; border-bottom: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.12 }}; }
 #site-footer-{{ section.id }} .site-footer__newsletter-heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(20px, 3vw, 26px); margin: 0 0 10px; }
 #site-footer-{{ section.id }} .site-footer__newsletter-body { opacity: .75; margin: 0 0 18px; }
@@ -128,6 +130,7 @@
     { "type": "text", "id": "brand_blurb", "label": "Brand blurb", "default": "Guilt-free chocolate made with clean, real ingredients." },
     { "type": "checkbox", "id": "show_payment_icons", "label": "Show payment icons", "default": true },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#17110b" },
+        { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#ffffff" }
   ],
   "blocks": [

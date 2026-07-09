@@ -3,6 +3,8 @@
 {%- render 'scroll-reveal' -%}
 {%- render 'add-to-cart-fx' -%}
 <section class="also-like" id="also-like-{{ section.id }}">
+{%- if section.settings.wave_top -%}{%- render 'wave-divider', color: section.settings.background_color -%}{%- endif -%}
+
   <div class="also-like__wrap">
     <h2 class="also-like__heading reveal">{{ section.settings.heading }}</h2>
     {%- if section.settings.subheading != blank -%}
@@ -53,7 +55,7 @@
 </section>
 
 {%- style -%}
-#also-like-{{ section.id }} { padding: 48px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
+#also-like-{{ section.id }} { position: relative; padding: 48px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
 #also-like-{{ section.id }} .also-like__wrap { max-width: 1240px; margin: 0 auto; }
 #also-like-{{ section.id }} .also-like__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(22px, 3vw, 30px); margin: 0 0 8px; }
 #also-like-{{ section.id }} .also-like__subheading { text-align: {{ section.settings.text_alignment }}; opacity: .7; margin: 0 0 28px; }
@@ -106,6 +108,7 @@
     { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
     { "type": "text", "id": "subheading", "label": "Subheading", "default": "You might also enjoy which similar chocolates" },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+        { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
   ],
   "blocks": [

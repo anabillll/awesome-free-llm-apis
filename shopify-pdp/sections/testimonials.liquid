@@ -2,6 +2,8 @@
 {%- render 'theme-fonts' -%}
 {%- render 'scroll-reveal' -%}
 <section class="testi" id="testi-{{ section.id }}">
+{%- if section.settings.wave_top -%}{%- render 'wave-divider', color: section.settings.background_color -%}{%- endif -%}
+
   <div class="testi__wrap">
     <h2 class="testi__heading reveal">{{ section.settings.heading }}</h2>
     {%- if section.settings.subheading != blank -%}
@@ -31,7 +33,7 @@
 </section>
 
 {%- style -%}
-#testi-{{ section.id }} { padding: 52px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
+#testi-{{ section.id }} { position: relative; padding: 52px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
 #testi-{{ section.id }} .testi__wrap { max-width: 1240px; margin: 0 auto; }
 #testi-{{ section.id }} .testi__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; text-align: {{ section.settings.text_alignment }}; font-size: clamp(28px, 4vw, 40px); margin: 0 0 8px; }
 #testi-{{ section.id }} .testi__subheading { text-align: {{ section.settings.text_alignment }}; opacity: .7; margin: 0 0 28px; font-size: 14px; }
@@ -60,6 +62,7 @@
     { "type": "text", "id": "subheading", "label": "Subheading", "default": "" },
     { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+        { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
   ],
   "blocks": [

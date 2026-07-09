@@ -78,7 +78,7 @@
         "vanilla": { "type": "ingredient", "settings": { "name": "Vanilla", "percent": 60 } }
       },
       "block_order": ["cacao", "sugar", "vanilla"],
-      "settings": {}
+      "settings": { "wave_top": true }
     },
     "compare": {
       "type": "comparison-table",
@@ -91,7 +91,7 @@
         "row-6": { "type": "feature_row", "settings": { "feature": "Vegan Options", "us": true, "competitor_2": true } }
       },
       "block_order": ["row-1", "row-2", "row-3", "row-4", "row-5", "row-6"],
-      "settings": {}
+      "settings": { "wave_top": true }
     },
     "faq": {
       "type": "faq-accordion",
@@ -103,7 +103,7 @@
         "q5": { "type": "question", "settings": { "question": "What sweeteners do you use?" } }
       },
       "block_order": ["q1", "q2", "q3", "q4", "q5"],
-      "settings": {}
+      "settings": { "wave_top": true }
     },
     "recommendations": {
       "type": "product-recommendations",
@@ -114,7 +114,7 @@
         "rec-4": { "type": "product" }
       },
       "block_order": ["rec-1", "rec-2", "rec-3", "rec-4"],
-      "settings": {}
+      "settings": { "wave_top": true }
     },
     "final-cta": {
       "type": "last-chance-cta",
@@ -134,7 +134,7 @@
         "app": { "type": "app_badges", "settings": { "heading": "Get The App" } }
       },
       "block_order": ["shop", "company", "local", "app"],
-      "settings": {}
+      "settings": { "wave_top": true }
     }
   },
   "order": [
