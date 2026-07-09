@@ -331,7 +331,13 @@
 #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__price-wrap { order: 4; align-items: center; margin-inline-start: 0; }
 #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__ribbon { top: -11px; inset-inline-end: auto; inset-inline-start: 50%; transform: translateX(-50%); border-radius: 4px; white-space: nowrap; }
 @media (max-width: 480px) {
-  #pdp-main-{{ section.id }} .pdp-tiers--horizontal { grid-template-columns: 1fr; }
+  #pdp-main-{{ section.id }} .pdp-tiers--horizontal { gap: 6px; }
+  #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier { padding: 14px 6px 12px; gap: 5px; }
+  #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__label { font-size: 13px; }
+  #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__price { font-size: 13px; }
+  #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__save { font-size: 9.5px; padding: 1px 5px; }
+  #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-select--tier { font-size: 10px; padding: 5px 3px; }
+  #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__ribbon { font-size: 9px; padding: 2px 6px; }
 }
 
 #pdp-main-{{ section.id }} .pdp-atc { width: 100%; background: var(--pdp-ink); color: {{ section.settings.background_color | default: '#fff8ec' }}; border: none; padding: 16px; font-family: 'Poppins', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; letter-spacing: .03em; text-transform: uppercase; border-radius: 6px; cursor: pointer; transition: background .15s, transform .1s; }
