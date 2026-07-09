@@ -243,7 +243,7 @@
 {%- style -%}
 #pdp-main-{{ section.id }} {
   --pdp-ink: {{ section.settings.text_color | default: '#241134' }};
-  --pdp-accent: #ff8a3d;
+  --pdp-accent: #9b7fd4;
   --pdp-cream: #ffefc7;
   --pdp-line: #e8dcf5;
   --pdp-green: #14b876;
@@ -564,7 +564,7 @@
       "name": "Main product",
       "blocks": [
         { "type": "pricing_tier", "settings": { "quantity": 1, "price": "900" } },
-        { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1620", "show_flavor_select": true, "save_percent": 10, "is_popular": true } },
+        { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1620", "show_flavor_select": false, "save_percent": 10, "is_popular": true } },
         { "type": "pricing_tier", "settings": { "quantity": 3, "price": "2295", "save_percent": 15 } },
         { "type": "accordion", "settings": { "heading": "Details" } },
         { "type": "accordion", "settings": { "heading": "Shipping & Returns" } },

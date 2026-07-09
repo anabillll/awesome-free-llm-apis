@@ -14,8 +14,8 @@
       "type": "main-product",
       "blocks": {
         "tier-1": { "type": "pricing_tier", "settings": { "quantity": 1, "price": "900" } },
-        "tier-2": { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1642", "show_flavor_select": true, "save_percent": 10, "is_popular": true } },
-        "tier-3": { "type": "pricing_tier", "settings": { "quantity": 3, "price": "2400", "save_percent": 15 } },
+        "tier-2": { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1620", "show_flavor_select": false, "save_percent": 10, "is_popular": true } },
+        "tier-3": { "type": "pricing_tier", "settings": { "quantity": 3, "price": "2295", "save_percent": 15 } },
         "accordion-details": { "type": "accordion", "settings": { "heading": "Details" } },
         "accordion-shipping": { "type": "accordion", "settings": { "heading": "Shipping & Returns" } },
         "accordion-guarantee": { "type": "accordion", "settings": { "heading": "Our Guarantee" } },
