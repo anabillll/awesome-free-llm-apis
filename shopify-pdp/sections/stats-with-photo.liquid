@@ -1,0 +1,134 @@
+{%- comment -%} Lifestyle photo + animated stat counters (trust/social-proof section) {%- endcomment -%}
+{%- render 'theme-fonts' -%}
+{%- render 'scroll-reveal' -%}
+<section class="stats-photo{% if section.settings.image_position == 'right' %} stats-photo--reverse{% endif %}" id="stats-photo-{{ section.id }}">
+{%- if section.settings.wave_top -%}{%- render 'wave-divider', color: section.settings.background_color -%}{%- endif -%}
+
+  <div class="stats-photo__wrap">
+    <div class="stats-photo__media">
+      {%- if section.settings.image != blank -%}
+        {{ section.settings.image | image_url: width: 1000 | image_tag: loading: 'lazy', sizes: '(min-width: 900px) 50vw, 100vw', widths: '500,750,1000' }}
+      {%- else -%}
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'stats-photo__placeholder' }}
+      {%- endif -%}
+    </div>
+    <div class="stats-photo__content reveal">
+      {%- if section.settings.heading != blank -%}<h2 class="stats-photo__heading">{{ section.settings.heading }}</h2>{%- endif -%}
+      {%- if section.settings.subheading != blank -%}<p class="stats-photo__subheading">{{ section.settings.subheading }}</p>{%- endif -%}
+      <div class="stats-photo__grid">
+        {%- for block in section.blocks -%}
+          <div class="stats-photo__stat" data-stat data-stat-value="{{ block.settings.number }}" {{ block.shopify_attributes }}>
+            <span class="stats-photo__number" data-stat-number>0</span>
+            <span class="stats-photo__label">{{ block.settings.label }}</span>
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{%- style -%}
+#stats-photo-{{ section.id }} { position: relative; padding: 48px 5vw; background: {{ section.settings.background_color }}; color: {{ section.settings.text_color }}; }
+#stats-photo-{{ section.id }} .stats-photo__wrap { max-width: 1240px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 28px; align-items: center; }
+@media (min-width: 800px) { #stats-photo-{{ section.id }} .stats-photo__wrap { grid-template-columns: 1fr 1fr; gap: 56px; } }
+#stats-photo-{{ section.id }}.stats-photo--reverse .stats-photo__media { order: 2; }
+@media (min-width: 800px) {
+  #stats-photo-{{ section.id }}.stats-photo--reverse .stats-photo__media { order: 1; }
+  #stats-photo-{{ section.id }}.stats-photo--reverse .stats-photo__content { order: 2; }
+}
+#stats-photo-{{ section.id }} .stats-photo__media { overflow: hidden; border-radius: 10px; }
+#stats-photo-{{ section.id }} .stats-photo__media img,
+#stats-photo-{{ section.id }} .stats-photo__media svg { width: 100%; height: auto; display: block; transition: transform .5s ease; }
+#stats-photo-{{ section.id }} .stats-photo__media:hover img,
+#stats-photo-{{ section.id }} .stats-photo__media:hover svg { transform: scale(1.05); }
+@media (prefers-reduced-motion: reduce) { #stats-photo-{{ section.id }} .stats-photo__media img, #stats-photo-{{ section.id }} .stats-photo__media svg { transition: none; } }
+#stats-photo-{{ section.id }} .stats-photo__content { text-align: {{ section.settings.text_alignment }}; }
+#stats-photo-{{ section.id }} .stats-photo__heading { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(22px, 3vw, 30px); margin: 0 0 12px; }
+#stats-photo-{{ section.id }} .stats-photo__subheading { font-size: 15px; line-height: 1.7; opacity: .8; margin: 0 0 24px; }
+#stats-photo-{{ section.id }} .stats-photo__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+#stats-photo-{{ section.id }} .stats-photo__stat { display: flex; flex-direction: column; gap: 4px; }
+#stats-photo-{{ section.id }} .stats-photo__number { font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(28px, 5vw, 40px); color: var(--stats-accent, #9b7fd4); }
+#stats-photo-{{ section.id }} .stats-photo__label { font-size: 12.5px; opacity: .75; line-height: 1.4; }
+{%- endstyle -%}
+
+<script>
+(function () {
+  var root = document.getElementById('stats-photo-{{ section.id }}');
+  if (!root) return;
+  var stats = root.querySelectorAll('[data-stat]');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function animate(stat) {
+    var raw = stat.getAttribute('data-stat-value') || '';
+    var match = raw.match(/[\d.]+/);
+    var numEl = stat.querySelector('[data-stat-number]');
+    if (!numEl) return;
+    if (!match || reduced) { numEl.textContent = raw; return; }
+    var target = parseFloat(match[0]);
+    var prefix = raw.slice(0, match.index);
+    var suffix = raw.slice(match.index + match[0].length);
+    var start = null;
+    var duration = 1200;
+    function step(ts) {
+      if (!start) start = ts;
+      var progress = Math.min((ts - start) / duration, 1);
+      var value = Math.floor(progress * target);
+      numEl.textContent = prefix + value + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+      else numEl.textContent = raw;
+    }
+    requestAnimationFrame(step);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          animate(entry.target);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    stats.forEach(function (s) { observer.observe(s); });
+  } else {
+    stats.forEach(animate);
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Stats with photo",
+  "tag": "section",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    { "type": "select", "id": "image_position", "label": "Image position", "options": [ { "value": "left", "label": "Left" }, { "value": "right", "label": "Right" } ], "default": "left" },
+    { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "left" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Numbers That Back It Up" },
+    { "type": "text", "id": "subheading", "label": "Subheading", "default": "Real results from real chocolate people." },
+    { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#fff8ec" },
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#241134" }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        { "type": "text", "id": "number", "label": "Number", "default": "92%" },
+        { "type": "text", "id": "label", "label": "Label", "default": "of customers reorder within 60 days" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stats with photo",
+      "blocks": [
+        { "type": "stat", "settings": { "number": "92%", "label": "of customers reorder within 60 days" } },
+        { "type": "stat", "settings": { "number": "81%", "label": "say it curbed their sugar cravings" } },
+        { "type": "stat", "settings": { "number": "87%", "label": "noticed a difference in the first week" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

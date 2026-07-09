@@ -10,6 +10,32 @@
       <p class="testi__subheading reveal">{{ section.settings.subheading }}</p>
     {%- endif -%}
 
+    {%- if section.settings.layout == 'spotlight' -%}
+    <div class="testi__spotlight reveal" data-testi-spotlight>
+      {%- for block in section.blocks -%}
+        <div class="testi__spot{% if forloop.first %} is-active{% endif %}" data-spot-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+          {%- if block.settings.avatar != blank -%}
+            <div class="testi__spot-photo">{{ block.settings.avatar | image_url: width: 300 | image_tag: loading: 'lazy' }}</div>
+          {%- endif -%}
+          <div class="testi__spot-rating" aria-label="{{ 'general.testimonials.rating' | t }}">
+            {%- for i in (1..5) -%}<span class="testi__star{% if i <= block.settings.rating %} is-filled{% endif %}">★</span>{%- endfor -%}
+          </div>
+          <blockquote class="testi__spot-quote">{{ block.settings.quote }}</blockquote>
+          <div class="testi__spot-name">{{ block.settings.name }}</div>
+          {%- if block.settings.detail != blank -%}<div class="testi__spot-detail">{{ block.settings.detail }}</div>{%- endif -%}
+        </div>
+      {%- endfor -%}
+      {%- if section.blocks.size > 1 -%}
+      <div class="testi__spot-nav">
+        <button type="button" class="testi__spot-arrow" data-spot-prev aria-label="{{ 'general.testimonials.previous' | t }}">‹</button>
+        <div class="testi__spot-dots" data-spot-dots>
+          {%- for block in section.blocks -%}<button type="button" class="testi__spot-dot{% if forloop.first %} is-active{% endif %}" data-spot-dot="{{ forloop.index0 }}" aria-label="{{ 'general.testimonials.go_to' | t: index: forloop.index }}"></button>{%- endfor -%}
+        </div>
+        <button type="button" class="testi__spot-arrow" data-spot-next aria-label="{{ 'general.testimonials.next' | t }}">›</button>
+      </div>
+      {%- endif -%}
+    </div>
+    {%- else -%}
     <div class="testi__grid">
       {%- for block in section.blocks -%}
         <div class="testi__card reveal" style="transition-delay: {{ forloop.index0 | times: 80 }}ms;" {{ block.shopify_attributes }}>
@@ -29,6 +55,7 @@
         </div>
       {%- endfor -%}
     </div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -51,7 +78,46 @@
 #testi-{{ section.id }} .testi__author-text { display: flex; flex-direction: column; font-size: 13px; }
 #testi-{{ section.id }} .testi__name { font-weight: 700; }
 #testi-{{ section.id }} .testi__detail { opacity: .65; font-size: 12px; }
+
+#testi-{{ section.id }} .testi__spotlight { max-width: 640px; margin: 0 auto; text-align: center; }
+#testi-{{ section.id }} .testi__spot { display: none; flex-direction: column; align-items: center; }
+#testi-{{ section.id }} .testi__spot.is-active { display: flex; }
+#testi-{{ section.id }} .testi__spot-photo { width: 84px; height: 84px; border-radius: 50%; overflow: hidden; margin-bottom: 16px; }
+#testi-{{ section.id }} .testi__spot-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#testi-{{ section.id }} .testi__spot-rating { letter-spacing: 3px; margin-bottom: 14px; font-size: 15px; }
+#testi-{{ section.id }} .testi__spot-quote { margin: 0 0 18px; font-family: 'Caprasimo', 'Cairo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; font-weight: 400; font-size: clamp(20px, 3vw, 28px); line-height: 1.45; }
+#testi-{{ section.id }} .testi__spot-name { font-weight: 700; font-size: 15px; }
+#testi-{{ section.id }} .testi__spot-detail { opacity: .65; font-size: 13px; margin-top: 2px; }
+#testi-{{ section.id }} .testi__spot-nav { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 28px; }
+#testi-{{ section.id }} .testi__spot-arrow { background: none; border: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.25 }}; color: inherit; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; cursor: pointer; line-height: 1; transition: background .15s ease; }
+#testi-{{ section.id }} .testi__spot-arrow:hover { background: {{ section.settings.text_color | color_modify: 'alpha', 0.08 }}; }
+#testi-{{ section.id }} .testi__spot-dots { display: flex; gap: 8px; }
+#testi-{{ section.id }} .testi__spot-dot { width: 8px; height: 8px; border-radius: 50%; border: none; padding: 0; background: {{ section.settings.text_color | color_modify: 'alpha', 0.25 }}; cursor: pointer; }
+#testi-{{ section.id }} .testi__spot-dot.is-active { background: {{ section.settings.text_color }}; }
 {%- endstyle -%}
+
+<script>
+(function () {
+  var root = document.getElementById('testi-{{ section.id }}');
+  if (!root) return;
+  var spots = root.querySelectorAll('[data-spot-index]');
+  var dots = root.querySelectorAll('[data-spot-dot]');
+  if (!spots.length) return;
+  var current = 0;
+  function show(index) {
+    current = (index + spots.length) % spots.length;
+    spots.forEach(function (s) { s.classList.toggle('is-active', s.getAttribute('data-spot-index') == current); });
+    dots.forEach(function (d) { d.classList.toggle('is-active', d.getAttribute('data-spot-dot') == current); });
+  }
+  var prev = root.querySelector('[data-spot-prev]');
+  var next = root.querySelector('[data-spot-next]');
+  if (prev) prev.addEventListener('click', function () { show(current - 1); });
+  if (next) next.addEventListener('click', function () { show(current + 1); });
+  dots.forEach(function (d) {
+    d.addEventListener('click', function () { show(parseInt(d.getAttribute('data-spot-dot'), 10)); });
+  });
+})();
+</script>
 
 {% schema %}
 {
@@ -60,6 +126,7 @@
   "settings": [
     { "type": "text", "id": "heading", "label": "Heading", "default": "Loved By Chocolate People" },
     { "type": "text", "id": "subheading", "label": "Subheading", "default": "" },
+    { "type": "select", "id": "layout", "label": "Layout", "options": [ { "value": "grid", "label": "Grid (3 cards)" }, { "value": "spotlight", "label": "Spotlight (single, stacked)" } ], "default": "grid" },
     { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
     { "type": "color", "id": "background_color", "label": "Background color", "default": "#fff8ec" },
         { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },

@@ -11,9 +11,33 @@ Drop-in Online Store 2.0 sections for a product page and a homepage, sharing one
 
 ## Product page composition
 
-`templates/product.pdp.json` wires together, in order: `announcement-bar` → `main-product` (buy box: badges → rating → origin/trust badge → title → tagline → price → benefit checklist → bundle tiers → purchase options → Add to Cart) → `faq-accordion` → `featured-on` ("Trending On Social") → `testimonials` → `ingredients-showcase` → `comparison-table` → `image-gallery-grid` → `media-with-text` ×2 (benefits) → `usp-icon-bar` → `product-recommendations` → `last-chance-cta` → `newsletter-footer`. This order (trust signals early, FAQ/social proof right after the buy box, ingredients/comparison further down) is modeled on high-converting DTC supplement PDPs — reorder freely in the theme editor, this is just the shipped default.
+`templates/product.pdp.json` wires together, in order: `announcement-bar` → `main-product` (buy box: badges → rating → origin/trust badge → title → tagline → price → benefit checklist → urgency/countdown banner → bundle tiers → purchase options → Add to Cart) → `faq-accordion` → `featured-on` ("Trending On Social") → `testimonials` (spotlight layout) → `stats-with-photo` → `ingredients-showcase` → `process-timeline` ("Fresh in 30 Days") → `comparison-table` (tabbed) → `image-gallery-grid` → `media-with-text` ×2 (benefits) → `usp-icon-bar` → `product-recommendations` → `last-chance-cta` → `newsletter-footer`. This order (trust signals early, FAQ/social proof right after the buy box, ingredients/timeline/comparison further down) is modeled on high-converting DTC supplement PDPs — reorder freely in the theme editor, this is just the shipped default.
 
-The buy box's `tagline`, `origin_badge_*` settings and `checklist_item` blocks are all optional — leave the tagline blank or remove every checklist block and that part of the layout collapses cleanly with no empty gaps.
+The buy box's `tagline`, `origin_badge_*` settings, `checklist_item` blocks, and urgency banner are all optional — leave the tagline blank, remove every checklist block, or turn off `show_urgency_banner` and that part of the layout collapses cleanly with no empty gaps.
+
+### Urgency banner & Subscribe & Save
+
+`main-product.liquid`'s `show_urgency_banner` setting adds a small dashed-border countdown strip above the bundle tiers (`urgency_text` + `urgency_minutes`). The countdown loops — when it hits zero it silently resets to the full duration rather than freezing at `00:00`, since this is a recurring "batch" message, not a real per-visitor deadline.
+
+The Subscribe & Save purchase option is visually highlighted (accent border + `subscribe_badge_text` ribbon, default "Most Flexible") and can list up to three perks (`subscribe_perk_1/2/3`) under its frequency selector — leave a perk setting blank to drop that line.
+
+### Bundle tier images
+
+Each `pricing_tier` block has an optional `image` picker. Set one and it renders as a small thumbnail on that tier's card (top of the card in horizontal/grid layout, left of the label in vertical/list layout) — leave it blank and the card lays out exactly as before.
+
+### Stats with photo & Process timeline
+
+Two new standalone sections, each addable from "Add section" like any other:
+- `stats-with-photo`: a lifestyle photo next to up to any number of `stat` blocks (a number like `92%` + a label). Numbers animate with a count-up on scroll into view (via `IntersectionObserver`; skipped under `prefers-reduced-motion: reduce`, the final value just appears).
+- `process-timeline`: a vertical week-by-week timeline built from `milestone` blocks (week label, optional icon, heading, text) — ships as a "Fresh in 30 Days" production/shipping story by default, but the copy is fully editable for any 3–5 step process.
+
+### Tabbed comparison table
+
+`comparison-table.liquid` still works exactly as before (one competitor set defined via section settings + `feature_row` blocks) — that first table is now labelled by the `tab_1_label` setting but only shows as a tab if you add at least one `comparison_tab` block. Each `comparison_tab` block is a fully independent second (or third, etc.) comparison: its own three competitor labels plus a `rows` textarea (one row per line: `Feature | Us | Competitor 1 | Competitor 2 | Competitor 3`, using `1`/`0` for check/cross). This textarea format — instead of full nested blocks — is what makes a variable number of tabs possible at all; see the block-count limitation noted above for why a fully block-driven version isn't possible in Shopify's schema. Tab buttons switch the visible table with no page reload.
+
+### Testimonial layouts
+
+`testimonials.liquid` has a `layout` setting: `grid` (default off-PDP, 3-card layout) or `spotlight` (single large pull-quote with a customer photo, centered, with prev/next arrows and dots — used on the PDP by default for a richer, more editorial feel). Both layouts read from the same `testimonial` blocks, so switching is non-destructive.
 
 ## Homepage composition
 
@@ -50,14 +74,16 @@ Every repeatable piece of content is a schema **block**, not a hardcoded loop, s
 |---|---|
 | `announcement-bar` | `message` |
 | `featured-on` | `logo` |
-| `main-product` | `pricing_tier` (quantity tiers), `accordion`, `trust_icon`, `cross_sell_item` |
+| `main-product` | `pricing_tier` (quantity tiers), `accordion`, `trust_icon`, `cross_sell_item`, `checklist_item` |
 | `hero-banner` | `button` |
 | `usp-icon-bar` | `icon` |
 | `featured-collections` | `collection_tile` |
 | `image-gallery-grid` | `image` |
 | `ingredients-showcase` | `ingredient` |
-| `comparison-table` | `feature_row` |
+| `comparison-table` | `feature_row`, `comparison_tab` |
 | `testimonials` | `testimonial` |
+| `stats-with-photo` | `stat` |
+| `process-timeline` | `milestone` |
 | `faq-accordion` | `question` |
 | `product-recommendations` | `product` |
 | `last-chance-cta` | `button` |

@@ -1,13 +1,25 @@
 {%- comment -%} "Discover the Difference" feature comparison table {%- endcomment -%}
 {%- render 'theme-fonts' -%}
 {%- render 'scroll-reveal' -%}
+{%- liquid
+  assign tab_blocks = section.blocks | where: 'type', 'comparison_tab'
+-%}
 <section class="compare" id="compare-{{ section.id }}">
 {%- if section.settings.wave_top -%}{%- render 'wave-divider', color: section.settings.background_color -%}{%- endif -%}
 
   <div class="compare__wrap">
     <h2 class="compare__heading reveal">{{ section.settings.heading }}</h2>
 
-    <div class="compare__scroll">
+    {%- if tab_blocks.size > 0 -%}
+    <div class="compare__tabs reveal" role="tablist" data-compare-tabs>
+      <button type="button" class="compare__tab is-active" data-compare-tab="0" role="tab" aria-selected="true">{{ section.settings.tab_1_label }}</button>
+      {%- for block in tab_blocks -%}
+        <button type="button" class="compare__tab" data-compare-tab="{{ forloop.index }}" role="tab" aria-selected="false">{{ block.settings.tab_label }}</button>
+      {%- endfor -%}
+    </div>
+    {%- endif -%}
+
+    <div class="compare__scroll" data-compare-panel="0">
       <table class="compare__table">
         <thead>
           <tr>
@@ -21,6 +33,7 @@
         </thead>
         <tbody>
           {%- for block in section.blocks -%}
+            {%- if block.type == 'feature_row' -%}
             <tr {{ block.shopify_attributes }}>
               <td class="compare__feature-col">{{ block.settings.feature }}</td>
               <td class="compare__brand-col compare__brand-col--us">
@@ -33,10 +46,42 @@
                 </td>
               {%- endfor -%}
             </tr>
+            {%- endif -%}
           {%- endfor -%}
         </tbody>
       </table>
     </div>
+
+    {%- for block in tab_blocks -%}
+    <div class="compare__scroll" data-compare-panel="{{ forloop.index }}" hidden {{ block.shopify_attributes }}>
+      <table class="compare__table">
+        <thead>
+          <tr>
+            <th class="compare__feature-col">{{ section.settings.feature_column_label }}</th>
+            <th class="compare__brand-col compare__brand-col--us">{{ section.settings.our_product_label }}</th>
+            <th class="compare__brand-col">{{ block.settings.competitor_1_label }}</th>
+            <th class="compare__brand-col">{{ block.settings.competitor_2_label }}</th>
+            <th class="compare__brand-col">{{ block.settings.competitor_3_label }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {%- assign lines = block.settings.rows | newline_to_br | split: '<br />' -%}
+          {%- for line in lines -%}
+            {%- assign cells = line | strip | split: '|' -%}
+            {%- if cells.size >= 5 -%}
+            <tr>
+              <td class="compare__feature-col">{{ cells[0] | strip }}</td>
+              <td class="compare__brand-col compare__brand-col--us">{%- if cells[1] contains '1' -%}<span class="compare__check" aria-label="{{ 'general.compare.yes' | t }}">✓</span>{%- else -%}<span class="compare__cross" aria-label="{{ 'general.compare.no' | t }}">✕</span>{%- endif -%}</td>
+              <td class="compare__brand-col">{%- if cells[2] contains '1' -%}<span class="compare__check" aria-label="{{ 'general.compare.yes' | t }}">✓</span>{%- else -%}<span class="compare__cross" aria-label="{{ 'general.compare.no' | t }}">✕</span>{%- endif -%}</td>
+              <td class="compare__brand-col">{%- if cells[3] contains '1' -%}<span class="compare__check" aria-label="{{ 'general.compare.yes' | t }}">✓</span>{%- else -%}<span class="compare__cross" aria-label="{{ 'general.compare.no' | t }}">✕</span>{%- endif -%}</td>
+              <td class="compare__brand-col">{%- if cells[4] contains '1' -%}<span class="compare__check" aria-label="{{ 'general.compare.yes' | t }}">✓</span>{%- else -%}<span class="compare__cross" aria-label="{{ 'general.compare.no' | t }}">✕</span>{%- endif -%}</td>
+            </tr>
+            {%- endif -%}
+          {%- endfor -%}
+        </tbody>
+      </table>
+    </div>
+    {%- endfor -%}
   </div>
 </section>
 
@@ -56,7 +101,31 @@
 #compare-{{ section.id }} thead .compare__brand-col--us { background: #ffe49a; }
 #compare-{{ section.id }} .compare__check { color: #14b876; font-weight: 700; }
 #compare-{{ section.id }} .compare__cross { color: #ff4d6d; font-weight: 700; }
+#compare-{{ section.id }} .compare__tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; justify-content: {{ section.settings.text_alignment }}; }
+#compare-{{ section.id }} .compare__tab { border: 1px solid #e8dcf5; background: transparent; color: inherit; padding: 8px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .15s ease, color .15s ease; }
+#compare-{{ section.id }} .compare__tab.is-active { background: {{ section.settings.text_color }}; color: {{ section.settings.background_color }}; border-color: {{ section.settings.text_color }}; }
+#compare-{{ section.id }} .compare__scroll[hidden] { display: none; }
 {%- endstyle -%}
+
+<script>
+(function () {
+  var root = document.getElementById('compare-{{ section.id }}');
+  if (!root) return;
+  var tabs = root.querySelectorAll('[data-compare-tab]');
+  var panels = root.querySelectorAll('[data-compare-panel]');
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var index = tab.getAttribute('data-compare-tab');
+      tabs.forEach(function (t) {
+        var active = t === tab;
+        t.classList.toggle('is-active', active);
+        t.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      panels.forEach(function (p) { p.hidden = p.getAttribute('data-compare-panel') !== index; });
+    });
+  });
+})();
+</script>
 
 {% schema %}
 {
@@ -68,6 +137,7 @@
         { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },
     { "type": "color", "id": "text_color", "label": "Text color", "default": "#241134" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Discover the Difference: Taste the Best" },
+    { "type": "text", "id": "tab_1_label", "label": "First tab label (shown only if you add more tabs)", "default": "Vs. Chocolate Bars" },
     { "type": "text", "id": "feature_column_label", "label": "Feature column label", "default": "Features" },
     { "type": "text", "id": "our_product_label", "label": "Our product label", "default": "Our Product" },
     { "type": "text", "id": "competitor_1_label", "label": "Competitor 1 label", "default": "Competitor 1" },
@@ -84,6 +154,17 @@
         { "type": "checkbox", "id": "competitor_1", "label": "Competitor 1", "default": false },
         { "type": "checkbox", "id": "competitor_2", "label": "Competitor 2", "default": false },
         { "type": "checkbox", "id": "competitor_3", "label": "Competitor 3", "default": false }
+      ]
+    },
+    {
+      "type": "comparison_tab",
+      "name": "Extra comparison tab",
+      "settings": [
+        { "type": "text", "id": "tab_label", "label": "Tab label", "default": "Vs. Gummies" },
+        { "type": "text", "id": "competitor_1_label", "label": "Competitor 1 label", "default": "Competitor 1" },
+        { "type": "text", "id": "competitor_2_label", "label": "Competitor 2 label", "default": "Competitor 2" },
+        { "type": "text", "id": "competitor_3_label", "label": "Competitor 3 label", "default": "Competitor 3" },
+        { "type": "textarea", "id": "rows", "label": "Rows (one per line: Feature | Us | Competitor 1 | Competitor 2 | Competitor 3 — use 1 for check, 0 for cross)", "default": "Premium Ingredients|1|0|0|0\nUnique Flavors|1|1|0|0\nHandcrafted Quality|1|1|1|0" }
       ]
     }
   ],

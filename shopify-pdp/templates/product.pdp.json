@@ -67,7 +67,17 @@
         "t3": { "type": "testimonial", "settings": { "name": "Elena R.", "detail": "Verified Buyer", "rating": 4, "quote": "<p>My kid can't tell it's not “regular” chocolate. Winning.</p>" } }
       },
       "block_order": ["t1", "t2", "t3"],
-      "settings": {}
+      "settings": { "layout": "spotlight" }
+    },
+    "stats": {
+      "type": "stats-with-photo",
+      "blocks": {
+        "stat-1": { "type": "stat", "settings": { "number": "92%", "label": "of customers reorder within 60 days" } },
+        "stat-2": { "type": "stat", "settings": { "number": "81%", "label": "say it curbed their sugar cravings" } },
+        "stat-3": { "type": "stat", "settings": { "number": "87%", "label": "noticed a difference in the first week" } }
+      },
+      "block_order": ["stat-1", "stat-2", "stat-3"],
+      "settings": { "heading": "Numbers That Back It Up", "image_position": "right" }
     },
     "ingredients": {
       "type": "ingredients-showcase",
@@ -79,6 +89,17 @@
       "block_order": ["cacao", "sugar", "vanilla"],
       "settings": { "wave_top": true }
     },
+    "timeline": {
+      "type": "process-timeline",
+      "blocks": {
+        "week-1": { "type": "milestone", "settings": { "week_label": "Week 1", "heading": "Small-Batch Crafted", "text": "Your bars are made fresh to order in small batches, never sitting in a warehouse." } },
+        "week-2": { "type": "milestone", "settings": { "week_label": "Week 2", "heading": "Quality Checked", "text": "Every batch is tasted and lab-verified before it's cleared to ship." } },
+        "week-3": { "type": "milestone", "settings": { "week_label": "Week 3", "heading": "Shipped Fresh", "text": "Packed cold and sent out within days of production, not months." } },
+        "week-4": { "type": "milestone", "settings": { "week_label": "Week 4", "heading": "On Your Doorstep", "text": "Enjoy it fresh — and if you subscribed, the next batch is already on its way." } }
+      },
+      "block_order": ["week-1", "week-2", "week-3", "week-4"],
+      "settings": { "wave_top": true }
+    },
     "compare": {
       "type": "comparison-table",
       "blocks": {
@@ -87,10 +108,11 @@
         "row-3": { "type": "feature_row", "settings": { "feature": "Handcrafted Quality", "us": true, "competitor_1": true, "competitor_2": true } },
         "row-4": { "type": "feature_row", "settings": { "feature": "Eco-Friendly Packaging", "us": true, "competitor_2": true } },
         "row-5": { "type": "feature_row", "settings": { "feature": "Instant Satisfaction", "us": true, "competitor_1": true, "competitor_2": true, "competitor_3": true } },
-        "row-6": { "type": "feature_row", "settings": { "feature": "Vegan Options", "us": true, "competitor_2": true } }
+        "row-6": { "type": "feature_row", "settings": { "feature": "Vegan Options", "us": true, "competitor_2": true } },
+        "tab-2": { "type": "comparison_tab", "settings": { "tab_label": "Vs. Gummies", "competitor_1_label": "Gummy Brand A", "competitor_2_label": "Gummy Brand B", "competitor_3_label": "Gummy Brand C", "rows": "Real Cacao|1|0|0|0\nNo Added Sugar Syrup|1|0|1|0\nSatisfies a Real Craving|1|1|1|0\nFree From Gelatin|1|0|0|1" } }
       },
-      "block_order": ["row-1", "row-2", "row-3", "row-4", "row-5", "row-6"],
-      "settings": { "wave_top": true }
+      "block_order": ["row-1", "row-2", "row-3", "row-4", "row-5", "row-6", "tab-2"],
+      "settings": { "wave_top": false, "tab_1_label": "Vs. Chocolate Bars" }
     },
     "gallery-grid": {
       "type": "image-gallery-grid",
@@ -161,7 +183,9 @@
     "faq",
     "featured-on",
     "testimonials",
+    "stats",
     "ingredients",
+    "timeline",
     "compare",
     "gallery-grid",
     "benefit-1",

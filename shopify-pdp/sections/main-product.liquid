@@ -127,6 +127,14 @@
           {%- endfor -%}
         </select>
 
+        {%- if section.settings.show_urgency_banner -%}
+        <div class="pdp-urgency" data-pdp-urgency data-urgency-minutes="{{ section.settings.urgency_minutes }}">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="pdp-urgency__icon"><path d="M10 5v5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.6"/></svg>
+          <span class="pdp-urgency__text">{{ section.settings.urgency_text }}</span>
+          <span class="pdp-urgency__timer" data-urgency-timer aria-hidden="true">--:--</span>
+        </div>
+        {%- endif -%}
+
         {%- liquid
           assign tier_blocks = section.blocks | where: 'type', 'pricing_tier'
         -%}
@@ -135,6 +143,9 @@
           {%- for block in tier_blocks -%}
             <div class="pdp-tier{% if block.settings.is_popular %} pdp-tier--popular{% endif %}" data-tier data-tier-qty="{{ block.settings.quantity }}" {{ block.shopify_attributes }}>
               {%- if block.settings.is_popular -%}<span class="pdp-tier__ribbon">{{ block.settings.popular_label }}</span>{%- endif -%}
+              {%- if block.settings.image != blank -%}
+                <div class="pdp-tier__image">{{ block.settings.image | image_url: width: 200 | image_tag: loading: 'lazy', widths: '100,150,200' }}</div>
+              {%- endif -%}
               <div class="pdp-tier__radio"><input type="radio" name="tier" value="{{ block.settings.quantity }}" {% if forloop.first %}checked{% endif %}></div>
               <div class="pdp-tier__label">{{ 'products.product.buy_x' | t: count: block.settings.quantity }}</div>
               {%- if block.settings.show_flavor_select -%}
@@ -164,7 +175,10 @@
           </label>
 
           {%- if product.selling_plan_groups.size > 0 -%}
-          <label class="pdp-purchase-option" data-subscribe-option>
+          <label class="pdp-purchase-option pdp-purchase-option--highlight" data-subscribe-option>
+            {%- if section.settings.subscribe_badge_text != blank -%}
+              <span class="pdp-purchase-option__badge">{{ section.settings.subscribe_badge_text }}</span>
+            {%- endif -%}
             <input type="radio" name="purchase_type" value="subscription">
             <span class="pdp-purchase-option__text">
               {{ 'products.product.subscribe_and_save' | t }}
@@ -177,6 +191,25 @@
                 {%- endfor -%}
               {%- endfor -%}
             </select>
+            {%- liquid
+              assign perks = '' | split: ','
+              if section.settings.subscribe_perk_1 != blank
+                assign perks = perks | push: section.settings.subscribe_perk_1
+              endif
+              if section.settings.subscribe_perk_2 != blank
+                assign perks = perks | push: section.settings.subscribe_perk_2
+              endif
+              if section.settings.subscribe_perk_3 != blank
+                assign perks = perks | push: section.settings.subscribe_perk_3
+              endif
+            -%}
+            {%- if perks.size > 0 -%}
+            <ul class="pdp-subscribe-perks">
+              {%- for perk in perks -%}
+                <li><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10.5l3.5 3.5L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>{{ perk }}</li>
+              {%- endfor -%}
+            </ul>
+            {%- endif -%}
           </label>
           {%- endif -%}
         </fieldset>
@@ -342,23 +375,39 @@
 #pdp-main-{{ section.id }} .pdp-purchase-option__save { display: block; color: var(--pdp-green); font-size: 12px; }
 #pdp-main-{{ section.id }} .pdp-select--frequency { grid-column: 1 / -1; margin-top: 6px; }
 #pdp-main-{{ section.id }} .pdp-select--frequency:disabled { opacity: .5; }
+#pdp-main-{{ section.id }} .pdp-purchase-option--highlight { border: 1.5px solid var(--pdp-accent); position: relative; }
+#pdp-main-{{ section.id }} .pdp-purchase-option--highlight.is-selected { background: {{ section.settings.background_color | default: '#fff8ec' }}; box-shadow: inset 0 0 0 1.5px var(--pdp-accent); }
+#pdp-main-{{ section.id }} .pdp-purchase-option__badge { grid-column: 1 / -1; order: -1; justify-self: start; background: var(--pdp-accent); color: #fff8ec; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; padding: 2px 8px; border-radius: 4px; margin-bottom: 2px; }
+#pdp-main-{{ section.id }} .pdp-subscribe-perks { grid-column: 1 / -1; list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+#pdp-main-{{ section.id }} .pdp-subscribe-perks li { display: flex; align-items: flex-start; gap: 7px; font-size: 12.5px; opacity: .85; line-height: 1.35; }
+#pdp-main-{{ section.id }} .pdp-subscribe-perks svg { width: 14px; height: 14px; flex: none; margin-top: 1px; color: var(--pdp-green); }
 
 #pdp-main-{{ section.id }} .pdp-stock { font-size: 12px; opacity: .65; margin: 0 0 14px; }
+
+#pdp-main-{{ section.id }} .pdp-urgency { display: flex; align-items: center; gap: 8px; background: var(--pdp-cream); border: 1px dashed var(--pdp-red); border-radius: 8px; padding: 10px 14px; margin: 0 0 14px; font-size: 13px; font-weight: 600; }
+#pdp-main-{{ section.id }} .pdp-urgency__icon { width: 16px; height: 16px; flex: none; color: var(--pdp-red); }
+#pdp-main-{{ section.id }} .pdp-urgency__text { flex: 1 1 auto; }
+#pdp-main-{{ section.id }} .pdp-urgency__timer { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; background: var(--pdp-red); color: #fff8ec; padding: 3px 8px; border-radius: 4px; font-size: 13px; letter-spacing: .02em; flex: none; }
 
 #pdp-main-{{ section.id }} .pdp-tiers { border: 1px solid var(--pdp-line); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
 #pdp-main-{{ section.id }} .pdp-tier { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px; border-bottom: 1px solid var(--pdp-line); }
 #pdp-main-{{ section.id }} .pdp-tier:last-child { border-bottom: none; }
-#pdp-main-{{ section.id }} .pdp-tier__label { flex: 1 1 auto; }
+#pdp-main-{{ section.id }} .pdp-tier__radio { order: 1; }
+#pdp-main-{{ section.id }} .pdp-tier__image { order: 2; flex: none; width: 44px; height: 44px; border-radius: 8px; overflow: hidden; background: var(--pdp-cream); }
+#pdp-main-{{ section.id }} .pdp-tier__image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#pdp-main-{{ section.id }} .pdp-tier__label { order: 3; flex: 1 1 auto; }
+#pdp-main-{{ section.id }} .pdp-select--tier { order: 4; }
 #pdp-main-{{ section.id }} .pdp-tier--popular { background: var(--pdp-cream); }
 #pdp-main-{{ section.id }} .pdp-tier__ribbon { position: absolute; top: -1px; inset-inline-end: 12px; background: var(--pdp-ink); color: {{ section.settings.background_color | default: '#fff8ec' }}; font-size: 10px; text-transform: uppercase; padding: 3px 8px; border-radius: 0 0 4px 4px; }
 #pdp-main-{{ section.id }} .pdp-select--tier { width: auto; flex: 0 1 150px; }
-#pdp-main-{{ section.id }} .pdp-tier__price-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-inline-start: auto; }
+#pdp-main-{{ section.id }} .pdp-tier__price-wrap { order: 5; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-inline-start: auto; }
 #pdp-main-{{ section.id }} .pdp-tier__price { font-weight: 700; }
 #pdp-main-{{ section.id }} .pdp-tier__save { background: var(--pdp-green); color: #fff8ec; font-size: 11px; padding: 2px 8px; border-radius: 4px; }
 
 /* Bundle layout: horizontal (cards side by side) */
 #pdp-main-{{ section.id }} .pdp-tiers--horizontal { border: none; border-radius: 0; overflow: visible; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier { flex-direction: column; align-items: center; text-align: center; gap: 8px; border: 1px solid var(--pdp-line); border-radius: 10px; padding: 20px 10px 16px; }
+#pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__image { order: 0; width: 100%; height: 84px; border-radius: 8px; margin-bottom: 2px; }
 #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__radio { order: 1; }
 #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__label { order: 2; flex: none; font-weight: 700; }
 #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-select--tier { order: 3; flex: none; width: 100%; padding: 7px 6px; font-size: 12px; text-overflow: ellipsis; }
@@ -367,6 +416,7 @@
 @media (max-width: 480px) {
   #pdp-main-{{ section.id }} .pdp-tiers--horizontal { gap: 6px; }
   #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier { padding: 14px 6px 12px; gap: 5px; }
+  #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__image { height: 56px; }
   #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__label { font-size: 13px; }
   #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__price { font-size: 13px; }
   #pdp-main-{{ section.id }} .pdp-tiers--horizontal .pdp-tier__save { font-size: 9.5px; padding: 1px 5px; }
@@ -484,6 +534,24 @@
     });
   });
 
+  var urgency = root.querySelector('[data-pdp-urgency]');
+  if (urgency) {
+    var timerEl = urgency.querySelector('[data-urgency-timer]');
+    var totalSeconds = (parseInt(urgency.getAttribute('data-urgency-minutes'), 10) || 15) * 60;
+    var remaining = totalSeconds;
+    var render = function () {
+      var m = Math.floor(remaining / 60);
+      var s = remaining % 60;
+      timerEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    };
+    render();
+    setInterval(function () {
+      remaining -= 1;
+      if (remaining < 0) remaining = totalSeconds;
+      render();
+    }, 1000);
+  }
+
   var tiers = root.querySelectorAll('[data-tier]');
   tiers.forEach(function (tier) {
     tier.addEventListener('click', function () {
@@ -553,7 +621,14 @@
     { "type": "text", "id": "origin_badge_subheading", "label": "Origin badge subheading", "default": "Small-batch, real ingredients" },
     { "type": "richtext", "id": "tagline", "label": "Tagline", "default": "<p>Five ingredients to a chocolate bar that actually loves you back.</p>" },
     { "type": "select", "id": "tier_layout", "label": "Bundle layout", "options": [ { "value": "horizontal", "label": "Horizontal" }, { "value": "vertical", "label": "Vertical" } ], "default": "horizontal" },
+    { "type": "checkbox", "id": "show_urgency_banner", "label": "Show urgency/countdown banner", "default": true },
+    { "type": "text", "id": "urgency_text", "label": "Urgency banner text", "default": "Limited batch — offer ends in:" },
+    { "type": "range", "id": "urgency_minutes", "label": "Countdown length (minutes)", "min": 1, "max": 60, "step": 1, "default": 15 },
     { "type": "range", "id": "subscribe_save_percent", "label": "Subscribe & save percent", "min": 0, "max": 50, "step": 5, "default": 15 },
+    { "type": "text", "id": "subscribe_badge_text", "label": "Subscribe badge text", "default": "Most Flexible" },
+    { "type": "text", "id": "subscribe_perk_1", "label": "Subscribe perk 1", "default": "Free shipping every order" },
+    { "type": "text", "id": "subscribe_perk_2", "label": "Subscribe perk 2", "default": "Skip, pause, or cancel anytime" },
+    { "type": "text", "id": "subscribe_perk_3", "label": "Subscribe perk 3", "default": "Exclusive subscriber pricing" },
     { "type": "checkbox", "id": "show_pickup", "label": "Show pickup availability", "default": true },
     { "type": "text", "id": "guarantee_text", "label": "Guarantee bar text", "default": "Don't settle for less. Free shipping on orders over $50 & satisfaction guaranteed." },
     { "type": "text", "id": "also_consider_heading", "label": "Cross-sell heading", "default": "Also Consider" },
@@ -598,6 +673,7 @@
       "settings": [
         { "type": "number", "id": "quantity", "label": "Quantity", "default": 1 },
         { "type": "text", "id": "price", "label": "Price (cents)", "default": "900" },
+        { "type": "image_picker", "id": "image", "label": "Tier image" },
         { "type": "checkbox", "id": "show_flavor_select", "label": "Show flavor picker", "default": false },
         { "type": "range", "id": "save_percent", "label": "Save percent badge (0 to hide)", "min": 0, "max": 50, "step": 5, "default": 0 },
         { "type": "checkbox", "id": "is_popular", "label": "Highlight as most popular", "default": false },
