@@ -64,7 +64,7 @@
 #also-like-{{ section.id }} .also-like__card { position: relative; display: flex; flex-direction: column; transition: transform .15s; }
 #also-like-{{ section.id }} .also-like__card:hover { transform: translateY(-3px); }
 #also-like-{{ section.id }} .also-like__badge { position: absolute; top: 10px; inset-inline-start: 10px; font-size: 10px; text-transform: uppercase; font-weight: 700; padding: 3px 8px; border-radius: 4px; z-index: 1; }
-#also-like-{{ section.id }} .also-like__badge--sale { background: #7a2436; color: #fff; }
+#also-like-{{ section.id }} .also-like__badge--sale { background: #ff4d6d; color: #fff8ec; }
 #also-like-{{ section.id }} .also-like__badge--new { background: {{ section.settings.text_color }}; color: {{ section.settings.background_color }}; }
 #also-like-{{ section.id }} .also-like__image { display: block; overflow: hidden; border-radius: 8px; margin-bottom: 12px; }
 #also-like-{{ section.id }} .also-like__image img,
@@ -107,9 +107,9 @@
     { "type": "text", "id": "heading", "label": "Heading", "default": "You May Also Like" },
     { "type": "select", "id": "text_alignment", "label": "Text alignment", "options": [ { "value": "left", "label": "Left" }, { "value": "center", "label": "Center" }, { "value": "right", "label": "Right" } ], "default": "center" },
     { "type": "text", "id": "subheading", "label": "Subheading", "default": "You might also enjoy which similar chocolates" },
-    { "type": "color", "id": "background_color", "label": "Background color", "default": "#ffffff" },
+    { "type": "color", "id": "background_color", "label": "Background color", "default": "#fff8ec" },
         { "type": "checkbox", "id": "wave_top", "label": "Wavy top edge", "default": false },
-    { "type": "color", "id": "text_color", "label": "Text color", "default": "#17110b" }
+    { "type": "color", "id": "text_color", "label": "Text color", "default": "#241134" }
   ],
   "blocks": [
     {
