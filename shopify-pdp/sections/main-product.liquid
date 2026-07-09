@@ -79,15 +79,8 @@
           </div>
         {%- else -%}
           <div class="pdp-option" data-pdp-option data-option-position="1">
-            <label class="pdp-option__label">{{ 'products.product.pack' | t }}</label>
-            <div class="pdp-swatches" role="radiogroup">
-              <button type="button" class="pdp-swatch is-selected" data-option-value="Single" data-option-position="1">Single</button>
-              <button type="button" class="pdp-swatch" data-option-value="Two Pack" data-option-position="1">Two Pack</button>
-            </div>
-          </div>
-          <div class="pdp-option" data-pdp-option data-option-position="2">
             <label class="pdp-option__label" for="pdp-size-{{ section.id }}">{{ 'products.product.size' | t }}</label>
-            <select class="pdp-select" id="pdp-size-{{ section.id }}" data-option-position="2">
+            <select class="pdp-select" id="pdp-size-{{ section.id }}" data-option-position="1">
               <option>4oz</option>
               <option>8oz</option>
             </select>
@@ -248,7 +241,7 @@
   --pdp-line: #e8dcf5;
   --pdp-green: #14b876;
   --pdp-red: #ff4d6d;
-  --pdp-gold: #ffb000;
+  --pdp-gold: #9b7fd4;
   color: var(--pdp-ink);
   background: {{ section.settings.background_color | default: '#fff8ec' }};
   padding: 24px 5vw 48px;
