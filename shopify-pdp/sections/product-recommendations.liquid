@@ -1,6 +1,7 @@
 {%- comment -%} "You May Also Like" product grid with quick add-to-cart {%- endcomment -%}
 {%- render 'theme-fonts' -%}
 {%- render 'scroll-reveal' -%}
+{%- render 'add-to-cart-fx' -%}
 <section class="also-like" id="also-like-{{ section.id }}">
   <div class="also-like__wrap">
     <h2 class="also-like__heading reveal">{{ section.settings.heading }}</h2>
@@ -37,7 +38,7 @@
 
           <form method="post" action="/cart/add" class="also-like__form">
             <input type="hidden" name="id" value="{{ rec_product.selected_or_first_available_variant.id }}">
-            <button type="submit" class="also-like__atc" {% if rec_product.selected_or_first_available_variant.available == false %}disabled{% endif %}>
+            <button type="submit" class="also-like__atc" data-atc-success="{{ 'products.product.added_confirmation' | t }}" {% if rec_product.selected_or_first_available_variant.available == false %}disabled{% endif %}>
               {%- if rec_product.selected_or_first_available_variant.available == false -%}
                 {{ 'products.product.sold_out' | t }}
               {%- else -%}
@@ -87,7 +88,10 @@
       e.preventDefault();
       var formData = new FormData(form);
       fetch('/cart/add.js', { method: 'POST', body: formData })
-        .then(function () { document.dispatchEvent(new CustomEvent('cart:updated')); });
+        .then(function () {
+          document.dispatchEvent(new CustomEvent('cart:updated'));
+          if (window.pdpAtcFx) window.pdpAtcFx(form.querySelector('.also-like__atc'), { quantity: 1 });
+        });
     });
   });
 })();

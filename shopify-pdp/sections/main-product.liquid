@@ -1,6 +1,7 @@
 {%- comment -%} Main PDP section: gallery, buy box, tiered pricing, accordions, pickup availability, cross-sell {%- endcomment -%}
 {%- render 'theme-fonts' -%}
 {%- render 'scroll-reveal' -%}
+{%- render 'add-to-cart-fx' -%}
 {%- assign product = product -%}
 
 <section class="pdp-main" id="pdp-main-{{ section.id }}">
@@ -33,14 +34,14 @@
     </div>
 
     <div class="pdp-main__info">
-      <div class="pdp-badges">
+      <div class="pdp-badges pdp-intro-in" style="animation-delay: 0ms;">
         {%- if product.tags contains 'new' -%}<span class="pdp-badge pdp-badge--new">{{ 'products.product.new' | t }}</span>{%- endif -%}
         {%- if product.compare_at_price > product.price -%}<span class="pdp-badge pdp-badge--sale">{{ 'products.product.on_sale' | t }}</span>{%- endif -%}
       </div>
 
-      <h1 class="pdp-title">{{ product.title | default: 'Banana Chocolate Bar | 4oz' }}</h1>
+      <h1 class="pdp-title pdp-intro-in" style="animation-delay: 70ms;">{{ product.title | default: 'Banana Chocolate Bar | 4oz' }}</h1>
 
-      <div class="pdp-price" data-pdp-price>
+      <div class="pdp-price pdp-intro-in" data-pdp-price style="animation-delay: 140ms;">
         {%- if product.compare_at_price > product.price -%}
           <span class="pdp-price__compare">{{ product.compare_at_price | money }}</span>
         {%- endif -%}
@@ -48,13 +49,13 @@
       </div>
 
       {%- if section.settings.show_rating -%}
-      <div class="pdp-rating" aria-label="{{ 'products.product.rating' | t }}">
+      <div class="pdp-rating pdp-intro-in" aria-label="{{ 'products.product.rating' | t }}" style="animation-delay: 200ms;">
         {%- for i in (1..5) -%}<span class="pdp-rating__star{% if i <= section.settings.rating_value %} is-filled{% endif %}">★</span>{%- endfor -%}
         <span class="pdp-rating__count">({{ section.settings.rating_count }})</span>
       </div>
       {%- endif -%}
 
-      <form method="post" action="/cart/add" id="pdp-form-{{ section.id }}" class="pdp-form" data-pdp-form accept-charset="UTF-8" enctype="multipart/form-data">
+      <form method="post" action="/cart/add" id="pdp-form-{{ section.id }}" class="pdp-form pdp-intro-in" data-pdp-form accept-charset="UTF-8" enctype="multipart/form-data" style="animation-delay: 260ms;">
         <input type="hidden" name="form_type" value="product">
         <input type="hidden" name="utf8" value="✓">
 
@@ -165,7 +166,7 @@
 
         <input type="number" name="quantity" data-pdp-quantity value="1" min="1" hidden>
 
-        <button type="submit" class="pdp-atc" data-pdp-atc {% if product.selected_or_first_available_variant.available == false %}disabled{% endif %}>
+        <button type="submit" class="pdp-atc" data-pdp-atc data-atc-success="{{ 'products.product.added_confirmation' | t }}" {% if product.selected_or_first_available_variant.available == false %}disabled{% endif %}>
           {%- if product.selected_or_first_available_variant.available == false -%}
             {{ 'products.product.sold_out' | t }}
           {%- else -%}
@@ -277,6 +278,9 @@
 
 /* Info column */
 #pdp-main-{{ section.id }} .pdp-main__info { text-align: {{ section.settings.text_alignment }}; }
+@keyframes pdp-intro-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+#pdp-main-{{ section.id }} .pdp-intro-in { animation: pdp-intro-in .6s cubic-bezier(.22,.68,.32,1) both; }
+@media (prefers-reduced-motion: reduce) { #pdp-main-{{ section.id }} .pdp-intro-in { animation: none; } }
 #pdp-main-{{ section.id }} .pdp-badges { display: flex; gap: 8px; margin-bottom: 8px; }
 #pdp-main-{{ section.id }} .pdp-badge { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; font-weight: 600; }
 #pdp-main-{{ section.id }} .pdp-badge--new { background: var(--pdp-ink); color: {{ section.settings.background_color | default: '#ffffff' }}; }
@@ -470,7 +474,10 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      }).then(function () { document.dispatchEvent(new CustomEvent('cart:updated')); });
+      }).then(function () {
+        document.dispatchEvent(new CustomEvent('cart:updated'));
+        if (window.pdpAtcFx) window.pdpAtcFx(root.querySelector('[data-pdp-atc]'), { quantity: payload.quantity });
+      });
     });
   }
 })();

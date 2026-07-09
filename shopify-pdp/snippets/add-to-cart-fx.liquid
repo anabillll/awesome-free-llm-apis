@@ -1,0 +1,91 @@
+{%- comment -%}
+  Shared "snap to cart" micro-interaction. Render once per page; idempotent like theme-fonts/scroll-reveal.
+  Call window.pdpAtcFx(buttonEl, { quantity }) right after a successful /cart/add.js response.
+  A small square "snaps" off the button and flies toward the first element with [data-cart-icon]
+  (add that attribute to your header's cart icon to opt in to the flight target + bump + count-up;
+  without it, the square just pops and fades near the button). The button's own label swaps to a
+  confirmation state for ~1.4s either way. Fully skipped under prefers-reduced-motion: reduce.
+{%- endcomment -%}
+<style>
+  .atc-fx-square { position: fixed; z-index: 9999; width: 20px; height: 20px; border-radius: 3px; pointer-events: none; will-change: transform, opacity; }
+  @keyframes atc-fx-bump { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.28); } 65% { transform: scale(.93); } }
+  .atc-fx-bump { animation: atc-fx-bump .4s ease; }
+  @keyframes atc-fx-pulse { 0% { box-shadow: 0 0 0 0 rgba(0,0,0,.22); } 100% { box-shadow: 0 0 0 16px rgba(0,0,0,0); } }
+  .atc-fx-pulse { animation: atc-fx-pulse .55s ease-out; }
+  @media (prefers-reduced-motion: reduce) {
+    .atc-fx-square { display: none; }
+    .atc-fx-bump, .atc-fx-pulse { animation: none; }
+  }
+</style>
+<script>
+  (function () {
+    if (window.pdpAtcFx) return;
+    window.pdpAtcFx = function (triggerEl, opts) {
+      if (!triggerEl) return;
+      opts = opts || {};
+      var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var originalLabel = triggerEl.getAttribute('data-atc-label');
+      if (originalLabel === null) {
+        originalLabel = triggerEl.textContent.trim();
+        triggerEl.setAttribute('data-atc-label', originalLabel);
+      }
+      var successText = triggerEl.getAttribute('data-atc-success') || 'Added';
+      triggerEl.textContent = successText;
+      triggerEl.classList.add('atc-fx-pulse');
+      clearTimeout(triggerEl.__atcFxTimer);
+      triggerEl.__atcFxTimer = setTimeout(function () {
+        triggerEl.textContent = originalLabel;
+        triggerEl.classList.remove('atc-fx-pulse');
+      }, 1400);
+
+      if (reduceMotion || !('animate' in Element.prototype)) return;
+
+      var startRect = triggerEl.getBoundingClientRect();
+      var cartIcon = document.querySelector('[data-cart-icon]');
+      var targetRect = cartIcon ? cartIcon.getBoundingClientRect() : null;
+
+      var square = document.createElement('div');
+      square.className = 'atc-fx-square';
+      var bg = getComputedStyle(triggerEl).backgroundColor;
+      square.style.background = (bg && bg !== 'rgba(0, 0, 0, 0)') ? bg : '#2f2216';
+      var startX = startRect.left + startRect.width / 2 - 10;
+      var startY = startRect.top + startRect.height / 2 - 10;
+      square.style.left = startX + 'px';
+      square.style.top = startY + 'px';
+      document.body.appendChild(square);
+
+      var dx, dy, endScale;
+      if (targetRect) {
+        dx = (targetRect.left + targetRect.width / 2 - 10) - startX;
+        dy = (targetRect.top + targetRect.height / 2 - 10) - startY;
+        endScale = 0.3;
+      } else {
+        dx = 0;
+        dy = -54;
+        endScale = 0.4;
+      }
+
+      var anim = square.animate([
+        { transform: 'translate(0,0) scale(1) rotate(0deg)', opacity: 1, offset: 0 },
+        { transform: 'translate(' + (dx * 0.3) + 'px,' + (dy * 0.25 - 26) + 'px) scale(1.15) rotate(24deg)', opacity: 1, offset: .35 },
+        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + endScale + ') rotate(75deg)', opacity: 0, offset: 1 }
+      ], { duration: 650, easing: 'cubic-bezier(.3,.8,.4,1)', fill: 'forwards' });
+
+      anim.onfinish = function () {
+        square.remove();
+        if (cartIcon) {
+          cartIcon.classList.remove('atc-fx-bump');
+          void cartIcon.offsetWidth;
+          cartIcon.classList.add('atc-fx-bump');
+          var countEl = document.querySelector('[data-cart-count]');
+          if (countEl) {
+            var qty = opts.quantity ? parseInt(opts.quantity, 10) || 1 : 1;
+            var current = parseInt(countEl.textContent, 10) || 0;
+            countEl.textContent = current + qty;
+          }
+        }
+      };
+    };
+  })();
+</script>

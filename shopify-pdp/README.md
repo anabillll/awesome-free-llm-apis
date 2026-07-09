@@ -68,8 +68,10 @@ Every section has a `text_alignment` setting (Left / Center / Right) in the them
 
 - `snippets/scroll-reveal.liquid` is rendered once per section (like `theme-fonts`) and is idempotent — it defines a `.reveal` class (fade + rise on scroll, via `IntersectionObserver`) and re-runs itself on `shopify:section:load` so it keeps working while editing in the theme customizer. Fully disabled (content shown immediately, no motion) under `prefers-reduced-motion: reduce`.
 - Headings and repeated blocks (USP icons, gallery images, ingredient rows, FAQ questions, recommendation cards, cross-sell cards) use `.reveal` with a small per-item `transition-delay` (via `forloop.index0`) for a staggered entrance instead of everything fading in at once.
+- `main-product.liquid`'s above-the-fold buy box (badges → title → price → rating → form) plays its own staggered entrance on page load via `.pdp-intro-in` — it doesn't wait for scroll since it's already in view.
 - Buttons get a tactile `:active { transform: scale(.97) }` press; cards (cross-sell, recommendations) lift slightly on hover.
 - Accordion/FAQ content fades in on open instead of the native `<details>` hard-cut, via a short CSS keyframe scoped to `[open]`.
+- **Add to cart "snap"**: `snippets/add-to-cart-fx.liquid` (rendered by `main-product.liquid` and `product-recommendations.liquid`) is a shared micro-interaction — on a successful `/cart/add.js` response, a small square "snaps" off the button and flies toward the first element carrying `data-cart-icon` in your theme's header, bumping it and incrementing a `[data-cart-count]` element if present; the button label itself also swaps to a translated confirmation (`products.product.added_confirmation`) for ~1.4s. Both attributes are opt-in on your header markup — without them, the square just pops near the button instead of flying to a target, so the effect degrades gracefully in any theme. Fully skipped under `prefers-reduced-motion: reduce` (only the label swap still happens).
 
 ## Background / text color
 
