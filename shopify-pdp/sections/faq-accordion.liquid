@@ -10,7 +10,7 @@
       {%- for block in section.blocks -%}
         <details class="faq__item reveal" style="transition-delay: {{ forloop.index0 | times: 70 }}ms;" {{ block.shopify_attributes }}{% if forloop.first %} open{% endif %}>
           <summary class="faq__question">
-            <span>{{ block.settings.question }}</span>
+            <span class="faq__question-text"><span class="faq__number" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span>{{ block.settings.question }}</span>
             <span class="faq__icon" aria-hidden="true"></span>
           </summary>
           <div class="faq__answer">{{ block.settings.answer }}</div>
@@ -27,6 +27,8 @@
 #faq-{{ section.id }} .faq__item { border-bottom: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.15 }}; }
 #faq-{{ section.id }} .faq__item:first-child { border-top: 1px solid {{ section.settings.text_color | color_modify: 'alpha', 0.15 }}; }
 #faq-{{ section.id }} .faq__question { display: flex; justify-content: space-between; align-items: center; padding: 18px 4px; cursor: pointer; font-weight: 600; list-style: none; transition: opacity .15s ease, padding-inline-start .2s ease; }
+#faq-{{ section.id }} .faq__question-text { display: flex; align-items: baseline; gap: 14px; }
+#faq-{{ section.id }} .faq__number { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12px; font-weight: 500; opacity: .45; flex: none; }
 #faq-{{ section.id }} .faq__question:hover { opacity: .65; padding-inline-start: 6px; }
 #faq-{{ section.id }} .faq__question::-webkit-details-marker { display: none; }
 #faq-{{ section.id }} .faq__icon::before { content: '+'; font-size: 20px; }

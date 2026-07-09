@@ -13,6 +13,10 @@
     "main": {
       "type": "main-product",
       "blocks": {
+        "check-1": { "type": "checklist_item", "settings": { "text": "Real cacao, clean ingredients" } },
+        "check-2": { "type": "checklist_item", "settings": { "text": "Supports a steady, guilt-free snack habit" } },
+        "check-3": { "type": "checklist_item", "settings": { "text": "Made in small batches, lab-verified" } },
+        "check-4": { "type": "checklist_item", "settings": { "text": "Free from dairy, wheat, and the top 8 allergens" } },
         "tier-1": { "type": "pricing_tier", "settings": { "quantity": 1, "price": "900" } },
         "tier-2": { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1620", "show_flavor_select": false, "save_percent": 10, "is_popular": true } },
         "tier-3": { "type": "pricing_tier", "settings": { "quantity": 3, "price": "2295", "save_percent": 15 } },
@@ -24,21 +28,24 @@
         "trust-3": { "type": "trust_icon", "settings": { "label": "Handcrafted Quality" } },
         "trust-4": { "type": "trust_icon", "settings": { "label": "Free Shipping" } }
       },
-      "block_order": ["tier-1", "tier-2", "tier-3", "accordion-details", "accordion-shipping", "accordion-guarantee", "trust-1", "trust-2", "trust-3", "trust-4"],
-      "settings": {}
+      "block_order": ["check-1", "check-2", "check-3", "check-4", "tier-1", "tier-2", "tier-3", "accordion-details", "accordion-shipping", "accordion-guarantee", "trust-1", "trust-2", "trust-3", "trust-4"],
+      "settings": {
+        "origin_badge_heading": "Made With Care",
+        "origin_badge_subheading": "Small-batch, real ingredients",
+        "tagline": "<p>Five ingredients to a chocolate bar that actually loves you back.</p>"
+      }
     },
-    "usp-bar": {
-      "type": "usp-icon-bar",
+    "faq": {
+      "type": "faq-accordion",
       "blocks": {
-        "no-dairy": { "type": "icon", "settings": { "label": "No Dairy" } },
-        "no-wheat": { "type": "icon", "settings": { "label": "No Wheat" } },
-        "no-nut": { "type": "icon", "settings": { "label": "No Nut" } },
-        "no-corn": { "type": "icon", "settings": { "label": "No Corn" } },
-        "no-soy": { "type": "icon", "settings": { "label": "No Soy" } },
-        "no-gmo": { "type": "icon", "settings": { "label": "No GMO" } }
+        "q1": { "type": "question", "settings": { "question": "Where are your chocolates made?" } },
+        "q2": { "type": "question", "settings": { "question": "What ingredients are in your chocolate bars?" } },
+        "q3": { "type": "question", "settings": { "question": "Are your products vegan?" } },
+        "q4": { "type": "question", "settings": { "question": "Do your chocolate bars contain nuts?" } },
+        "q5": { "type": "question", "settings": { "question": "What sweeteners do you use?" } }
       },
-      "block_order": ["no-dairy", "no-wheat", "no-nut", "no-corn", "no-soy", "no-gmo"],
-      "settings": {}
+      "block_order": ["q1", "q2", "q3", "q4", "q5"],
+      "settings": { "wave_top": true }
     },
     "featured-on": {
       "type": "featured-on",
@@ -50,25 +57,17 @@
         "logo-5": { "type": "logo", "settings": { "fallback_label": "Well+Good" } }
       },
       "block_order": ["logo-1", "logo-2", "logo-3", "logo-4", "logo-5"],
-      "settings": { "heading": "As Featured On" }
+      "settings": { "heading": "Trending On Social", "wave_top": true }
     },
-    "gallery-grid": {
-      "type": "image-gallery-grid",
+    "testimonials": {
+      "type": "testimonials",
       "blocks": {
-        "image-1": { "type": "image" },
-        "image-2": { "type": "image" },
-        "image-3": { "type": "image" }
+        "t1": { "type": "testimonial", "settings": { "name": "Priya S.", "detail": "Verified Buyer", "rating": 5, "quote": "<p>Genuinely didn't expect a “healthy” chocolate bar to taste this good.</p>" } },
+        "t2": { "type": "testimonial", "settings": { "name": "Marcus T.", "detail": "Verified Buyer", "rating": 5, "quote": "<p>Subscribed after the first bite. The banana one is unreal.</p>" } },
+        "t3": { "type": "testimonial", "settings": { "name": "Elena R.", "detail": "Verified Buyer", "rating": 4, "quote": "<p>My kid can't tell it's not “regular” chocolate. Winning.</p>" } }
       },
-      "block_order": ["image-1", "image-2", "image-3"],
+      "block_order": ["t1", "t2", "t3"],
       "settings": {}
-    },
-    "benefit-1": {
-      "type": "media-with-text",
-      "settings": { "heading": "Media with text Benefit 1", "image_position": "left" }
-    },
-    "benefit-2": {
-      "type": "media-with-text",
-      "settings": { "heading": "Media with text Benefit 2", "image_position": "right" }
     },
     "ingredients": {
       "type": "ingredients-showcase",
@@ -93,17 +92,36 @@
       "block_order": ["row-1", "row-2", "row-3", "row-4", "row-5", "row-6"],
       "settings": { "wave_top": true }
     },
-    "faq": {
-      "type": "faq-accordion",
+    "gallery-grid": {
+      "type": "image-gallery-grid",
       "blocks": {
-        "q1": { "type": "question", "settings": { "question": "Where are your chocolates made?" } },
-        "q2": { "type": "question", "settings": { "question": "What ingredients are in your chocolate bars?" } },
-        "q3": { "type": "question", "settings": { "question": "Are your products vegan?" } },
-        "q4": { "type": "question", "settings": { "question": "Do your chocolate bars contain nuts?" } },
-        "q5": { "type": "question", "settings": { "question": "What sweeteners do you use?" } }
+        "image-1": { "type": "image" },
+        "image-2": { "type": "image" },
+        "image-3": { "type": "image" }
       },
-      "block_order": ["q1", "q2", "q3", "q4", "q5"],
-      "settings": { "wave_top": true }
+      "block_order": ["image-1", "image-2", "image-3"],
+      "settings": {}
+    },
+    "benefit-1": {
+      "type": "media-with-text",
+      "settings": { "heading": "Media with text Benefit 1", "image_position": "left" }
+    },
+    "benefit-2": {
+      "type": "media-with-text",
+      "settings": { "heading": "Media with text Benefit 2", "image_position": "right" }
+    },
+    "usp-bar": {
+      "type": "usp-icon-bar",
+      "blocks": {
+        "no-dairy": { "type": "icon", "settings": { "label": "No Dairy" } },
+        "no-wheat": { "type": "icon", "settings": { "label": "No Wheat" } },
+        "no-nut": { "type": "icon", "settings": { "label": "No Nut" } },
+        "no-corn": { "type": "icon", "settings": { "label": "No Corn" } },
+        "no-soy": { "type": "icon", "settings": { "label": "No Soy" } },
+        "no-gmo": { "type": "icon", "settings": { "label": "No GMO" } }
+      },
+      "block_order": ["no-dairy", "no-wheat", "no-nut", "no-corn", "no-soy", "no-gmo"],
+      "settings": {}
     },
     "recommendations": {
       "type": "product-recommendations",
@@ -114,7 +132,7 @@
         "rec-4": { "type": "product" }
       },
       "block_order": ["rec-1", "rec-2", "rec-3", "rec-4"],
-      "settings": { "wave_top": true }
+      "settings": {}
     },
     "final-cta": {
       "type": "last-chance-cta",
@@ -140,14 +158,15 @@
   "order": [
     "announcement-bar",
     "main",
-    "usp-bar",
+    "faq",
     "featured-on",
+    "testimonials",
+    "ingredients",
+    "compare",
     "gallery-grid",
     "benefit-1",
     "benefit-2",
-    "ingredients",
-    "compare",
-    "faq",
+    "usp-bar",
     "recommendations",
     "final-cta",
     "footer"

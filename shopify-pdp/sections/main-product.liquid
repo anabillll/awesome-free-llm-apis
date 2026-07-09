@@ -39,23 +39,55 @@
         {%- if product.compare_at_price > product.price -%}<span class="pdp-badge pdp-badge--sale">{{ 'products.product.on_sale' | t }}</span>{%- endif -%}
       </div>
 
-      <h1 class="pdp-title pdp-intro-in" style="animation-delay: 70ms;">{{ product.title | default: 'Banana Chocolate Bar | 4oz' }}</h1>
+      {%- if section.settings.show_rating -%}
+      <div class="pdp-rating pdp-intro-in" aria-label="{{ 'products.product.rating' | t }}" style="animation-delay: 40ms;">
+        {%- for i in (1..5) -%}<span class="pdp-rating__star{% if i <= section.settings.rating_value %} is-filled{% endif %}">★</span>{%- endfor -%}
+        <span class="pdp-rating__count">({{ section.settings.rating_count }})</span>
+      </div>
+      {%- endif -%}
 
-      <div class="pdp-price pdp-intro-in" data-pdp-price style="animation-delay: 140ms;">
+      {%- if section.settings.show_origin_badge -%}
+      <div class="pdp-origin-badge pdp-intro-in" style="animation-delay: 80ms;">
+        {%- if section.settings.origin_badge_icon != blank -%}
+          {{ section.settings.origin_badge_icon | image_url: width: 48 | image_tag: loading: 'lazy', class: 'pdp-origin-badge__icon' }}
+        {%- endif -%}
+        <span class="pdp-origin-badge__text">
+          <span class="pdp-origin-badge__heading">{{ section.settings.origin_badge_heading }}</span>
+          {%- if section.settings.origin_badge_subheading != blank -%}
+            <span class="pdp-origin-badge__subheading">{{ section.settings.origin_badge_subheading }}</span>
+          {%- endif -%}
+        </span>
+      </div>
+      {%- endif -%}
+
+      <h1 class="pdp-title pdp-intro-in" style="animation-delay: 120ms;">{{ product.title | default: 'Banana Chocolate Bar | 4oz' }}</h1>
+
+      {%- if section.settings.tagline != blank -%}
+        <div class="pdp-tagline pdp-intro-in" style="animation-delay: 160ms;">{{ section.settings.tagline }}</div>
+      {%- endif -%}
+
+      <div class="pdp-price pdp-intro-in" data-pdp-price style="animation-delay: 200ms;">
         {%- if product.compare_at_price > product.price -%}
           <span class="pdp-price__compare">{{ product.compare_at_price | money }}</span>
         {%- endif -%}
         <span class="pdp-price__current">{{ product.price | default: 1200 | money }}</span>
       </div>
 
-      {%- if section.settings.show_rating -%}
-      <div class="pdp-rating pdp-intro-in" aria-label="{{ 'products.product.rating' | t }}" style="animation-delay: 200ms;">
-        {%- for i in (1..5) -%}<span class="pdp-rating__star{% if i <= section.settings.rating_value %} is-filled{% endif %}">★</span>{%- endfor -%}
-        <span class="pdp-rating__count">({{ section.settings.rating_count }})</span>
-      </div>
+      {%- liquid
+        assign checklist_blocks = section.blocks | where: 'type', 'checklist_item'
+      -%}
+      {%- if checklist_blocks.size > 0 -%}
+      <ul class="pdp-checklist pdp-intro-in" style="animation-delay: 240ms;">
+        {%- for block in checklist_blocks -%}
+          <li class="pdp-checklist__item" {{ block.shopify_attributes }}>
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10.5l3.5 3.5L16 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>{{ block.settings.text }}</span>
+          </li>
+        {%- endfor -%}
+      </ul>
       {%- endif -%}
 
-      <form method="post" action="/cart/add" id="pdp-form-{{ section.id }}" class="pdp-form pdp-intro-in" data-pdp-form accept-charset="UTF-8" enctype="multipart/form-data" style="animation-delay: 260ms;">
+      <form method="post" action="/cart/add" id="pdp-form-{{ section.id }}" class="pdp-form pdp-intro-in" data-pdp-form accept-charset="UTF-8" enctype="multipart/form-data" style="animation-delay: 280ms;">
         <input type="hidden" name="form_type" value="product">
         <input type="hidden" name="utf8" value="✓">
 
@@ -282,10 +314,19 @@
 #pdp-main-{{ section.id }} .pdp-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 12px; margin: 0 0 16px; }
 #pdp-main-{{ section.id }} .pdp-price__compare { text-decoration: line-through; opacity: .5; font-size: clamp(13px, 3vw, 15px); }
 #pdp-main-{{ section.id }} .pdp-price__current { font-size: clamp(18px, 4vw, 21px); font-weight: 700; }
-#pdp-main-{{ section.id }} .pdp-rating { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0 0 20px; color: var(--pdp-gold); font-size: 14px; }
+#pdp-main-{{ section.id }} .pdp-rating { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0 0 12px; color: var(--pdp-gold); font-size: 14px; }
 #pdp-main-{{ section.id }} .pdp-rating__star { opacity: .3; }
 #pdp-main-{{ section.id }} .pdp-rating__star.is-filled { opacity: 1; }
 #pdp-main-{{ section.id }} .pdp-rating__count { color: var(--pdp-ink); opacity: .6; margin-inline-start: 4px; }
+#pdp-main-{{ section.id }} .pdp-origin-badge { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--pdp-line); border-radius: 8px; padding: 8px 14px; margin: 0 0 16px; }
+#pdp-main-{{ section.id }} .pdp-origin-badge__icon { width: 28px; height: 28px; object-fit: contain; flex: none; }
+#pdp-main-{{ section.id }} .pdp-origin-badge__text { display: flex; flex-direction: column; line-height: 1.3; }
+#pdp-main-{{ section.id }} .pdp-origin-badge__heading { font-size: 13px; font-weight: 700; }
+#pdp-main-{{ section.id }} .pdp-origin-badge__subheading { font-size: 11.5px; opacity: .65; }
+#pdp-main-{{ section.id }} .pdp-tagline { font-size: 15px; line-height: 1.6; opacity: .8; margin: 0 0 14px; max-width: 46ch; }
+#pdp-main-{{ section.id }} .pdp-checklist { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+#pdp-main-{{ section.id }} .pdp-checklist__item { display: flex; align-items: flex-start; gap: 10px; font-size: 14.5px; line-height: 1.4; }
+#pdp-main-{{ section.id }} .pdp-checklist__item svg { width: 18px; height: 18px; flex: none; margin-top: 1px; color: var(--pdp-green); }
 
 #pdp-main-{{ section.id }} .pdp-option { margin-bottom: 16px; }
 #pdp-main-{{ section.id }} .pdp-option__label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
@@ -506,6 +547,11 @@
     { "type": "checkbox", "id": "show_rating", "label": "Show star rating", "default": true },
     { "type": "range", "id": "rating_value", "label": "Rating value", "min": 0, "max": 5, "step": 1, "default": 5 },
     { "type": "text", "id": "rating_count", "label": "Rating count", "default": "128" },
+    { "type": "checkbox", "id": "show_origin_badge", "label": "Show origin/trust badge", "default": true },
+    { "type": "image_picker", "id": "origin_badge_icon", "label": "Origin badge icon" },
+    { "type": "text", "id": "origin_badge_heading", "label": "Origin badge heading", "default": "Made In The USA" },
+    { "type": "text", "id": "origin_badge_subheading", "label": "Origin badge subheading", "default": "Small-batch, real ingredients" },
+    { "type": "richtext", "id": "tagline", "label": "Tagline", "default": "<p>Five ingredients to a chocolate bar that actually loves you back.</p>" },
     { "type": "select", "id": "tier_layout", "label": "Bundle layout", "options": [ { "value": "horizontal", "label": "Horizontal" }, { "value": "vertical", "label": "Vertical" } ], "default": "horizontal" },
     { "type": "range", "id": "subscribe_save_percent", "label": "Subscribe & save percent", "min": 0, "max": 50, "step": 5, "default": 15 },
     { "type": "checkbox", "id": "show_pickup", "label": "Show pickup availability", "default": true },
@@ -514,6 +560,13 @@
     { "type": "text", "id": "add_selected_label", "label": "Add selected button label", "default": "Add Selected to Cart" }
   ],
   "blocks": [
+    {
+      "type": "checklist_item",
+      "name": "Checklist item",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text", "default": "Real cacao, clean ingredients" }
+      ]
+    },
     {
       "type": "accordion",
       "name": "Accordion item",
@@ -556,6 +609,10 @@
     {
       "name": "Main product",
       "blocks": [
+        { "type": "checklist_item", "settings": { "text": "Real cacao, clean ingredients" } },
+        { "type": "checklist_item", "settings": { "text": "Supports a steady, guilt-free snack habit" } },
+        { "type": "checklist_item", "settings": { "text": "Made in small batches, lab-verified" } },
+        { "type": "checklist_item", "settings": { "text": "Free from dairy, wheat, and the top 8 allergens" } },
         { "type": "pricing_tier", "settings": { "quantity": 1, "price": "900" } },
         { "type": "pricing_tier", "settings": { "quantity": 2, "price": "1620", "show_flavor_select": false, "save_percent": 10, "is_popular": true } },
         { "type": "pricing_tier", "settings": { "quantity": 3, "price": "2295", "save_percent": 15 } },
