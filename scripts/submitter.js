@@ -105,19 +105,171 @@ function findAnswer(company, questionText) {
     if (new RegExp(pattern, "i").test(q)) return answer;
   }
 
-  // Universal yes/no answers
-  const { universal } = SCREENING;
-  if (/eligible.*work.*canada|authorized.*work.*canada|work.*full.?time.*canada/i.test(q)) return universal.work_authorization_canada;
-  if (/located.*canada|based.*canada|reside.*canada/i.test(q)) return universal.location_canada;
-  if (/willing.*relocate/i.test(q)) return universal.willing_to_relocate;
-  if (/years.*ecommerce|ecommerce.*experience/i.test(q)) return universal.years_experience_ecommerce;
-  if (/years.*shopify|shopify.*experience/i.test(q)) return universal.years_experience_shopify;
-  if (/years.*digital marketing/i.test(q)) return universal.years_experience_digital_marketing;
-  if (/years.*email marketing/i.test(q)) return universal.years_experience_email_marketing;
-  if (/years.*meta ads|years.*facebook ads/i.test(q)) return universal.years_experience_meta_ads;
-  if (/years.*google ads/i.test(q)) return universal.years_experience_google_ads;
+  // Work authorization & location
+  if (/eligible.*work.*canada|authorized.*work.*canada|legally.*work.*canada|work.*full.?time.*canada|legal.*right.*work/i.test(q)) return "Yes";
+  if (/located.*canada|based.*canada|reside.*canada|live.*canada|currently.*canada/i.test(q)) return "Yes";
+  if (/legally.*work.*ontario|work.*ontario|based.*ontario|toronto/i.test(q)) return "Yes";
+  if (/legally.*eligible.*work|eligible.*work.*this role|authorized.*work/i.test(q)) return "Yes";
+  if (/require.*visa.*sponsor|require.*sponsorship|need.*sponsorship/i.test(q)) return "No";
 
-  return null; // Unknown — will pause for human input
+  // Commute / location flexibility
+  if (/willing.*relocate/i.test(q)) return "Yes";
+  if (/willing.*commute|able.*commute|comfortable.*commute/i.test(q)) return "Yes";
+  if (/willing.*work.*on.?site|comfortable.*on.?site|able.*work.*office/i.test(q)) return "Yes";
+  if (/willing.*work.*hybrid/i.test(q)) return "Yes";
+  if (/willing.*work.*remote/i.test(q)) return "Yes";
+
+  // Availability & schedule
+  if (/available.*full.?time|full.?time.*position|full.?time.*role/i.test(q)) return "Yes";
+  if (/available.*start|when.*start|start.*date|earliest.*start/i.test(q)) return "Immediately";
+  if (/available.*weekend|weekend.*availability/i.test(q)) return "Yes";
+  if (/available.*monday.*friday|monday to friday/i.test(q)) return "Yes";
+  if (/overtime|extra hours|flexible.*hours/i.test(q)) return "Yes";
+  if (/notice period|how much notice/i.test(q)) return "2 weeks";
+  if (/immediately available|can.*start immediately/i.test(q)) return "Yes";
+
+  // Background / references
+  if (/background check|criminal record check|reference check/i.test(q)) return "Yes";
+  if (/provide.*reference|references.*available/i.test(q)) return "Yes";
+  if (/drug test/i.test(q)) return "Yes";
+
+  // Salary
+  if (/hourly.*rate|rate.*per hour|desired.*hourly|expected.*hourly/i.test(q)) return "30";
+  if (/desired.*salary|expected.*salary|salary.*expectation|annual.*salary|compensation.*expect/i.test(q)) return "65000";
+  if (/minimum.*salary|salary.*requirement/i.test(q)) return "62400";
+
+  // Education
+  if (/highest.*education|level.*education|degree.*hold|education.*level/i.test(q)) return "Bachelor's Degree";
+  if (/bachelor|undergraduate degree/i.test(q)) return "Yes";
+  if (/master|mba|graduate degree/i.test(q)) return "No";
+
+  // Years of experience — specific tools/skills
+  if (/years.*shopify|shopify.*years|experience.*shopify.*year/i.test(q)) return "3";
+  if (/years.*klaviyo|klaviyo.*years/i.test(q)) return "2";
+  if (/years.*meta.*ads|years.*facebook.*ads|meta.*ads.*years|facebook.*ads.*years/i.test(q)) return "3";
+  if (/years.*google.*ads|google.*ads.*years/i.test(q)) return "2";
+  if (/years.*email.*marketing|email.*marketing.*years/i.test(q)) return "2";
+  if (/years.*paid.*media|paid.*media.*years/i.test(q)) return "3";
+  if (/years.*paid.*social|paid.*social.*years/i.test(q)) return "3";
+  if (/years.*ecommerce|ecommerce.*years/i.test(q)) return "3";
+  if (/years.*digital.*marketing|digital.*marketing.*years/i.test(q)) return "3";
+  if (/years.*marketing/i.test(q)) return "3";
+  if (/years.*shopify.*experience|shopify.*experience.*years/i.test(q)) return "3";
+  if (/years.*crm|crm.*years/i.test(q)) return "2";
+  if (/years.*canva|canva.*years/i.test(q)) return "3";
+  if (/years.*analytics|analytics.*years/i.test(q)) return "3";
+
+  // Skill yes/no
+  if (/experience.*shopify|shopify.*experience|proficient.*shopify|familiar.*shopify/i.test(q)) return "Yes";
+  if (/experience.*klaviyo|klaviyo.*experience/i.test(q)) return "Yes";
+  if (/experience.*meta.*ads|experience.*facebook.*ads/i.test(q)) return "Yes";
+  if (/experience.*google.*ads/i.test(q)) return "Yes";
+  if (/experience.*email.*marketing/i.test(q)) return "Yes";
+  if (/experience.*paid.*social|paid.*social.*experience/i.test(q)) return "Yes";
+  if (/experience.*ecommerce|ecommerce.*experience/i.test(q)) return "Yes";
+  if (/experience.*digital.*marketing/i.test(q)) return "Yes";
+  if (/experience.*canva/i.test(q)) return "Yes";
+  if (/experience.*google.*analytics|google.*analytics.*experience/i.test(q)) return "Yes";
+  if (/experience.*microsoft.*excel|excel.*experience/i.test(q)) return "Yes";
+  if (/experience.*social.*media/i.test(q)) return "Yes";
+  if (/experience.*content/i.test(q)) return "Yes";
+  if (/experience.*a\/b testing|a\/b.*test/i.test(q)) return "Yes";
+  if (/experience.*cro|conversion.*rate.*optim/i.test(q)) return "Yes";
+  if (/proficient.*english|fluent.*english|english.*fluent/i.test(q)) return "Yes";
+  if (/proficient.*french|fluent.*french|bilingual|french.*required/i.test(q)) return "No";
+  if (/driver.*licen|valid.*licen/i.test(q)) return "Yes";
+  if (/own.*vehicle|have.*car/i.test(q)) return "No";
+
+  // Generic yes/no catch-alls (safe defaults)
+  if (/are you|do you|can you|have you|will you|would you/i.test(q)) return "Yes";
+
+  return null; // still unknown — will be handled by guessAnswer()
+}
+
+// ─── Smart answer guesser (used when findAnswer returns null) ─────────────────
+
+function guessYesOrNo(questionText) {
+  const q = questionText.toLowerCase();
+  // Flip to No only when we genuinely don't qualify
+  if (/require.*sponsor|need.*visa|visa.*sponsor/i.test(q)) return "No";
+  if (/master|mba|phd|doctorate/i.test(q)) return "No";
+  if (/french|bilingual/i.test(q)) return "No";
+  if (/mandarin|cantonese|korean|japanese|spanish|portuguese/i.test(q)) return "No";
+  return "Yes"; // safe default
+}
+
+function guessNumber(questionText) {
+  const q = questionText.toLowerCase();
+  if (/shopify/.test(q)) return "3";
+  if (/klaviyo/.test(q)) return "2";
+  if (/google.*ads|ppc|sem/.test(q)) return "2";
+  if (/meta.*ads|facebook.*ads/.test(q)) return "3";
+  if (/email.*marketing/.test(q)) return "2";
+  if (/paid.*media|paid.*social/.test(q)) return "3";
+  if (/ecommerce|digital.*marketing/.test(q)) return "3";
+  if (/marketing/.test(q)) return "3";
+  if (/salary|annual|compensation/.test(q)) return "65000";
+  if (/hourly|rate/.test(q)) return "30";
+  return "2"; // generic fallback
+}
+
+function guessShortText(questionText) {
+  const q = questionText.toLowerCase();
+  if (/salary|compensation|pay|rate/.test(q)) {
+    if (/hour/.test(q)) return "$30/hr";
+    return "$65,000";
+  }
+  if (/notice period/.test(q)) return "2 weeks";
+  if (/start.*date|when.*start|available.*start/.test(q)) return "Immediately";
+  if (/city|location|where.*based|reside/.test(q)) return "Toronto, ON";
+  if (/phone|mobile|number/.test(q)) return "";
+  if (/linkedin/.test(q)) return "N/A";
+  if (/portfolio|website|url/.test(q)) return "N/A";
+  if (/postal.*code|zip/.test(q)) return "M5V 0C3";
+  if (/country/.test(q)) return "Canada";
+  if (/province|state/.test(q)) return "Ontario";
+  return "N/A";
+}
+
+function guessLongText(questionText, job) {
+  const q = questionText.toLowerCase();
+
+  if (/shopify/.test(q)) {
+    return "I have 3 years of hands-on Shopify experience as the founder of two DTC brands. I manage product listings, collections, pricing, promotions, checkout optimization, and post-purchase upsell flows directly in Shopify.";
+  }
+  if (/klaviyo/.test(q)) {
+    return "I use Klaviyo to build and manage automated email flows (welcome, abandoned cart, post-purchase, win-back) and execute campaign calendars for my DTC brands. I handle segmentation, A/B testing, and track revenue attribution in Klaviyo analytics.";
+  }
+  if (/meta.*ads|facebook.*ads/.test(q)) {
+    return "I have 3 years managing Meta Ads campaigns for DTC brands using a systematic creative testing framework — testing audience avatars, angles, and offers, then scaling winning combinations. I achieved 5× ROAS across a $20K ad spend portfolio.";
+  }
+  if (/google.*ads/.test(q)) {
+    return "I have 2 years managing Google Ads search campaigns for DTC ecommerce, including keyword strategy, bid optimization, and performance tracking via Google Analytics.";
+  }
+  if (/email.*marketing|email.*program/.test(q)) {
+    return "I have built and managed full email programs for my DTC brands using Klaviyo — including welcome flows, abandoned cart sequences, post-purchase flows, and monthly promotional campaigns. I manage segmentation and track open rates, click rates, and revenue attributed.";
+  }
+  if (/ecommerce|digital.*marketing/.test(q)) {
+    return "I have 3 years of ecommerce and digital marketing experience as the founder of two DTC brands (&us fashion and Kalani Shop health & beauty), managing paid media, email marketing, and Shopify operations end-to-end. I grew the portfolio to $100K+ revenue on $20K in ad spend (5× ROAS).";
+  }
+  if (/why.*interest|why.*apply|what.*draw|why.*role|motivation/.test(q)) {
+    const co = job && job.company ? job.company : "your company";
+    return `I am drawn to ${co} because the role closely matches the work I do day-to-day — growing revenue through paid media, email, and Shopify optimization. I want to bring my hands-on DTC experience to a team environment where I can make a measurable impact.`;
+  }
+  if (/tell.*yourself|about yourself|background|introduce yourself/.test(q)) {
+    return "I am an ecommerce marketer with 3 years of hands-on experience founding and scaling two DTC brands on Shopify. I manage paid media on Meta Ads and Google Ads, run email marketing programs in Klaviyo, and optimize Shopify storefronts for conversion. I grew my brand portfolio to $100K+ in revenue on $20K in ad spend.";
+  }
+  if (/strength|best.*skill|top.*skill/.test(q)) {
+    return "My strongest skills are paid media management (Meta Ads and Google Ads), Klaviyo email automation, and Shopify ecommerce operations. I am data-driven and approach every channel with a test-and-iterate mindset.";
+  }
+  if (/weakness|improve|area.*growth/.test(q)) {
+    return "I am actively building deeper expertise in advanced analytics and reporting — I have strong intuition from my DTC experience and am continuously leveling up on structured data analysis.";
+  }
+  if (/cover.*letter|additional.*information|anything.*else|further.*info/.test(q)) {
+    return "Thank you for considering my application. I am excited about this opportunity and confident that my hands-on DTC ecommerce experience — managing Shopify, Meta Ads, Google Ads, and Klaviyo end-to-end — translates directly to this role.";
+  }
+  // Generic fallback
+  return "I have 3 years of hands-on ecommerce and digital marketing experience as the founder of DTC brands on Shopify, managing paid media (Meta Ads, Google Ads), email marketing (Klaviyo), and full store operations.";
 }
 
 // ─── 2captcha solver ─────────────────────────────────────────────────────────
@@ -414,44 +566,91 @@ async function answerScreeningQuestions(page, job) {
       labelText = (await labelEl.textContent()) || "";
     } catch (_) {}
     if (!labelText.trim()) continue;
-    if (UI_NOISE_RE.test(labelText.trim())) continue; // skip UI chrome, not a question
+    if (UI_NOISE_RE.test(labelText.trim())) continue;
 
-    const answer = findAnswer(job.company, labelText);
+    // Detect input type first — needed to pick the right answer format
+    const hasYesNoRadio = await qEl.locator('input[type="radio"][value="Yes" i], input[type="radio"][value="No" i]').count() > 0;
+    const hasRadio       = !hasYesNoRadio && await qEl.locator('input[type="radio"]').count() > 0;
+    const hasSelect      = await qEl.locator("select").count() > 0;
+    const hasTextarea    = await qEl.locator("textarea").count() > 0;
+    const hasNumber      = await qEl.locator('input[type="number"]').count() > 0;
+    const hasText        = await qEl.locator('input[type="text"], input:not([type]), input[type="email"]').count() > 0;
+
+    // Try known answers first, then fall back to smart guesser
+    let answer = findAnswer(job.company, labelText);
+
     if (answer === null) {
-      console.log(`   ❓ Unknown question: "${labelText.trim().slice(0, 80)}"`);
-      await pauseForHuman(page,
-        `Unknown question: "${labelText.trim().slice(0, 120)}"\nPlease type your answer in the browser, then press ENTER.`
-      );
+      // Auto-guess based on input type + question content
+      if (hasYesNoRadio) {
+        answer = guessYesOrNo(labelText);
+      } else if (hasNumber) {
+        answer = guessNumber(labelText);
+      } else if (hasTextarea) {
+        answer = guessLongText(labelText, job);
+      } else if (hasText) {
+        answer = guessShortText(labelText);
+      } else if (hasSelect) {
+        answer = guessShortText(labelText); // best effort — selectOption will try to match
+      } else {
+        answer = "Yes"; // last resort for unknown input types
+      }
+      console.log(`   🤖 Auto-answered: "${labelText.trim().slice(0, 70)}" → "${String(answer).slice(0, 60)}"`);
+    } else {
+      console.log(`   ✅ Known answer: "${labelText.trim().slice(0, 70)}" → "${String(answer).slice(0, 60)}"`);
+    }
+
+    // Fill the input
+    if (hasYesNoRadio) {
+      const isYes = /^yes$/i.test(String(answer).trim());
+      const target = isYes
+        ? qEl.locator('input[type="radio"][value="Yes" i]').first()
+        : qEl.locator('input[type="radio"][value="No" i]').first();
+      await target.check().catch(() => {});
       continue;
     }
 
-    // Yes/No radios
-    const yesRadio = qEl.locator('input[type="radio"][value="Yes"], input[type="radio"][value="yes"]').first();
-    if (await yesRadio.count() > 0) {
-      const isYes = /^yes$/i.test(answer.trim());
-      await (isYes ? yesRadio : qEl.locator('input[type="radio"][value="No"], input[type="radio"][value="no"]').first())
-        .check().catch(() => {});
+    if (hasRadio) {
+      // Non-yes/no radio — try to click one matching the answer text
+      const labels = await qEl.locator('label').all();
+      let matched = false;
+      for (const lbl of labels) {
+        const txt = (await lbl.textContent() || "").trim().toLowerCase();
+        if (txt === String(answer).toLowerCase()) {
+          await lbl.click().catch(() => {}); matched = true; break;
+        }
+      }
+      if (!matched && labels.length > 0) await labels[0].click().catch(() => {}); // pick first option
       continue;
     }
 
-    // Select
-    const select = qEl.locator("select").first();
-    if (await select.count() > 0) {
+    if (hasSelect) {
+      const select = qEl.locator("select").first();
       await select.selectOption({ label: answer })
-        .catch(() => select.selectOption({ value: answer }).catch(() => {}));
+        .catch(() => select.selectOption({ value: answer })
+        .catch(async () => {
+          // Pick first non-empty option as fallback
+          const opts = await select.locator("option").all();
+          for (const opt of opts) {
+            const v = await opt.getAttribute("value");
+            if (v && v !== "") { await select.selectOption({ value: v }); break; }
+          }
+        }));
       continue;
     }
 
-    // Textarea
-    const textarea = qEl.locator("textarea").first();
-    if (await textarea.count() > 0) {
-      await textarea.fill(answer); continue;
+    if (hasTextarea) {
+      await qEl.locator("textarea").first().fill(String(answer)).catch(() => {});
+      continue;
     }
 
-    // Text input
-    const input = qEl.locator('input[type="text"], input[type="number"], input:not([type])').first();
-    if (await input.count() > 0) {
-      await input.fill(answer);
+    if (hasNumber) {
+      await qEl.locator('input[type="number"]').first().fill(String(answer)).catch(() => {});
+      continue;
+    }
+
+    if (hasText) {
+      await qEl.locator('input[type="text"], input:not([type]), input[type="email"]').first().fill(String(answer)).catch(() => {});
+      continue;
     }
   }
 }
@@ -620,9 +819,8 @@ async function handleEasyApply(applyPage, job) {
       await applyPage.waitForTimeout(800);
       const retried = await findNextOrSubmitAllFrames(applyPage);
       if (!retried) {
-        await fullDiagnostic(applyPage);
-        await pauseForHuman(applyPage, "Couldn't find Next/Submit — please advance manually, then press ENTER.");
-        continue;
+        console.log("   ⚠️  Couldn't find Next/Submit button after scroll — skipping this job.");
+        return "skipped";
       }
       if (retried.type === "submit") {
         if (DRY_RUN) { console.log("   [DRY RUN] Would click Submit."); return "applied"; }
@@ -686,15 +884,11 @@ async function applyToJob(page, job) {
     await page.waitForTimeout(2000);
   }
 
-  // If the URL left Indeed entirely it's an external ATS
+  // If the URL left Indeed entirely it's an external ATS — skip silently
   const postClickUrl = applyPage.url();
   if (!postClickUrl.includes("indeed.com") && !postClickUrl.includes("smartapply")) {
-    console.log(`   ↪ External ATS: ${postClickUrl}`);
-    await pauseForHuman(applyPage,
-      "External employer ATS opened. Fill and submit manually, then press ENTER (or type 'skip')."
-    );
-    const ans = await waitForInput("   Applied? (yes/skip): ");
-    return ans.trim().toLowerCase().startsWith("s") ? "skipped" : "applied";
+    console.log(`   ↪ External ATS detected (${postClickUrl.slice(0, 60)}) — skipping (Easy Apply only)`);
+    return "skipped";
   }
 
   return await handleEasyApply(applyPage, job);
