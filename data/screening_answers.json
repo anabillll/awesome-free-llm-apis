@@ -1,0 +1,66 @@
+{
+  "universal": {
+    "work_authorization_canada": "Yes",
+    "location_canada": "Yes",
+    "willing_to_work_in_person": "Yes",
+    "willing_to_relocate": "Yes",
+    "years_experience_ecommerce": "3",
+    "years_experience_shopify": "3",
+    "years_experience_digital_marketing": "3",
+    "years_experience_email_marketing": "2",
+    "years_experience_meta_ads": "3",
+    "years_experience_google_ads": "2"
+  },
+  "by_company": {
+    "Acceler8 Labs": [
+      {
+        "pattern": "eligible to work full-time in Canada",
+        "answer": "Yes, I am authorized to work full-time in Canada and am based in Toronto, ON."
+      },
+      {
+        "pattern": "email marketing platforms",
+        "answer": "Klaviyo — I have used it to build welcome flows, abandoned cart sequences, post-purchase flows, and promotional blast campaigns for my DTC brands."
+      },
+      {
+        "pattern": "ecommerce or DTC brands.*email.*revenue",
+        "answer": "Yes. I founded and operate two DTC ecommerce brands (&us, a fashion and clothing brand, and Kalani Shop, a health and beauty brand). I built and managed the full Klaviyo email programs for both — including automated flows and campaigns — as part of a broader growth strategy that scaled our portfolio to over $100K in revenue."
+      }
+    ],
+    "ScaleMyMealPrep": [
+      {
+        "pattern": "Shopify issue.*diagnosed.*fixed|Meta Ads campaign change",
+        "answer": "Shopify: On one of my DTC brands, I noticed post-purchase revenue per order was low. I identified that the checkout experience ended at the confirmation page with no further engagement. I implemented a post-purchase upsell flow and built complementary product bundles in Shopify, which increased average order value and improved backend profitability without increasing ad spend.\n\nMeta Ads: A campaign had plateaued in ROAS. I restructured it by separating audience avatars into distinct ad sets and systematically testing different desires and creative angles per avatar. Once I identified the highest-performing combinations, I cut the underperformers and scaled budget to the winners — which broke the plateau and improved ROAS."
+      },
+      {
+        "pattern": "hands-on.*Shopify.*Meta|confirmation.*experience",
+        "answer": "Yes — I have personally managed both platforms hands-on. I build and update Shopify storefronts directly (product pages, collections, promotions, upsells, bundles) and I personally set up, monitor, and optimize Meta Ads campaigns including creative testing and audience targeting."
+      },
+      {
+        "pattern": "how many clients",
+        "answer": "I have simultaneously managed 2–3 DTC brands as founder/operator, handling all ecommerce and paid media functions across each."
+      }
+    ],
+    "Marketech Digital Solutions": [
+      {
+        "pattern": "agency.*client.services|accounts.*carry|day-to-day scope",
+        "answer": "I have operated as founder/operator across 2–3 DTC ecommerce brands simultaneously (fashion and health & beauty), managing the full email and paid media programs for each. My day-to-day scope covered content calendars, Klaviyo campaign and flow execution, performance reporting, and iterating based on results — similar to managing a small portfolio of client accounts."
+      },
+      {
+        "pattern": "Claude.*ChatGPT|AI tools|workflow changed",
+        "answer": "I use Claude, ChatGPT, and Gemini daily. I use them to draft and refine email copy, brief creative assets, and analyze campaign performance data. I also use Higgsfield and ElevenLabs for video and audio content, and Canva for design. In the last year, AI tools have compressed the time from brief to first draft — I can now produce, review, and iterate on content at much higher volume."
+      },
+      {
+        "pattern": "email performance data|numbers.*look at|performance data changed",
+        "answer": "I look at revenue attributed, open rate, click rate, and unsubscribe rate first. In one campaign, strong open rates but weak click rates told me the subject line was working but the body copy or offer wasn't landing. I tested a revised CTA and simplified offer in the next send, which moved the click rate materially."
+      },
+      {
+        "pattern": "Klaviyo.*experience|built.*managed.*Klaviyo",
+        "answer": "I have built and managed: welcome sequences, abandoned cart flows, post-purchase flows, browse abandonment flows, and win-back campaigns. On the campaign side, I've planned and executed monthly promotional calendars, managed segmentation by purchase history and engagement level, and tracked flow and campaign revenue in Klaviyo's analytics."
+      },
+      {
+        "pattern": "monthly salary|hourly rate|rate.*looking for",
+        "answer": "CAD $30/hour"
+      }
+    ]
+  }
+}
