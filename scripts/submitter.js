@@ -194,6 +194,7 @@ async function findNextOrSubmit(page) {
   // Submit first (so if both visible, we prefer to finish)
   const submitBtn = await findVisible(page, [
     'button[data-testid="ia-submitButton"]',
+    'button[data-testid="form-card-submit-button"]',
     'button[data-testid*="submit" i]',
     'button[aria-label="Submit your application"]',
     'button[aria-label*="Submit" i]',
@@ -204,12 +205,15 @@ async function findNextOrSubmit(page) {
 
   const nextBtn = await findVisible(page, [
     'button[data-testid="ia-continueButton"]',
+    'button[data-testid="form-card-continue-button"]',
+    'button[data-testid="ContinueButton"]',
     'button[data-testid*="continue" i]',
     'button[aria-label="Continue to next step"]',
     'button[aria-label*="continue" i]',
     'button:has-text("Continue")',
     'button:has-text("Next")',
     'button:has-text("Review your application")',
+    'button:has-text("Apply now")',
   ]);
   if (nextBtn) return { type: "next", btn: nextBtn };
 
@@ -249,6 +253,9 @@ async function fillFormFields(page, job) {
   }
 }
 
+// UI text that looks like a label but is not a screening question
+const UI_NOISE_RE = /use your indeed resume|upload.*resume|indeed profile|save and close|skip to main|sign in|log in|report an issue/i;
+
 async function answerScreeningQuestions(page, job) {
   // Indeed uses several containers for screening questions
   const questionContainers = await page.locator(
@@ -267,6 +274,7 @@ async function answerScreeningQuestions(page, job) {
       labelText = (await labelEl.textContent()) || "";
     } catch (_) {}
     if (!labelText.trim()) continue;
+    if (UI_NOISE_RE.test(labelText.trim())) continue; // skip UI chrome, not a question
 
     const answer = findAnswer(job.company, labelText);
     if (answer === null) {
@@ -387,6 +395,41 @@ async function answerQuestionsAllFrames(page, job) {
   }
 }
 
+// ─── Resume selection step (smartapply first screen) ─────────────────────────
+
+async function handleResumeSelection(ctx, job) {
+  const url = ctx.url ? ctx.url() : "";
+  if (!url.includes("resume-selection")) return;
+
+  // Prefer uploading our tailored resume
+  const uploadBtn = await findVisible(ctx, [
+    'button:has-text("Upload a resume")',
+    'button:has-text("Upload resume")',
+    '[role="radio"]:has-text("Upload")',
+    'label:has-text("Upload a")',
+  ]);
+  if (uploadBtn) {
+    await uploadBtn.click();
+    await ctx.waitForTimeout(1000);
+    const resumePath = resumeFilePath(job.company, job.title);
+    if (fs.existsSync(resumePath)) {
+      try {
+        const fi = ctx.locator('input[type="file"]').first();
+        if (await fi.count() > 0) { await fi.setInputFiles(resumePath); console.log("   ✓ Resume uploaded"); }
+      } catch (_) {}
+    }
+    return;
+  }
+
+  // Fall back to "Use your Indeed Resume"
+  const indeedBtn = await findVisible(ctx, [
+    'button:has-text("Use your Indeed Resume")',
+    '[role="radio"]:has-text("Indeed Resume")',
+    'label:has-text("Indeed Resume")',
+  ]);
+  if (indeedBtn) { await indeedBtn.click(); console.log("   ✓ Selected Indeed Resume"); }
+}
+
 // ─── Indeed Easy Apply handler ────────────────────────────────────────────────
 
 async function handleEasyApply(applyPage, job) {
@@ -412,6 +455,11 @@ async function handleEasyApply(applyPage, job) {
     const pageUrl = applyPage.url ? applyPage.url() : "";
     if (pageUrl.includes("login")) {
       await pauseForHuman(applyPage, "Login required — log in to Indeed, then press ENTER.");
+    }
+
+    // Handle resume selection screen (first step of smartapply)
+    for (const frame of allFrames(applyPage)) {
+      try { await handleResumeSelection(frame, job); } catch (_) {}
     }
 
     await answerQuestionsAllFrames(applyPage, job);
