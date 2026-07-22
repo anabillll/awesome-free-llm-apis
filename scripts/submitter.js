@@ -24,6 +24,7 @@ const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
 const https = require("https");
+const { execSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const RESUME_JSON = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "master_resume.json"), "utf8"));
@@ -738,12 +739,39 @@ async function isBrowserAlive(page) {
 
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
+const REPLENISH_SCRIPT = path.join(ROOT, "scripts", "replenish.js");
+const REPLENISH_THRESHOLD = 5; // auto-replenish when ready queue falls below this
+
+function countReadyJobs() {
+  const text = fs.readFileSync(TRACKER, "utf8");
+  return parseCSV(text).filter((r) => r.status === "ready").length;
+}
+
+function runReplenish() {
+  console.log("\n🔄  Queue running low — auto-replenishing from Indeed...");
+  try {
+    execSync(`node "${REPLENISH_SCRIPT}" --target 20`, {
+      stdio: "inherit",
+      timeout: 300_000, // 5 min max
+      env: { ...process.env },
+    });
+  } catch (e) {
+    console.log("  [warn] Replenish exited with error — continuing with existing queue.");
+  }
+}
+
 async function main() {
   console.log("🚀  Ecommerce Job Application Submitter");
   if (DRY_RUN) console.log("   Mode: DRY RUN (no submissions will be made)");
   console.log(`   Session limit: ${SESSION_LIMIT} applications\n`);
 
-  // Load tracker
+  // Auto-replenish if queue is below threshold
+  const initialReady = countReadyJobs();
+  if (initialReady < REPLENISH_THRESHOLD) {
+    runReplenish();
+  }
+
+  // Load tracker (fresh after possible replenish)
   const trackerText = fs.readFileSync(TRACKER, "utf8");
   const rows = parseCSV(trackerText);
   const readyJobs = rows.filter((r) => r.status === "ready");
@@ -788,6 +816,14 @@ async function main() {
         submitted++;
         console.log(`\n✅  [${submitted}/${SESSION_LIMIT}] ${job.company} — ${job.title}: SUBMITTED`);
         try { await context.storageState({ path: path.join(SESSION_DIR, "state.json") }); } catch (_) {}
+
+        // Mid-session replenish: if ready queue is low, find more jobs while browser is paused
+        const remaining = countReadyJobs();
+        if (remaining < REPLENISH_THRESHOLD && submitted < SESSION_LIMIT) {
+          console.log(`\n   Queue at ${remaining} — replenishing before next submission...`);
+          runReplenish();
+        }
+
         if (submitted < SESSION_LIMIT && readyJobs.indexOf(job) < readyJobs.length - 1) {
           await naturalDelay();
         }
