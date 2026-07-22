@@ -40,8 +40,8 @@ const CHROMIUM_PATH = fs.existsSync("/opt/pw-browsers/chromium-1194/chrome-linux
 const DRY_RUN = process.argv.includes("--dry-run");
 const LIMIT_ARG = process.argv.indexOf("--limit");
 const SESSION_LIMIT = LIMIT_ARG !== -1 ? parseInt(process.argv[LIMIT_ARG + 1], 10) : 15;
-const MIN_DELAY_MS = 30_000;   // 30 seconds minimum between submissions
-const MAX_DELAY_MS = 60_000;   // 60 seconds maximum
+const MIN_DELAY_MS = 5_000;    // 5 seconds minimum between submissions
+const MAX_DELAY_MS = 10_000;   // 10 seconds maximum
 
 fs.mkdirSync(SESSION_DIR, { recursive: true });
 
