@@ -1,0 +1,67 @@
+name: Apply to Jobs
+
+on:
+  schedule:
+    # Runs Mon–Fri at 10am Toronto time (14:00 UTC)
+    - cron: "0 14 * * 1-5"
+  workflow_dispatch:   # lets you click "Run workflow" manually in GitHub
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Restore tracker.csv from previous run (persists applied/ready status)
+      - name: Restore tracker
+        uses: actions/cache/restore@v4
+        with:
+          path: data/tracker.csv
+          key: tracker-${{ github.run_number }}
+          restore-keys: tracker-
+
+      # Restore Indeed login session from previous run
+      - name: Restore browser session
+        uses: actions/cache/restore@v4
+        with:
+          path: output/browser_session
+          key: session-${{ github.run_number }}
+          restore-keys: session-
+
+      - name: Find and apply to jobs
+        env:
+          INDEED_EMAIL: ${{ secrets.INDEED_EMAIL }}
+          INDEED_PASSWORD: ${{ secrets.INDEED_PASSWORD }}
+          CAPTCHA_API_KEY: ${{ secrets.CAPTCHA_API_KEY }}
+        run: node scripts/submitter.js --limit 15
+
+      # Save tracker after run so next run knows what's already applied
+      - name: Save tracker
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/tracker.csv
+          key: tracker-${{ github.run_number }}
+
+      # Save browser session so next run stays logged in
+      - name: Save browser session
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: output/browser_session
+          key: session-${{ github.run_number }}

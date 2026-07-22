@@ -42,9 +42,12 @@ const CHROMIUM_PATH = fs.existsSync("/opt/pw-browsers/chromium-1194/chrome-linux
 const DRY_RUN = process.argv.includes("--dry-run");
 const LIMIT_ARG = process.argv.indexOf("--limit");
 const SESSION_LIMIT = LIMIT_ARG !== -1 ? parseInt(process.argv[LIMIT_ARG + 1], 10) : 15;
-const MIN_DELAY_MS = 5_000;    // 5 seconds minimum between submissions
-const MAX_DELAY_MS = 10_000;   // 10 seconds maximum
+const MIN_DELAY_MS = 5_000;
+const MAX_DELAY_MS = 10_000;
 const CAPTCHA_API_KEY = process.env.CAPTCHA_API_KEY || "";
+const IS_CI = !!(process.env.CI || process.env.GITHUB_ACTIONS);
+const INDEED_EMAIL = process.env.INDEED_EMAIL || "";
+const INDEED_PASSWORD = process.env.INDEED_PASSWORD || "";
 
 fs.mkdirSync(SESSION_DIR, { recursive: true });
 
@@ -943,9 +946,14 @@ const BROWSER_CRASH_RE = /Target page|Target closed|browser has been closed|Sess
 
 async function launchBrowser() {
   const opts = {
-    headless: false,
-    args: ["--start-maximized", "--disable-blink-features=AutomationControlled"],
-    slowMo: 50,
+    headless: IS_CI,   // headless in GitHub Actions, visible window locally
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-blink-features=AutomationControlled",
+      "--start-maximized",
+    ],
+    slowMo: IS_CI ? 0 : 50,
   };
   if (CHROMIUM_PATH) opts.executablePath = CHROMIUM_PATH;
   const browser = await chromium.launch(opts);
@@ -953,7 +961,7 @@ async function launchBrowser() {
     storageState: fs.existsSync(path.join(SESSION_DIR, "state.json"))
       ? path.join(SESSION_DIR, "state.json")
       : undefined,
-    viewport: null,
+    viewport: IS_CI ? { width: 1280, height: 800 } : null,
     userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
   });
   const page = await context.newPage();
@@ -961,11 +969,54 @@ async function launchBrowser() {
 }
 
 async function ensureLoggedIn(page, context) {
-  await page.goto("https://ca.indeed.com/account/login", { waitUntil: "domcontentloaded" });
+  await page.goto("https://ca.indeed.com/", { waitUntil: "domcontentloaded", timeout: 30_000 });
   await page.waitForTimeout(2000);
-  if (await page.locator('input[type="password"]').count() > 0) {
-    await pauseForHuman(page, "Please log in to Indeed in the browser window, then press ENTER here.");
+
+  // Check if already logged in (restored session from cache)
+  const loggedIn = await page.locator(
+    '[data-testid="header-user-menu"], [aria-label*="account" i], .gnav-header-user, [href*="my-jobs"]'
+  ).count() > 0;
+  if (loggedIn) {
+    console.log("✓ Already logged in (session restored).");
+    return;
   }
+
+  // Auto-login with env credentials (used in GitHub Actions and locally if set)
+  if (INDEED_EMAIL && INDEED_PASSWORD) {
+    console.log("   Logging in to Indeed...");
+    await page.goto("https://secure.indeed.com/account/login", { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1500);
+
+    // Step 1: email
+    const emailField = page.locator('input[type="email"], input[name="__email"], input[autocomplete="email"]').first();
+    if (await emailField.count() > 0) {
+      await emailField.fill(INDEED_EMAIL);
+      await page.waitForTimeout(500);
+      await page.locator('button[type="submit"], button:has-text("Continue"), button:has-text("Sign in")').first().click().catch(() => {});
+      await page.waitForTimeout(2500);
+    }
+
+    // Step 2: password (may be on same page or next)
+    const pwField = page.locator('input[type="password"]').first();
+    if (await pwField.count() > 0) {
+      await pwField.fill(INDEED_PASSWORD);
+      await page.waitForTimeout(500);
+      await page.locator('button[type="submit"], button:has-text("Sign in"), button:has-text("Log in")').first().click().catch(() => {});
+      await page.waitForTimeout(3000);
+    }
+
+    // Handle CAPTCHA that might appear on login
+    await handleCaptcha(page);
+    await page.waitForTimeout(2000);
+    console.log("✓ Logged in.");
+  } else if (!IS_CI) {
+    // Local run without credentials — ask user to log in manually
+    await pauseForHuman(page, "Please log in to Indeed in the browser window, then press ENTER here.");
+  } else {
+    console.error("❌  INDEED_EMAIL and INDEED_PASSWORD secrets are not set. Add them in GitHub → Settings → Secrets.");
+    process.exit(1);
+  }
+
   await context.storageState({ path: path.join(SESSION_DIR, "state.json") });
   console.log("✓ Session saved.");
 }
