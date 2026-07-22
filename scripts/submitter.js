@@ -442,6 +442,19 @@ async function handleEasyApply(applyPage, job) {
   while (maxSteps-- > 0) {
     await applyPage.waitForTimeout(1500);
 
+    // Detect post-submission: Indeed navigates back to homepage and preloads the next application.
+    // The preloadresumeapply iframe is a reliable indicator that the previous job was submitted.
+    try {
+      const pageUrl = applyPage.url ? applyPage.url() : "";
+      const frameUrls = allFrames(applyPage).map(f => { try { return f.url ? f.url() : ""; } catch(_) { return ""; } });
+      const onHomepage = /indeed\.com\/?(\?.*)?$|indeed\.com\/jobs/.test(pageUrl) && !pageUrl.includes("viewjob") && !pageUrl.includes("apply");
+      const preloading = frameUrls.some(u => u.includes("preloadresumeapply") || u.includes("apply-complete") || u.includes("confirmation"));
+      if (onHomepage && preloading) {
+        console.log("   ✓ Application submitted — Indeed navigated back to homepage with preload indicator.");
+        return "applied";
+      }
+    } catch (_) {}
+
     // CAPTCHA check (any frame)
     for (const frame of allFrames(applyPage)) {
       try {
