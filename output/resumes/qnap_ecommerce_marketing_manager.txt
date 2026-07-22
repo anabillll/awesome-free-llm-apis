@@ -3,7 +3,25 @@ anabilofficial@gmail.com
 Toronto, ON, Canada
 
 SKILLS
-Shopify, Google Analytics, SEO, Google Ads, Digital Marketing, Campaign Management, Conversion Rate Optimization, Klaviyo, Facebook Advertising, Microsoft Excel, Media Buying, E-commerce, Marketing automation, Multivariate testing, Analysis skills, Account management, Collaboration, Cross-functional collaboration, Customer service, Time management, Process improvement, Leadership, Accountability, Attention to detail, Organizational skills, Communication skills
+Shopify, Google Analytics, Email Marketing, SEO, Google Ads, Digital Marketing, Campaign Management, Conversion Rate Optimization, Klaviyo, Facebook Advertising, Microsoft Excel, Claude AI, ChatGPT, Gemini, Canva, Higgsfield, ElevenLabs, Media Buying, E-commerce, Marketing automation, Multivariate testing, Post-purchase upsells, Paid social advertising, Creative testing, Audience segmentation, Bundle strategy, DTC brand management, Analysis skills, Account management, Collaboration, Cross-functional collaboration, Customer service, Time management, Process improvement, Leadership, Accountability, Attention to detail, Organizational skills, Communication skills
+
+EXPERIENCE
+Founder & Ecommerce Manager – &us (2023–Present)
+Remote
+  • Founded and scaled a fashion and clothing DTC brand on Shopify, managing the full stack from storefront setup to paid acquisition and retention
+  • Achieved $100K+ in revenue on $20K in ad spend across a portfolio of DTC brands, delivering a 5× ROAS
+  • Managed Meta Ads (Facebook/Instagram) campaigns using a systematic creative testing framework: testing audience avatars, desired outcomes, and angles, then scaling winning combinations
+  • Built and optimized post-purchase upsell flows and product bundles to increase AOV and backend profitability
+  • Implemented Klaviyo email marketing automation including welcome flows, abandoned cart sequences, and promotional campaigns
+  • Applied conversion rate optimization (CRO) best practices across product pages, checkout, and landing pages
+  • Managed product catalog, pricing, inventory, collections, and seasonal promotions in Shopify
+
+Founder & Ecommerce Manager – Kalani Shop (2026–Present)
+Remote
+  • Launched a health and beauty DTC brand on Shopify, specializing in wellness products including migraine relief solutions
+  • Managed end-to-end ecommerce operations: product listings, pricing, promotions, inventory, and customer experience
+  • Executed paid media campaigns and Klaviyo email marketing to drive customer acquisition and retention
+  • Optimized product pages and store UX for conversion, applying learnings from prior DTC brand experience
 
 EDUCATION
 Bachelor's – Future University in Egypt

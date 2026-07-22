@@ -113,7 +113,7 @@ function buildResume(resume, job) {
 }
 
 function buildCoverLetter(resume, job) {
-  const { personal, skills } = resume;
+  const { personal, skills, experience } = resume;
   const { company, title, description, hidden_keyword } = job;
 
   const topSkills = (job.emphasize || []).slice(0, 4).map(toTitleCase).join(", ");
@@ -122,13 +122,20 @@ function buildCoverLetter(resume, job) {
     ...skills.marketing_ecommerce,
   ].join(", ");
 
+  // Build an experience sentence from the resume's real roles
+  const expSentence = (experience && experience.length > 0)
+    ? `As the founder of ${experience.map((e) => e.company).join(" and ")}, I built and scaled DTC ecommerce brands across fashion and health & beauty — growing a portfolio to over $100K in revenue on $20K in ad spend through Meta Ads creative testing, Klaviyo email automation, and Shopify CRO.`
+    : "";
+
   let body = `Dear Hiring Team at ${company},
 
-I am writing to express my interest in the ${title} role at ${company}. With a background in e-commerce operations, digital marketing, and performance media — including hands-on experience with ${topSkills || allSkills} — I am confident I can contribute meaningfully to your team from day one.
+I am writing to express my interest in the ${title} role at ${company}. With hands-on experience in ${topSkills || allSkills}, I am confident I can contribute meaningfully to your team from day one.
 
-My experience spans Shopify store management, paid media buying across Facebook and Google Ads, Klaviyo-driven email marketing automation, and data-informed decision-making through Google Analytics and multivariate testing. I am particularly drawn to ${company} because the scope of this role aligns closely with the ecommerce challenges I most enjoy solving: growing revenue, improving conversion rates, and scaling paid acquisition efficiently.
+${expSentence}
 
-I thrive in cross-functional environments, am comfortable owning projects independently, and bring strong attention to detail to every campaign and process I manage.
+My day-to-day has spanned the full ecommerce stack: managing Shopify storefronts, running paid media campaigns on Facebook and Google Ads, building post-purchase upsell and bundle strategies to improve backend profitability, and driving retention through Klaviyo email flows and campaigns. I approach every channel with a test-and-iterate mindset — systematically testing avatars, angles, and offers, then scaling what works.
+
+I am particularly drawn to ${company} because the scope of this role aligns closely with the problems I most enjoy solving: growing revenue, improving conversion rates, and building systems that scale efficiently.
 
 I would welcome the opportunity to discuss how my background fits ${company}'s goals. Thank you for your consideration.
 
