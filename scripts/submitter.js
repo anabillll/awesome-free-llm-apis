@@ -308,97 +308,116 @@ async function answerScreeningQuestions(page, job) {
   }
 }
 
-// ─── iframe detection ─────────────────────────────────────────────────────────
+// ─── Multi-frame helpers ──────────────────────────────────────────────────────
 
-async function getApplyFrame(page) {
-  await page.waitForTimeout(1500);
+function allFrames(page) {
+  return page.frames ? page.frames() : [page];
+}
 
-  // Check all frames by URL first (most reliable)
-  for (const frame of page.frames()) {
-    const u = frame.url();
-    if (u.includes("indeedapply") || u.includes("smartapply.indeed") || u.includes("apply.indeed")) {
-      console.log(`   → Easy Apply iframe detected (${u.slice(0, 60)}...)`);
-      return frame;
-    }
+async function fullDiagnostic(page) {
+  console.log("\n   === PAGE DIAGNOSTIC ===");
+  const frames = allFrames(page);
+  console.log(`   Frames loaded (${frames.length}):`);
+  for (const f of frames) {
+    console.log(`     ${f.url ? f.url().slice(0, 90) : "(unknown)"}`);
   }
 
-  // Fallback: look for an iframe element and get its content frame
-  const iframeSelectors = [
-    'iframe[src*="indeedapply"]',
-    'iframe[src*="smartapply"]',
-    'iframe[name="indeedapply"]',
-    'iframe[title*="apply" i]',
-    'iframe[id*="indeedapply" i]',
-  ];
-  for (const sel of iframeSelectors) {
+  // DOM iframes
+  try {
+    const domIframes = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("iframe")).map((f) =>
+        `src="${f.src.slice(0, 70)}" name="${f.name}" id="${f.id}"`
+      )
+    );
+    console.log(`   DOM <iframe> elements:\n     ${domIframes.join("\n     ") || "(none)"}`);
+  } catch (_) {}
+
+  // Visible buttons in every frame
+  for (const frame of frames) {
     try {
-      const el = page.locator(sel).first();
-      if (await el.count() > 0) {
-        const frame = await el.contentFrame();
-        if (frame) { console.log(`   → iframe via selector: ${sel}`); return frame; }
+      const url = (frame.url ? frame.url() : "") || "(blank)";
+      const btns = await frame.evaluate(() =>
+        Array.from(document.querySelectorAll('button, [role="button"]'))
+          .filter((b) => b.offsetParent !== null)
+          .map((b) => `"${b.textContent.trim().slice(0, 35)}" dt=${b.dataset.testid || ""} aria=${b.getAttribute("aria-label") || ""}`)
+          .slice(0, 15)
+      );
+      if (btns.length) {
+        console.log(`   Buttons in ${url.slice(0, 60)}:\n     ${btns.join("\n     ")}`);
       }
     } catch (_) {}
   }
-
-  return null; // no iframe — use the page directly
+  console.log("   === END DIAGNOSTIC ===\n");
 }
 
-async function debugButtons(ctx) {
-  try {
-    const btns = await ctx.locator("button").all();
-    const infos = [];
-    for (const b of btns.slice(0, 30)) {
-      const visible = await b.isVisible().catch(() => false);
-      if (!visible) continue;
-      const text    = (await b.textContent().catch(() => "")).trim();
-      const tid     = await b.getAttribute("data-testid").catch(() => "") || "";
-      const label   = await b.getAttribute("aria-label").catch(() => "") || "";
-      infos.push(`"${text}" [testid=${tid}] [aria=${label}]`);
-    }
-    console.log(`   Visible buttons on page:\n     ${infos.join("\n     ") || "(none)"}`);
-  } catch (_) {}
+async function findNextOrSubmitAllFrames(page) {
+  // Try every frame — including the main page frame
+  for (const frame of allFrames(page)) {
+    try {
+      const r = await findNextOrSubmit(frame);
+      if (r) {
+        const u = frame.url ? frame.url().slice(0, 60) : "main";
+        if (u && !u.includes(page.url ? page.url() : "")) {
+          console.log(`   (found in frame: ${u})`);
+        }
+        return r;
+      }
+    } catch (_) {}
+  }
+  return null;
+}
+
+async function fillFormAllFrames(page, job) {
+  for (const frame of allFrames(page)) {
+    try { await fillFormFields(frame, job); } catch (_) {}
+  }
+}
+
+async function answerQuestionsAllFrames(page, job) {
+  for (const frame of allFrames(page)) {
+    try { await answerScreeningQuestions(frame, job); } catch (_) {}
+  }
 }
 
 // ─── Indeed Easy Apply handler ────────────────────────────────────────────────
 
 async function handleEasyApply(applyPage, job) {
-  // Detect if the form is inside an iframe
-  const frame = await getApplyFrame(applyPage);
-  const ctx = frame || applyPage; // work in the iframe if found, otherwise the page
+  // Print a diagnostic to show which frames/buttons are actually present
+  await fullDiagnostic(applyPage);
 
-  await fillFormFields(ctx, job);
+  await fillFormAllFrames(applyPage, job);
 
   let maxSteps = 12;
   while (maxSteps-- > 0) {
-    await applyPage.waitForTimeout(1200);
+    await applyPage.waitForTimeout(1500);
 
-    // Re-check iframe (URL may have changed after clicking Apply)
-    const currentFrame = await getApplyFrame(applyPage);
-    const c = currentFrame || ctx;
-
-    // CAPTCHA check
-    if (await c.locator('iframe[src*="recaptcha"], .g-recaptcha, [data-sitekey]').count() > 0) {
-      await pauseForHuman(applyPage, "CAPTCHA detected — complete it in the browser, then press ENTER.");
+    // CAPTCHA check (any frame)
+    for (const frame of allFrames(applyPage)) {
+      try {
+        if (await frame.locator('iframe[src*="recaptcha"], .g-recaptcha, [data-sitekey]').count() > 0) {
+          await pauseForHuman(applyPage, "CAPTCHA detected — complete it in the browser, then press ENTER.");
+        }
+      } catch (_) {}
     }
 
-    // Login wall check
-    const pageUrl = applyPage.url();
-    if (await c.locator('input[type="password"]').count() > 0 && pageUrl.includes("login")) {
+    // Login wall
+    const pageUrl = applyPage.url ? applyPage.url() : "";
+    if (pageUrl.includes("login")) {
       await pauseForHuman(applyPage, "Login required — log in to Indeed, then press ENTER.");
     }
 
-    await answerScreeningQuestions(c, job);
-    await fillFormFields(c, job);
+    await answerQuestionsAllFrames(applyPage, job);
+    await fillFormAllFrames(applyPage, job);
 
-    const action = await findNextOrSubmit(c);
+    const action = await findNextOrSubmitAllFrames(applyPage);
 
     if (!action) {
-      // Scroll and retry
-      await applyPage.keyboard.press("End");
+      // Scroll and retry once
+      try { await applyPage.keyboard.press("End"); } catch (_) {}
       await applyPage.waitForTimeout(800);
-      const retried = await findNextOrSubmit(c);
+      const retried = await findNextOrSubmitAllFrames(applyPage);
       if (!retried) {
-        await debugButtons(c);
+        await fullDiagnostic(applyPage);
         await pauseForHuman(applyPage, "Couldn't find Next/Submit — please advance manually, then press ENTER.");
         continue;
       }
