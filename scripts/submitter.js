@@ -31,7 +31,11 @@ const TRACKER = path.join(ROOT, "data", "tracker.csv");
 const RESUME_DIR = path.join(ROOT, "output", "resumes");
 const COVER_DIR = path.join(ROOT, "output", "cover_letters");
 const SESSION_DIR = path.join(ROOT, "output", "browser_session");
-const CHROMIUM_PATH = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+// Use the cloud pre-installed Chromium if available, otherwise let Playwright
+// find its own locally-installed version (the default on Windows/Mac/Linux).
+const CHROMIUM_PATH = fs.existsSync("/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
+  ? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
+  : undefined;
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const LIMIT_ARG = process.argv.indexOf("--limit");
@@ -334,12 +338,13 @@ async function main() {
   console.log(`Found ${readyJobs.length} ready application(s). Will process up to ${SESSION_LIMIT}.\n`);
 
   // Launch browser (headed, persistent session so login survives)
-  const browser = await chromium.launch({
+  const launchOptions = {
     headless: false,
-    executablePath: CHROMIUM_PATH,
     args: ["--start-maximized", "--disable-blink-features=AutomationControlled"],
     slowMo: 50,
-  });
+  };
+  if (CHROMIUM_PATH) launchOptions.executablePath = CHROMIUM_PATH;
+  const browser = await chromium.launch(launchOptions);
 
   const context = await browser.newContext({
     storageState: fs.existsSync(path.join(SESSION_DIR, "state.json"))
