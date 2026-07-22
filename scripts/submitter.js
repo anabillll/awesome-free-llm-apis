@@ -308,38 +308,98 @@ async function answerScreeningQuestions(page, job) {
   }
 }
 
+// ─── iframe detection ─────────────────────────────────────────────────────────
+
+async function getApplyFrame(page) {
+  await page.waitForTimeout(1500);
+
+  // Check all frames by URL first (most reliable)
+  for (const frame of page.frames()) {
+    const u = frame.url();
+    if (u.includes("indeedapply") || u.includes("smartapply.indeed") || u.includes("apply.indeed")) {
+      console.log(`   → Easy Apply iframe detected (${u.slice(0, 60)}...)`);
+      return frame;
+    }
+  }
+
+  // Fallback: look for an iframe element and get its content frame
+  const iframeSelectors = [
+    'iframe[src*="indeedapply"]',
+    'iframe[src*="smartapply"]',
+    'iframe[name="indeedapply"]',
+    'iframe[title*="apply" i]',
+    'iframe[id*="indeedapply" i]',
+  ];
+  for (const sel of iframeSelectors) {
+    try {
+      const el = page.locator(sel).first();
+      if (await el.count() > 0) {
+        const frame = await el.contentFrame();
+        if (frame) { console.log(`   → iframe via selector: ${sel}`); return frame; }
+      }
+    } catch (_) {}
+  }
+
+  return null; // no iframe — use the page directly
+}
+
+async function debugButtons(ctx) {
+  try {
+    const btns = await ctx.locator("button").all();
+    const infos = [];
+    for (const b of btns.slice(0, 30)) {
+      const visible = await b.isVisible().catch(() => false);
+      if (!visible) continue;
+      const text    = (await b.textContent().catch(() => "")).trim();
+      const tid     = await b.getAttribute("data-testid").catch(() => "") || "";
+      const label   = await b.getAttribute("aria-label").catch(() => "") || "";
+      infos.push(`"${text}" [testid=${tid}] [aria=${label}]`);
+    }
+    console.log(`   Visible buttons on page:\n     ${infos.join("\n     ") || "(none)"}`);
+  } catch (_) {}
+}
+
 // ─── Indeed Easy Apply handler ────────────────────────────────────────────────
 
 async function handleEasyApply(applyPage, job) {
-  await fillFormFields(applyPage, job);
+  // Detect if the form is inside an iframe
+  const frame = await getApplyFrame(applyPage);
+  const ctx = frame || applyPage; // work in the iframe if found, otherwise the page
+
+  await fillFormFields(ctx, job);
 
   let maxSteps = 12;
   while (maxSteps-- > 0) {
     await applyPage.waitForTimeout(1200);
 
+    // Re-check iframe (URL may have changed after clicking Apply)
+    const currentFrame = await getApplyFrame(applyPage);
+    const c = currentFrame || ctx;
+
     // CAPTCHA check
-    if (await applyPage.locator('iframe[src*="recaptcha"], .g-recaptcha, [data-sitekey]').count() > 0) {
+    if (await c.locator('iframe[src*="recaptcha"], .g-recaptcha, [data-sitekey]').count() > 0) {
       await pauseForHuman(applyPage, "CAPTCHA detected — complete it in the browser, then press ENTER.");
     }
 
     // Login wall check
-    const url = applyPage.url();
-    if (await applyPage.locator('input[type="password"]').count() > 0 && url.includes("login")) {
+    const pageUrl = applyPage.url();
+    if (await c.locator('input[type="password"]').count() > 0 && pageUrl.includes("login")) {
       await pauseForHuman(applyPage, "Login required — log in to Indeed, then press ENTER.");
     }
 
-    await answerScreeningQuestions(applyPage, job);
-    await fillFormFields(applyPage, job);  // re-fill in case new fields appeared
+    await answerScreeningQuestions(c, job);
+    await fillFormFields(c, job);
 
-    const action = await findNextOrSubmit(applyPage);
+    const action = await findNextOrSubmit(c);
 
     if (!action) {
-      // Try scrolling down — button may be below the fold
+      // Scroll and retry
       await applyPage.keyboard.press("End");
       await applyPage.waitForTimeout(800);
-      const retried = await findNextOrSubmit(applyPage);
+      const retried = await findNextOrSubmit(c);
       if (!retried) {
-        await pauseForHuman(applyPage, "Couldn't find Next/Submit — please advance the form manually, then press ENTER.");
+        await debugButtons(c);
+        await pauseForHuman(applyPage, "Couldn't find Next/Submit — please advance manually, then press ENTER.");
         continue;
       }
       if (retried.type === "submit") {
@@ -349,6 +409,7 @@ async function handleEasyApply(applyPage, job) {
         console.log("   ✓ Application submitted");
         return "applied";
       }
+      console.log("   → Advancing (after scroll)...");
       await retried.btn.click();
       continue;
     }
@@ -361,7 +422,6 @@ async function handleEasyApply(applyPage, job) {
       return "applied";
     }
 
-    // Click Next/Continue
     console.log("   → Advancing to next step...");
     await action.btn.click();
   }
