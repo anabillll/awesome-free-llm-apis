@@ -156,114 +156,67 @@ function naturalDelay() {
   return sleep(ms);
 }
 
-// ─── Indeed Easy Apply handler ────────────────────────────────────────────────
+// ─── Indeed button helpers ────────────────────────────────────────────────────
 
-async function handleIndeedEasyApply(page, job) {
-  const p = RESUME_JSON.personal;
-
-  // Fill standard fields if present
-  await fillIfVisible(page, 'input[name="applicant.name"], input[aria-label*="name" i]', p.name);
-  await fillIfVisible(page, 'input[name="applicant.email"], input[type="email"]', p.email);
-  await fillIfVisible(page, 'input[name="applicant.phoneNumber"], input[type="tel"]', p.phone || "");
-
-  // Upload resume
-  const resumePath = resumeFilePath(job.company, job.title);
-  if (fs.existsSync(resumePath)) {
-    const fileInput = page.locator('input[type="file"]').first();
-    if (await fileInput.count() > 0) {
-      await fileInput.setInputFiles(resumePath);
-      console.log("   ✓ Resume uploaded");
-    }
+async function findVisible(page, selectors) {
+  for (const sel of selectors) {
+    try {
+      const el = page.locator(sel).first();
+      if (await el.count() > 0 && await el.isVisible()) return el;
+    } catch (_) {}
   }
-
-  // Handle multi-step application pages
-  let maxSteps = 10;
-  while (maxSteps-- > 0) {
-    // Check for CAPTCHA
-    if (await page.locator('iframe[src*="recaptcha"], .g-recaptcha, [data-sitekey]').count() > 0) {
-      await pauseForHuman(page, "CAPTCHA detected — please complete it in the browser.");
-    }
-
-    // Check for login wall
-    if (await page.locator('input[type="password"]').count() > 0 &&
-        (await page.url()).includes("login")) {
-      await pauseForHuman(page, "Login required — please log in to Indeed in the browser.");
-    }
-
-    // Answer visible screening questions
-    const questions = await page.locator('[data-testid="screening-question"], .ia-Questions-item, .jobs-easy-apply-form-section, [class*="FormSection"]').all();
-    for (const qEl of questions) {
-      const labelEl = qEl.locator('label, legend, [class*="label" i], [class*="question" i]').first();
-      const labelText = await labelEl.textContent().catch(() => "");
-      if (!labelText.trim()) continue;
-
-      const answer = findAnswer(job.company, labelText);
-
-      if (answer === null) {
-        // Unknown question — pause for human
-        await pauseForHuman(page,
-          `Unknown screening question: "${labelText.trim()}"\nType your answer in the browser, then press ENTER.`
-        );
-        continue;
-      }
-
-      // Yes/No radio buttons
-      const yesRadio = qEl.locator('input[type="radio"][value="Yes"], input[type="radio"][value="yes"]').first();
-      const noRadio = qEl.locator('input[type="radio"][value="No"], input[type="radio"][value="no"]').first();
-      if (await yesRadio.count() > 0) {
-        const isYes = /^yes$/i.test(answer.trim());
-        if (isYes) await yesRadio.check().catch(() => {});
-        else if (await noRadio.count() > 0) await noRadio.check().catch(() => {});
-        continue;
-      }
-
-      // Select/dropdown
-      const select = qEl.locator("select").first();
-      if (await select.count() > 0) {
-        await select.selectOption({ label: answer }).catch(async () => {
-          await select.selectOption({ value: answer }).catch(() => {});
-        });
-        continue;
-      }
-
-      // Textarea
-      const textarea = qEl.locator("textarea").first();
-      if (await textarea.count() > 0) {
-        await textarea.fill(answer);
-        continue;
-      }
-
-      // Text input
-      const input = qEl.locator('input[type="text"], input:not([type])').first();
-      if (await input.count() > 0) {
-        await input.fill(answer);
-      }
-    }
-
-    // Try to advance to next step or submit
-    const nextBtn = page.locator('button:has-text("Continue"), button:has-text("Next"), button[aria-label*="continue" i]').first();
-    const submitBtn = page.locator('button[aria-label*="Submit"], button:has-text("Submit application"), button:has-text("Submit")').first();
-
-    if (await submitBtn.count() > 0 && await submitBtn.isVisible()) {
-      if (DRY_RUN) {
-        console.log("   [DRY RUN] Would click Submit now.");
-        return "applied";
-      }
-      await submitBtn.click();
-      await page.waitForTimeout(3000);
-      console.log("   ✓ Application submitted");
-      return "applied";
-    } else if (await nextBtn.count() > 0 && await nextBtn.isVisible()) {
-      await nextBtn.click();
-      await page.waitForTimeout(2000);
-    } else {
-      // No recognizable next/submit button
-      await pauseForHuman(page, "Couldn't find a Next or Submit button. Please advance the form manually, then press ENTER.");
-    }
-  }
-
-  return "applied";
+  return null;
 }
+
+async function clickApplyButton(page) {
+  // Indeed Easy Apply button — try specific data-testid / class attrs first
+  const btn = await findVisible(page, [
+    '[data-testid="jobsearch-IndeedApplyButton"]',
+    '[class*="IndeedApplyButton"]',
+    '[class*="indeedApplyButton"]',
+    '#indeedApplyButton',
+    '[id*="IndeedApply"]',
+    'button[class*="apply" i]:not([class*="Applied"])',
+    'button:has-text("Apply now")',
+    'a:has-text("Apply now")',
+    'button:has-text("Easy Apply")',
+    '[data-testid="apply-button"]',
+    'button:has-text("Apply")',
+  ]);
+  if (btn) {
+    await btn.click();
+    return true;
+  }
+  return false;
+}
+
+async function findNextOrSubmit(page) {
+  // Submit first (so if both visible, we prefer to finish)
+  const submitBtn = await findVisible(page, [
+    'button[data-testid="ia-submitButton"]',
+    'button[data-testid*="submit" i]',
+    'button[aria-label="Submit your application"]',
+    'button[aria-label*="Submit" i]',
+    'button:has-text("Submit application")',
+    'button:has-text("Submit")',
+  ]);
+  if (submitBtn) return { type: "submit", btn: submitBtn };
+
+  const nextBtn = await findVisible(page, [
+    'button[data-testid="ia-continueButton"]',
+    'button[data-testid*="continue" i]',
+    'button[aria-label="Continue to next step"]',
+    'button[aria-label*="continue" i]',
+    'button:has-text("Continue")',
+    'button:has-text("Next")',
+    'button:has-text("Review your application")',
+  ]);
+  if (nextBtn) return { type: "next", btn: nextBtn };
+
+  return null;
+}
+
+// ─── Form field filling ────────────────────────────────────────────────────────
 
 async function fillIfVisible(page, selector, value) {
   if (!value) return;
@@ -273,6 +226,150 @@ async function fillIfVisible(page, selector, value) {
   }
 }
 
+async function fillFormFields(page, job) {
+  const p = RESUME_JSON.personal;
+  await fillIfVisible(page,
+    'input[name="applicant.name"], input[autocomplete="name"], input[aria-label*="name" i]:not([aria-label*="company" i])', p.name);
+  await fillIfVisible(page,
+    'input[name="applicant.email"], input[type="email"], input[autocomplete="email"]', p.email);
+  await fillIfVisible(page,
+    'input[name="applicant.phoneNumber"], input[type="tel"], input[autocomplete="tel"]', p.phone || "");
+
+  // Resume upload
+  const resumePath = resumeFilePath(job.company, job.title);
+  if (fs.existsSync(resumePath)) {
+    try {
+      const fileInput = page.locator('input[type="file"]').first();
+      if (await fileInput.count() > 0) {
+        await fileInput.setInputFiles(resumePath);
+        console.log("   ✓ Resume uploaded");
+        await page.waitForTimeout(1500);
+      }
+    } catch (_) {}
+  }
+}
+
+async function answerScreeningQuestions(page, job) {
+  // Indeed uses several containers for screening questions
+  const questionContainers = await page.locator(
+    '[data-testid="screening-question"], ' +
+    '.ia-Questions-item, ' +
+    '[class*="QuestionsForm"] > div, ' +
+    '[class*="FormSection"], ' +
+    '[class*="question-group"], ' +
+    'fieldset'
+  ).all();
+
+  for (const qEl of questionContainers) {
+    let labelText = "";
+    try {
+      const labelEl = qEl.locator('label, legend, [class*="label" i], p').first();
+      labelText = (await labelEl.textContent()) || "";
+    } catch (_) {}
+    if (!labelText.trim()) continue;
+
+    const answer = findAnswer(job.company, labelText);
+    if (answer === null) {
+      console.log(`   ❓ Unknown question: "${labelText.trim().slice(0, 80)}"`);
+      await pauseForHuman(page,
+        `Unknown question: "${labelText.trim().slice(0, 120)}"\nPlease type your answer in the browser, then press ENTER.`
+      );
+      continue;
+    }
+
+    // Yes/No radios
+    const yesRadio = qEl.locator('input[type="radio"][value="Yes"], input[type="radio"][value="yes"]').first();
+    if (await yesRadio.count() > 0) {
+      const isYes = /^yes$/i.test(answer.trim());
+      await (isYes ? yesRadio : qEl.locator('input[type="radio"][value="No"], input[type="radio"][value="no"]').first())
+        .check().catch(() => {});
+      continue;
+    }
+
+    // Select
+    const select = qEl.locator("select").first();
+    if (await select.count() > 0) {
+      await select.selectOption({ label: answer })
+        .catch(() => select.selectOption({ value: answer }).catch(() => {}));
+      continue;
+    }
+
+    // Textarea
+    const textarea = qEl.locator("textarea").first();
+    if (await textarea.count() > 0) {
+      await textarea.fill(answer); continue;
+    }
+
+    // Text input
+    const input = qEl.locator('input[type="text"], input[type="number"], input:not([type])').first();
+    if (await input.count() > 0) {
+      await input.fill(answer);
+    }
+  }
+}
+
+// ─── Indeed Easy Apply handler ────────────────────────────────────────────────
+
+async function handleEasyApply(applyPage, job) {
+  await fillFormFields(applyPage, job);
+
+  let maxSteps = 12;
+  while (maxSteps-- > 0) {
+    await applyPage.waitForTimeout(1200);
+
+    // CAPTCHA check
+    if (await applyPage.locator('iframe[src*="recaptcha"], .g-recaptcha, [data-sitekey]').count() > 0) {
+      await pauseForHuman(applyPage, "CAPTCHA detected — complete it in the browser, then press ENTER.");
+    }
+
+    // Login wall check
+    const url = applyPage.url();
+    if (await applyPage.locator('input[type="password"]').count() > 0 && url.includes("login")) {
+      await pauseForHuman(applyPage, "Login required — log in to Indeed, then press ENTER.");
+    }
+
+    await answerScreeningQuestions(applyPage, job);
+    await fillFormFields(applyPage, job);  // re-fill in case new fields appeared
+
+    const action = await findNextOrSubmit(applyPage);
+
+    if (!action) {
+      // Try scrolling down — button may be below the fold
+      await applyPage.keyboard.press("End");
+      await applyPage.waitForTimeout(800);
+      const retried = await findNextOrSubmit(applyPage);
+      if (!retried) {
+        await pauseForHuman(applyPage, "Couldn't find Next/Submit — please advance the form manually, then press ENTER.");
+        continue;
+      }
+      if (retried.type === "submit") {
+        if (DRY_RUN) { console.log("   [DRY RUN] Would click Submit."); return "applied"; }
+        await retried.btn.click();
+        await applyPage.waitForTimeout(3000);
+        console.log("   ✓ Application submitted");
+        return "applied";
+      }
+      await retried.btn.click();
+      continue;
+    }
+
+    if (action.type === "submit") {
+      if (DRY_RUN) { console.log("   [DRY RUN] Would click Submit."); return "applied"; }
+      await action.btn.click();
+      await applyPage.waitForTimeout(3000);
+      console.log("   ✓ Application submitted");
+      return "applied";
+    }
+
+    // Click Next/Continue
+    console.log("   → Advancing to next step...");
+    await action.btn.click();
+  }
+
+  console.log("   ⚠️  Max steps reached — marking as applied (verify manually).");
+  return "applied";
+}
+
 // ─── Main application flow ───────────────────────────────────────────────────
 
 async function applyToJob(page, job) {
@@ -280,42 +377,47 @@ async function applyToJob(page, job) {
   console.log(`    URL: ${job.url}`);
 
   await page.goto(job.url, { waitUntil: "domcontentloaded", timeout: 30_000 });
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(2500);
 
-  // Check for bot/CAPTCHA wall right after load
+  // CAPTCHA on load
   if (await page.locator('[class*="captcha"], iframe[src*="captcha"]').count() > 0) {
     await pauseForHuman(page, "Bot-check / CAPTCHA on page load. Complete it, then press ENTER.");
   }
 
-  // Detect Indeed account restriction warning
+  // Account restriction
   const warningText = await page.locator('[data-testid="warning-message"], .jobsearch-Infoshield').textContent().catch(() => "");
   if (/account.*restrict|suspended|blocked/i.test(warningText)) {
-    console.log("🚨  Account restriction warning detected. Stopping session immediately.");
+    console.log("🚨  Account restriction detected. Stopping.");
     process.exit(1);
   }
 
-  // Click "Apply now" or "Easy Apply" if present
-  const applyBtn = page.locator(
-    'button:has-text("Apply now"), a:has-text("Apply now"), button:has-text("Easy Apply"), [data-testid="apply-button"]'
-  ).first();
-  if (await applyBtn.count() > 0 && await applyBtn.isVisible()) {
-    await applyBtn.click();
+  // Click "Apply now" / "Easy Apply" — watch for a new popup/tab
+  let applyPage = page;
+  const [newPage] = await Promise.all([
+    page.context().waitForEvent("page", { timeout: 4000 }).catch(() => null),
+    clickApplyButton(page),
+  ]);
+
+  if (newPage) {
+    await newPage.waitForLoadState("domcontentloaded").catch(() => {});
+    applyPage = newPage;
+    console.log("   → Application opened in new tab");
+  } else {
     await page.waitForTimeout(2000);
   }
 
-  // Check if we landed on an external ATS
-  const currentUrl = page.url();
-  const isExternal = !currentUrl.includes("indeed.com");
-  if (isExternal) {
-    console.log(`   ↪ External ATS detected: ${currentUrl}`);
-    await pauseForHuman(page,
-      "External employer ATS opened. Fill and submit the form manually, then press ENTER when done (or type 'skip' to skip this one)."
+  // If the URL left Indeed entirely it's an external ATS
+  const postClickUrl = applyPage.url();
+  if (!postClickUrl.includes("indeed.com") && !postClickUrl.includes("smartapply")) {
+    console.log(`   ↪ External ATS: ${postClickUrl}`);
+    await pauseForHuman(applyPage,
+      "External employer ATS opened. Fill and submit manually, then press ENTER (or type 'skip')."
     );
-    const input = await waitForInput("   Applied? (yes/skip): ");
-    return input.trim().toLowerCase().startsWith("s") ? "skipped" : "applied";
+    const ans = await waitForInput("   Applied? (yes/skip): ");
+    return ans.trim().toLowerCase().startsWith("s") ? "skipped" : "applied";
   }
 
-  return await handleIndeedEasyApply(page, job);
+  return await handleEasyApply(applyPage, job);
 }
 
 // ─── Entry point ─────────────────────────────────────────────────────────────
