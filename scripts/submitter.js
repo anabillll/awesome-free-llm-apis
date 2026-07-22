@@ -937,6 +937,7 @@ const REPLENISH_SCRIPT = path.join(ROOT, "scripts", "replenish.js");
 const REPLENISH_THRESHOLD = 5; // auto-replenish when ready queue falls below this
 
 function countReadyJobs() {
+  if (!fs.existsSync(TRACKER)) return 0;
   const text = fs.readFileSync(TRACKER, "utf8");
   return parseCSV(text).filter((r) => r.status === "ready").length;
 }
@@ -959,7 +960,13 @@ async function main() {
   if (DRY_RUN) console.log("   Mode: DRY RUN (no submissions will be made)");
   console.log(`   Session limit: ${SESSION_LIMIT} applications\n`);
 
-  // Always replenish up to 20 before starting (finds new jobs from Indeed)
+  // Create tracker with CSV header if it doesn't exist yet
+  if (!fs.existsSync(TRACKER)) {
+    fs.writeFileSync(TRACKER, "company,title,url,location,work_type,tier,apply_method,date_found,date_applied,status,notes,skill_gaps\n");
+    console.log("📋 Created fresh tracker.csv (first run on this machine)\n");
+  }
+
+  // Always search Indeed for fresh jobs before submitting
   runReplenish();
 
   // Load tracker (fresh after replenish)

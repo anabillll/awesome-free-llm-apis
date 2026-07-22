@@ -88,7 +88,14 @@ function readTracker() {
   });
 }
 
+function ensureTrackerExists() {
+  if (!fs.existsSync(TRACKER)) {
+    fs.writeFileSync(TRACKER, "company,title,url,location,work_type,tier,apply_method,date_found,date_applied,status,notes,skill_gaps\n");
+  }
+}
+
 function appendTracker(row) {
+  ensureTrackerExists();
   const fields = [
     "company", "title", "url", "location", "work_type", "tier",
     "apply_method", "date_found", "date_applied", "status", "notes", "skill_gaps",
