@@ -1,23 +1,19 @@
 #!/usr/bin/env node
 /**
- * Replenish — auto-fills tracker.csv with fresh jobs from Indeed.
+ * Replenish — finds fresh jobs from Indeed and adds them to tracker.csv.
  *
- * Scans Indeed job listings via Playwright, filters against criteria.json,
- * generates application materials for each qualifying job, and appends them
- * to tracker.csv so submitter.js always has a queue to work from.
+ * Uses Indeed's RSS feeds (no browser needed for search), then visits each
+ * job page via Playwright to grab the full description.
  *
  * Usage:
- *   node scripts/replenish.js [--target N]
- *
- * Options:
- *   --target N   Ensure at least N ready-jobs are in the tracker (default: 20)
- *   --dry-run    Print jobs found without writing to tracker
- *
- * Runs headlessly by default. Set DEBUG=1 to see the browser.
+ *   node scripts/replenish.js             (ensure 20 ready jobs)
+ *   node scripts/replenish.js --target 30 (ensure 30 ready jobs)
+ *   node scripts/replenish.js --dry-run   (print without writing)
  */
 
 const fs = require("fs");
 const path = require("path");
+const https = require("https");
 const { execSync } = require("child_process");
 const { chromium } = require("playwright");
 
@@ -31,67 +27,65 @@ const BROWSER_SESSION = path.join(ROOT, "output", "browser_session");
 fs.mkdirSync(TMP, { recursive: true });
 
 const args = process.argv.slice(2);
-const TARGET = parseInt(args[args.indexOf("--target") + 1] || "20", 10);
+const targetArg = args.indexOf("--target");
+const TARGET = targetArg !== -1 ? parseInt(args[targetArg + 1], 10) : 20;
 const DRY_RUN = args.includes("--dry-run");
-const HEADLESS = !process.env.DEBUG;
 
-// Search queries to cycle through
+// Search queries → Indeed RSS
 const SEARCH_QUERIES = [
-  "ecommerce manager",
-  "shopify manager",
-  "email marketing manager",
-  "digital marketing manager",
-  "paid media specialist",
-  "performance marketing manager",
-  "klaviyo specialist",
-  "facebook ads manager",
-  "google ads specialist",
-  "ecommerce specialist",
-  "media buyer",
-  "growth marketing manager",
+  { q: "ecommerce manager", l: "" },
+  { q: "shopify manager", l: "" },
+  { q: "email marketing manager klaviyo", l: "" },
+  { q: "digital marketing manager", l: "" },
+  { q: "paid media specialist", l: "" },
+  { q: "performance marketing manager", l: "" },
+  { q: "klaviyo email specialist", l: "" },
+  { q: "facebook ads manager ecommerce", l: "" },
+  { q: "google ads specialist", l: "" },
+  { q: "ecommerce coordinator shopify", l: "" },
+  { q: "media buyer DTC", l: "" },
+  { q: "growth marketing manager", l: "" },
+  { q: "email marketing manager", l: "Toronto, ON" },
+  { q: "ecommerce manager", l: "Toronto, ON" },
+  { q: "digital marketing manager", l: "Toronto, ON" },
+  { q: "paid media manager", l: "Toronto, ON" },
 ];
 
-function today() {
-  return new Date().toISOString().split("T")[0];
+// ─── CSV helpers ──────────────────────────────────────────────────────────────
+
+function splitCSVLine(line) {
+  const result = [];
+  let cur = "";
+  let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (c === "," && !inQ) {
+      result.push(cur); cur = "";
+    } else { cur += c; }
+  }
+  result.push(cur);
+  return result;
 }
 
-function csvEscape(v) {
-  if (v == null) return "";
-  const s = String(v);
+function csvEsc(v) {
+  const s = String(v ?? "");
   return s.includes(",") || s.includes('"') || s.includes("\n")
-    ? `"${s.replace(/"/g, '""')}"`
-    : s;
+    ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 function readTracker() {
   if (!fs.existsSync(TRACKER)) return [];
   const lines = fs.readFileSync(TRACKER, "utf8").trim().split("\n");
-  const headers = lines[0].split(",");
+  const headers = splitCSVLine(lines[0]);
   return lines.slice(1).map((line) => {
-    const cols = parseCSVLine(line);
+    const cols = splitCSVLine(line);
     const row = {};
     headers.forEach((h, i) => { row[h] = cols[i] || ""; });
     return row;
   });
-}
-
-function parseCSVLine(line) {
-  const result = [];
-  let current = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
-      else { inQuotes = !inQuotes; }
-    } else if (ch === "," && !inQuotes) {
-      result.push(current); current = "";
-    } else {
-      current += ch;
-    }
-  }
-  result.push(current);
-  return result;
 }
 
 function appendTracker(row) {
@@ -99,7 +93,7 @@ function appendTracker(row) {
     "company", "title", "url", "location", "work_type", "tier",
     "apply_method", "date_found", "date_applied", "status", "notes", "skill_gaps",
   ];
-  const line = fields.map((f) => csvEscape(row[f] ?? "")).join(",");
+  const line = fields.map((f) => csvEsc(row[f] ?? "")).join(",");
   fs.appendFileSync(TRACKER, line + "\n");
 }
 
@@ -107,13 +101,82 @@ function countReady() {
   return readTracker().filter((r) => r.status === "ready").length;
 }
 
-function trackerUrls() {
-  return new Set(readTracker().map((r) => r.url));
+function trackerKeys() {
+  // Deduplicate by URL and also by "company + title" to avoid near-duplicates
+  const rows = readTracker();
+  const urls = new Set(rows.map((r) => r.url));
+  const pairs = new Set(rows.map((r) => `${r.company.toLowerCase()}|${r.title.toLowerCase()}`));
+  return { urls, pairs };
 }
 
-function slug(s) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 40);
+function today() {
+  return new Date().toISOString().split("T")[0];
 }
+
+// ─── Indeed RSS ───────────────────────────────────────────────────────────────
+
+function httpsGet(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, { timeout: 15000 }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return httpsGet(res.headers.location).then(resolve).catch(reject);
+      }
+      let data = "";
+      res.on("data", (c) => (data += c));
+      res.on("end", () => resolve(data));
+    });
+    req.on("error", reject);
+    req.on("timeout", () => { req.destroy(); reject(new Error("timeout")); });
+  });
+}
+
+function parseRSS(xml) {
+  const items = [];
+  const matches = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
+  for (const m of matches) {
+    const block = m[1];
+    const extract = (tag) => {
+      const cdataM = block.match(new RegExp(`<${tag}><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>`));
+      if (cdataM) return cdataM[1].trim();
+      const plain = block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`));
+      return plain ? plain[1].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim() : "";
+    };
+    const rawTitle = extract("title");   // "Job Title - Company (Location)"
+    const link = extract("link") || extract("guid");
+    const snippet = extract("description").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+
+    if (!link || !rawTitle) continue;
+
+    // Parse "Job Title - Company (Location)"
+    const dashIdx = rawTitle.lastIndexOf(" - ");
+    if (dashIdx === -1) continue;
+    const jobTitle = rawTitle.slice(0, dashIdx).trim();
+    const rest = rawTitle.slice(dashIdx + 3).trim();
+    const parenIdx = rest.lastIndexOf("(");
+    const company = parenIdx > 0 ? rest.slice(0, parenIdx).trim() : rest;
+    const location = parenIdx > 0 ? rest.slice(parenIdx + 1).replace(")", "").trim() : "";
+
+    items.push({ title: jobTitle, company, location, snippet, link });
+  }
+  return items;
+}
+
+async function fetchIndeedRSS(query, location) {
+  const params = new URLSearchParams({ q: query, sort: "date" });
+  if (location) params.set("l", location);
+  // Remote filter key for Indeed Canada
+  if (!location) params.set("remotejob", "032b3046-06a3-4876-8dfd-474eb5e7ed11");
+  const url = `https://ca.indeed.com/rss?${params.toString()}`;
+  try {
+    const xml = await httpsGet(url);
+    return parseRSS(xml);
+  } catch (e) {
+    console.log(`  [warn] RSS fetch failed for "${query}": ${e.message}`);
+    return [];
+  }
+}
+
+// ─── Filtering & classification ───────────────────────────────────────────────
 
 function autoExcludeReason(text, title) {
   const t = (text + " " + title).toLowerCase();
@@ -122,8 +185,8 @@ function autoExcludeReason(text, title) {
       case "requires_french":
         if (/bilingu|french|fran[çc]ais/.test(t)) return rule.description; break;
       case "requires_senior_5plus_years":
-        if (/5\+?\s*years|five\s*\+?\s*years/.test(t) &&
-            /senior|lead|head|director|principal/.test(t)) return rule.description; break;
+        if (/[5-9]\+?\s*years|five\s*\+?\s*years|ten\s*years/.test(t) &&
+            /senior|lead|head|director|principal|vp\b/.test(t)) return rule.description; break;
       case "requires_relocation_outside_canada":
         if (/must relocate|relocation required/.test(t) &&
             !/canada|toronto|remote/.test(t)) return rule.description; break;
@@ -141,7 +204,36 @@ function autoExcludeReason(text, title) {
   return null;
 }
 
-function extractEmphasizeKeywords(jdText) {
+function classifyWorkType(location, snippet) {
+  const t = (location + " " + snippet).toLowerCase();
+  if (/\bremote\b/.test(t)) return "remote";
+  if (/hybrid/.test(t)) return "hybrid";
+  return "on-site";
+}
+
+function classifyTier(location, workType) {
+  if (workType === "remote") return 1;
+  if (workType === "hybrid") return 3;
+  const commutable = CRITERIA.location_priority[3].commutable_cities.map((c) => c.toLowerCase());
+  const loc = location.toLowerCase();
+  if (commutable.some((c) => loc.includes(c))) return 4;
+  return 99;
+}
+
+function isTitleRelevant(title) {
+  const t = title.toLowerCase();
+  // Must contain at least one relevant keyword
+  const relevant = [
+    "ecommerce", "e-commerce", "shopify", "email marketing", "digital marketing",
+    "paid media", "paid social", "media buyer", "performance marketing",
+    "google ads", "facebook ads", "meta ads", "klaviyo", "growth marketing",
+    "marketing manager", "marketing specialist", "marketing coordinator",
+    "crm", "retention", "sem", "seo", "ppc", "dtc",
+  ];
+  return relevant.some((kw) => t.includes(kw));
+}
+
+function extractEmphasizeKeywords(text) {
   const patterns = [
     "shopify", "klaviyo", "google analytics", "google ads", "facebook ads",
     "meta ads", "instagram ads", "tiktok ads", "email marketing",
@@ -157,9 +249,11 @@ function extractEmphasizeKeywords(jdText) {
     "brand management", "content marketing", "social media marketing",
     "influencer marketing", "affiliate marketing",
   ];
-  const text = jdText.toLowerCase();
-  return patterns.filter((kw) => text.includes(kw));
+  const lower = text.toLowerCase();
+  return patterns.filter((kw) => lower.includes(kw));
 }
+
+// ─── Application generation ───────────────────────────────────────────────────
 
 function generateApplication(job) {
   const tmpFile = path.join(TMP, `replenish_${Date.now()}.json`);
@@ -174,221 +268,191 @@ function generateApplication(job) {
   }
 }
 
-function classifyWorkType(location, snippet) {
-  const t = (location + " " + snippet).toLowerCase();
-  if (/\bremote\b/.test(t)) return "remote";
-  if (/hybrid/.test(t)) return "hybrid";
-  return "on-site";
-}
+// ─── Playwright: fetch full job description ───────────────────────────────────
 
-function classifyTier(location, workType) {
-  if (workType === "remote") return 1;
-  if (workType === "hybrid") return 3;
-  // On-site: check if commutable city
-  const commutable = CRITERIA.location_priority[3].commutable_cities.map((c) => c.toLowerCase());
-  const loc = location.toLowerCase();
-  if (commutable.some((c) => loc.includes(c))) return 4;
-  return 99; // outside commutable
-}
-
-function isOutsideCommutableArea(location, workType) {
-  if (workType === "remote") return false;
-  const commutable = CRITERIA.location_priority[3].commutable_cities.map((c) => c.toLowerCase());
-  const loc = location.toLowerCase();
-  return !commutable.some((c) => loc.includes(c));
-}
-
-async function searchIndeedPage(page, query, location, seenUrls) {
-  const jobs = [];
-  const searchLoc = location || "remote";
-  const url = `https://ca.indeed.com/jobs?q=${encodeURIComponent(query)}&l=${encodeURIComponent(searchLoc)}&remotejob=032b3046-06a3-4876-8dfd-474eb5e7ed11`;
-
+async function fetchJobDescription(page, url) {
   try {
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30_000 });
-    await page.waitForTimeout(2000);
-
-    // Extract job cards
-    const cards = await page.$$eval(
-      '[data-testid="slider_item"], .job_seen_beacon, [class*="jobCard"], [class*="result"]',
-      (els) => els.map((el) => {
-        const titleEl = el.querySelector('[class*="jobTitle"] a, h2 a, [data-testid="jobTitle"] a');
-        const compEl = el.querySelector('[class*="companyName"], [data-testid="company-name"]');
-        const locEl = el.querySelector('[class*="companyLocation"], [data-testid="text-location"]');
-        const snippetEl = el.querySelector('[class*="summary"], [class*="snippet"]');
-        if (!titleEl) return null;
-        return {
-          title: titleEl.innerText.trim(),
-          company: compEl ? compEl.innerText.trim() : "",
-          location: locEl ? locEl.innerText.trim() : "",
-          snippet: snippetEl ? snippetEl.innerText.trim() : "",
-          href: titleEl.href || "",
-        };
-      }).filter(Boolean)
-    ).catch(() => []);
-
-    for (const card of cards) {
-      if (!card.href || seenUrls.has(card.href)) continue;
-      if (!card.title || !card.company) continue;
-      jobs.push(card);
-    }
-  } catch (e) {
-    console.log(`  [warn] search failed for "${query}" @ ${searchLoc}: ${e.message.split("\n")[0]}`);
-  }
-  return jobs;
-}
-
-async function getJobDescription(page, href) {
-  try {
-    await page.goto(href, { waitUntil: "domcontentloaded", timeout: 20_000 });
-    await page.waitForTimeout(1500);
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20_000 });
+    await page.waitForTimeout(1200);
     const desc = await page.$eval(
-      '#jobDescriptionText, [class*="jobDescription"], [class*="description-content"]',
+      '#jobDescriptionText, [class*="jobDescription"], [class*="description"]',
       (el) => el.innerText.trim()
     ).catch(() => "");
-    const applyUrl = page.url();
-    return { description: desc, url: applyUrl };
-  } catch (e) {
-    return { description: "", url: href };
+    // Capture final URL (after redirects)
+    const finalUrl = page.url();
+    return { description: desc, finalUrl };
+  } catch (_) {
+    return { description: "", finalUrl: url };
   }
 }
 
-async function main() {
-  const readyCount = countReady();
-  console.log(`\n🔍 Replenish — ${readyCount} ready jobs in tracker, target: ${TARGET}`);
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
-  if (readyCount >= TARGET && !DRY_RUN) {
-    console.log(`✅ Already have ${readyCount} ready jobs — no replenishment needed.\n`);
+async function main() {
+  const readyNow = countReady();
+  console.log(`\n🔍 Replenish — ${readyNow} ready jobs in tracker, target: ${TARGET}`);
+
+  if (readyNow >= TARGET && !DRY_RUN) {
+    console.log(`✅ Already at target (${readyNow} ready). Nothing to do.\n`);
     return;
   }
 
-  const needed = TARGET - readyCount;
-  console.log(`📋 Need to find ${needed} more qualifying jobs...\n`);
+  const needed = TARGET - readyNow;
+  console.log(`📋 Looking for ${needed} new jobs...\n`);
 
-  const existingUrls = trackerUrls();
-  const newJobs = [];
-  let added = 0;
-
-  let browser, context, page;
-  try {
-    browser = await chromium.launch({
-      headless: HEADLESS,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    });
-    context = await browser.newContext({
-      storageState: fs.existsSync(path.join(BROWSER_SESSION, "state.json"))
-        ? path.join(BROWSER_SESSION, "state.json")
-        : undefined,
-      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-    });
-    page = await context.newPage();
-
-    // Cycle through search queries until we have enough
-    const searchTargets = [
-      ...SEARCH_QUERIES.map((q) => ({ q, loc: "" })),           // remote
-      ...SEARCH_QUERIES.slice(0, 6).map((q) => ({ q, loc: "Toronto, ON" })), // on-site/hybrid
-    ];
-
-    for (const { q, loc } of searchTargets) {
-      if (added >= needed) break;
-
-      console.log(`🔎 Searching: "${q}" ${loc ? `@ ${loc}` : "(remote)"}`);
-      const cards = await searchIndeedPage(page, q, loc, existingUrls);
-      console.log(`   Found ${cards.length} new listings`);
-
-      for (const card of cards) {
-        if (added >= needed) break;
-        if (existingUrls.has(card.href)) continue;
-
-        // Quick title relevance check
-        const titleLower = card.title.toLowerCase();
-        const relevant = CRITERIA.target_titles.some((t) =>
-          titleLower.includes(t.toLowerCase().split(" ")[0]) ||
-          t.toLowerCase().includes(titleLower.split(" ")[0])
-        );
-        if (!relevant) continue;
-
-        const workType = classifyWorkType(card.location, card.snippet);
-        const tier = classifyTier(card.location, workType);
-
-        // Skip non-commutable on-site jobs
-        if (tier === 99) {
-          console.log(`   ⛔ Skip (location): ${card.title} @ ${card.company} (${card.location})`);
-          existingUrls.add(card.href);
-          continue;
-        }
-
-        // Get full job description
-        const { description, url } = await getJobDescription(page, card.href);
-        existingUrls.add(url);
-        existingUrls.add(card.href);
-
-        // Auto-exclude check
-        const excludeReason = autoExcludeReason(description + " " + card.snippet, card.title);
-        if (excludeReason) {
-          console.log(`   ⛔ Auto-excluded: ${card.title} @ ${card.company} — ${excludeReason}`);
-          if (!DRY_RUN) {
-            appendTracker({
-              company: card.company, title: card.title, url,
-              location: card.location, work_type: workType, tier,
-              apply_method: "indeed", date_found: today(),
-              date_applied: "", status: "excluded",
-              notes: `AUTO-EXCLUDED: ${excludeReason}`, skill_gaps: "",
-            });
-          }
-          continue;
-        }
-
-        const emphasize = extractEmphasizeKeywords(description + " " + card.snippet);
-        const job = {
-          company: card.company,
-          title: card.title,
-          url,
-          location: card.location,
-          work_type: workType,
-          tier,
-          description: description || card.snippet,
-          emphasize,
-        };
-
-        if (DRY_RUN) {
-          console.log(`   ✅ [DRY-RUN] Would add: ${card.title} @ ${card.company} (${card.location})`);
-          newJobs.push(job);
-          added++;
-          continue;
-        }
-
-        // Generate tailored application
-        try {
-          const { resumeFile, coverFile, skill_gaps } = generateApplication(job);
-          const base = path.basename(resumeFile).replace(".txt", "");
-          const notes = `Resume: ${path.basename(resumeFile)} | Cover: ${path.basename(coverFile)}`;
-          appendTracker({
-            company: job.company, title: job.title, url: job.url,
-            location: job.location, work_type: workType, tier,
-            apply_method: "indeed", date_found: today(),
-            date_applied: "", status: "ready",
-            notes,
-            skill_gaps: skill_gaps.join("; "),
-          });
-          console.log(`   ✅ Added: ${job.title} @ ${job.company} → ${path.basename(resumeFile)}`);
-          added++;
-        } catch (e) {
-          console.log(`   ⚠️  Failed to generate for ${job.title} @ ${job.company}: ${e.message.split("\n")[0]}`);
-        }
-
-        // Polite delay between detail page fetches
-        await page.waitForTimeout(1500 + Math.random() * 1000);
+  // Collect RSS results across all queries
+  const allItems = [];
+  const seenLinks = new Set();
+  for (const { q, l } of SEARCH_QUERIES) {
+    process.stdout.write(`  RSS: "${q}"${l ? ` @ ${l}` : " (remote)"}... `);
+    const items = await fetchIndeedRSS(q, l);
+    let fresh = 0;
+    for (const item of items) {
+      if (!seenLinks.has(item.link)) {
+        seenLinks.add(item.link);
+        allItems.push(item);
+        fresh++;
       }
-
-      // Delay between search pages
-      await page.waitForTimeout(2000 + Math.random() * 2000);
     }
-  } finally {
-    if (browser) await browser.close().catch(() => {});
+    console.log(`${fresh} new listings`);
+    await new Promise((r) => setTimeout(r, 800)); // polite delay between RSS requests
   }
 
-  console.log(`\n✅ Replenish complete — added ${added} new jobs to tracker.`);
-  console.log(`   Ready jobs now: ${countReady()}\n`);
+  console.log(`\nTotal unique listings from RSS: ${allItems.length}`);
+
+  // Filter by title relevance first (cheap)
+  const { urls: trackerUrls, pairs: trackerPairs } = trackerKeys();
+  const candidates = allItems.filter((item) => {
+    if (!isTitleRelevant(item.title)) return false;
+    if (trackerUrls.has(item.link)) return false;
+    const pair = `${item.company.toLowerCase()}|${item.title.toLowerCase()}`;
+    if (trackerPairs.has(pair)) return false;
+    return true;
+  });
+  console.log(`After title filter: ${candidates.length} candidates\n`);
+
+  if (candidates.length === 0) {
+    console.log("No new candidates found. Try running again later for fresh listings.\n");
+    return;
+  }
+
+  // Launch browser just for fetching full descriptions
+  const browser = await chromium.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath: fs.existsSync("/opt/pw-browsers/chromium-1194/chrome-linux/chrome")
+      ? "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
+      : undefined,
+  });
+  const context = await browser.newContext({
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+  });
+  const page = await context.newPage();
+
+  let added = 0;
+  const { urls: freshUrls, pairs: freshPairs } = trackerKeys(); // re-read after browser launch
+
+  try {
+    for (const item of candidates) {
+      if (added >= needed) break;
+
+      // Re-check dedup (tracker may have been updated mid-run)
+      if (freshUrls.has(item.link)) continue;
+      const pair = `${item.company.toLowerCase()}|${item.title.toLowerCase()}`;
+      if (freshPairs.has(pair)) continue;
+
+      const workType = classifyWorkType(item.location, item.snippet);
+      const tier = classifyTier(item.location, workType);
+      if (tier === 99) {
+        console.log(`  ⛔ Out of area: ${item.title} @ ${item.company} (${item.location})`);
+        freshUrls.add(item.link);
+        continue;
+      }
+
+      // Quick exclude on snippet alone (saves a page load)
+      const quickExclude = autoExcludeReason(item.snippet, item.title);
+      if (quickExclude) {
+        console.log(`  ⛔ Auto-excluded (snippet): ${item.title} @ ${item.company}`);
+        if (!DRY_RUN) {
+          appendTracker({
+            company: item.company, title: item.title, url: item.link,
+            location: item.location, work_type: workType, tier,
+            apply_method: "indeed", date_found: today(),
+            date_applied: "", status: "excluded",
+            notes: `AUTO-EXCLUDED: ${quickExclude}`, skill_gaps: "",
+          });
+        }
+        freshUrls.add(item.link);
+        freshPairs.add(pair);
+        continue;
+      }
+
+      // Fetch full description
+      process.stdout.write(`  📄 ${item.title} @ ${item.company}... `);
+      const { description, finalUrl } = await fetchJobDescription(page, item.link);
+      freshUrls.add(finalUrl);
+      freshUrls.add(item.link);
+
+      const fullText = description || item.snippet;
+      const excludeReason = autoExcludeReason(fullText, item.title);
+      if (excludeReason) {
+        console.log(`excluded (${excludeReason.slice(0, 50)})`);
+        if (!DRY_RUN) {
+          appendTracker({
+            company: item.company, title: item.title, url: finalUrl,
+            location: item.location, work_type: workType, tier,
+            apply_method: "indeed", date_found: today(),
+            date_applied: "", status: "excluded",
+            notes: `AUTO-EXCLUDED: ${excludeReason}`, skill_gaps: "",
+          });
+        }
+        freshPairs.add(pair);
+        continue;
+      }
+
+      const emphasize = extractEmphasizeKeywords(fullText);
+      const job = {
+        company: item.company,
+        title: item.title,
+        url: finalUrl,
+        location: item.location,
+        work_type: workType,
+        tier,
+        description: fullText,
+        emphasize,
+      };
+
+      if (DRY_RUN) {
+        console.log(`[DRY-RUN] would add`);
+        added++;
+        freshPairs.add(pair);
+        continue;
+      }
+
+      try {
+        const { resumeFile, coverFile, skill_gaps } = generateApplication(job);
+        appendTracker({
+          company: job.company, title: job.title, url: job.url,
+          location: job.location, work_type: workType, tier,
+          apply_method: "indeed", date_found: today(),
+          date_applied: "", status: "ready",
+          notes: `Resume: ${path.basename(resumeFile)} | Cover: ${path.basename(coverFile)}`,
+          skill_gaps: skill_gaps.join("; "),
+        });
+        console.log(`✅ added`);
+        added++;
+        freshPairs.add(pair);
+      } catch (e) {
+        console.log(`failed to generate: ${e.message.slice(0, 60)}`);
+      }
+
+      await new Promise((r) => setTimeout(r, 1000 + Math.random() * 1000));
+    }
+  } finally {
+    await browser.close().catch(() => {});
+  }
+
+  console.log(`\n✅ Replenish done — added ${added} new jobs. Ready jobs now: ${countReady()}\n`);
 }
 
 main().catch((e) => {

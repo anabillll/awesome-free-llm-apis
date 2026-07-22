@@ -748,7 +748,7 @@ function countReadyJobs() {
 }
 
 function runReplenish() {
-  console.log("\n🔄  Queue running low — auto-replenishing from Indeed...");
+  console.log("\n🔄  Searching Indeed for fresh jobs...");
   try {
     execSync(`node "${REPLENISH_SCRIPT}" --target 20`, {
       stdio: "inherit",
@@ -765,19 +765,16 @@ async function main() {
   if (DRY_RUN) console.log("   Mode: DRY RUN (no submissions will be made)");
   console.log(`   Session limit: ${SESSION_LIMIT} applications\n`);
 
-  // Auto-replenish if queue is below threshold
-  const initialReady = countReadyJobs();
-  if (initialReady < REPLENISH_THRESHOLD) {
-    runReplenish();
-  }
+  // Always replenish up to 20 before starting (finds new jobs from Indeed)
+  runReplenish();
 
-  // Load tracker (fresh after possible replenish)
+  // Load tracker (fresh after replenish)
   const trackerText = fs.readFileSync(TRACKER, "utf8");
   const rows = parseCSV(trackerText);
   const readyJobs = rows.filter((r) => r.status === "ready");
 
   if (readyJobs.length === 0) {
-    console.log("No jobs with status=ready found in tracker.csv. Nothing to do.");
+    console.log("No jobs with status=ready found. Replenish found nothing new — try again later.");
     return;
   }
   console.log(`Found ${readyJobs.length} ready application(s). Will process up to ${SESSION_LIMIT}.\n`);
