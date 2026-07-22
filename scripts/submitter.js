@@ -23,6 +23,7 @@ const { chromium } = require("../node_modules/playwright");
 const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
+const https = require("https");
 
 const ROOT = path.resolve(__dirname, "..");
 const RESUME_JSON = JSON.parse(fs.readFileSync(path.join(ROOT, "data", "master_resume.json"), "utf8"));
@@ -42,6 +43,7 @@ const LIMIT_ARG = process.argv.indexOf("--limit");
 const SESSION_LIMIT = LIMIT_ARG !== -1 ? parseInt(process.argv[LIMIT_ARG + 1], 10) : 15;
 const MIN_DELAY_MS = 5_000;    // 5 seconds minimum between submissions
 const MAX_DELAY_MS = 10_000;   // 10 seconds maximum
+const CAPTCHA_API_KEY = process.env.CAPTCHA_API_KEY || "";
 
 fs.mkdirSync(SESSION_DIR, { recursive: true });
 
@@ -115,6 +117,143 @@ function findAnswer(company, questionText) {
   if (/years.*google ads/i.test(q)) return universal.years_experience_google_ads;
 
   return null; // Unknown — will pause for human input
+}
+
+// ─── 2captcha solver ─────────────────────────────────────────────────────────
+
+function httpsGet(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      let data = "";
+      res.on("data", (c) => (data += c));
+      res.on("end", () => resolve(data));
+    }).on("error", reject);
+  });
+}
+
+async function solveCaptchaWith2captcha(page, apiKey) {
+  // Extract sitekey from the recaptcha iframe URL or data-sitekey attribute
+  let sitekey = null;
+  let pageUrl = page.url ? page.url() : "";
+
+  // Search in all frames for the sitekey
+  for (const frame of (page.frames ? page.frames() : [])) {
+    try {
+      const u = frame.url ? frame.url() : "";
+      const m = u.match(/[?&]k=([A-Za-z0-9_-]+)/);
+      if (m) { sitekey = m[1]; pageUrl = frame.url(); break; }
+    } catch (_) {}
+  }
+
+  // Also try DOM
+  if (!sitekey) {
+    try {
+      sitekey = await page.evaluate(() => {
+        const el = document.querySelector('[data-sitekey]');
+        if (el) return el.getAttribute('data-sitekey');
+        const iframe = document.querySelector('iframe[src*="recaptcha"]');
+        if (iframe) { const m = iframe.src.match(/[?&]k=([A-Za-z0-9_-]+)/); return m ? m[1] : null; }
+        return null;
+      });
+    } catch (_) {}
+  }
+
+  if (!sitekey) {
+    console.log("   ⚠️  Could not extract CAPTCHA sitekey — falling back to manual.");
+    return null;
+  }
+
+  console.log(`   🔐  Sending CAPTCHA to 2captcha (key: ${sitekey.slice(0, 12)}…)`);
+
+  const submitUrl = `https://2captcha.com/in.php?key=${apiKey}&method=userrecaptcha` +
+    `&googlekey=${encodeURIComponent(sitekey)}&pageurl=${encodeURIComponent(pageUrl)}` +
+    `&enterprise=1&json=1`;
+
+  let captchaId;
+  try {
+    const resp = JSON.parse(await httpsGet(submitUrl));
+    if (resp.status !== 1) { console.log(`   2captcha submit error: ${resp.request}`); return null; }
+    captchaId = resp.request;
+  } catch (e) { console.log(`   2captcha submit failed: ${e.message}`); return null; }
+
+  console.log(`   ⏳  CAPTCHA queued (id ${captchaId}), waiting for solution…`);
+
+  for (let i = 0; i < 30; i++) {
+    await sleep(5000);
+    try {
+      const res = JSON.parse(await httpsGet(
+        `https://2captcha.com/res.php?key=${apiKey}&action=get&id=${captchaId}&json=1`
+      ));
+      if (res.status === 1) {
+        console.log("   ✓ CAPTCHA solved by 2captcha");
+        return res.request; // the token
+      }
+      if (res.request !== "CAPCHA_NOT_READY") {
+        console.log(`   2captcha poll error: ${res.request}`); return null;
+      }
+    } catch (_) {}
+  }
+
+  console.log("   2captcha timed out after 2.5 min — falling back to manual.");
+  return null;
+}
+
+async function injectCaptchaToken(page, token) {
+  // Try injecting into the main page first, then all frames
+  const targets = [page, ...(page.frames ? page.frames() : [])];
+  for (const t of targets) {
+    try {
+      await t.evaluate((tk) => {
+        // Set hidden textarea value (standard reCAPTCHA v2 / Enterprise)
+        document.querySelectorAll('[name="g-recaptcha-response"]').forEach((el) => {
+          el.style.display = "block";
+          el.value = tk;
+        });
+        // Fire explicit callback if present
+        const container = document.querySelector('.g-recaptcha, [data-sitekey]');
+        if (container) {
+          const cb = container.getAttribute('data-callback');
+          if (cb && typeof window[cb] === "function") { window[cb](tk); return; }
+        }
+        // Fire via internal grecaptcha_cfg
+        if (window.___grecaptcha_cfg) {
+          const clients = window.___grecaptcha_cfg.clients || {};
+          Object.values(clients).forEach((c) => {
+            Object.values(c).forEach((w) => {
+              if (w && typeof w.callback === "function") {
+                try { w.callback(tk); } catch (_) {}
+              }
+            });
+          });
+        }
+      }, token);
+    } catch (_) {}
+  }
+}
+
+async function handleCaptcha(page) {
+  // Check if a CAPTCHA is actually present
+  let captchaPresent = false;
+  for (const frame of (page.frames ? page.frames() : [page])) {
+    try {
+      if (await frame.locator('iframe[src*="recaptcha"], .g-recaptcha, [data-sitekey]').count() > 0) {
+        captchaPresent = true; break;
+      }
+    } catch (_) {}
+  }
+  if (!captchaPresent) return;
+
+  if (CAPTCHA_API_KEY) {
+    const token = await solveCaptchaWith2captcha(page, CAPTCHA_API_KEY);
+    if (token) {
+      await injectCaptchaToken(page, token);
+      await page.waitForTimeout(2000); // let the page process the token
+      return;
+    }
+  }
+
+  // Fall back to manual
+  await pauseForHuman(page, "CAPTCHA detected — complete it in the browser, then press ENTER.");
 }
 
 // ─── Human-in-the-loop pause ─────────────────────────────────────────────────
@@ -455,14 +594,8 @@ async function handleEasyApply(applyPage, job) {
       }
     } catch (_) {}
 
-    // CAPTCHA check (any frame)
-    for (const frame of allFrames(applyPage)) {
-      try {
-        if (await frame.locator('iframe[src*="recaptcha"], .g-recaptcha, [data-sitekey]').count() > 0) {
-          await pauseForHuman(applyPage, "CAPTCHA detected — complete it in the browser, then press ENTER.");
-        }
-      } catch (_) {}
-    }
+    // CAPTCHA check — auto-solve if API key set, otherwise pause for human
+    await handleCaptcha(applyPage);
 
     // Login wall
     const pageUrl = applyPage.url ? applyPage.url() : "";
@@ -528,9 +661,7 @@ async function applyToJob(page, job) {
   await page.waitForTimeout(2500);
 
   // CAPTCHA on load
-  if (await page.locator('[class*="captcha"], iframe[src*="captcha"]').count() > 0) {
-    await pauseForHuman(page, "Bot-check / CAPTCHA on page load. Complete it, then press ENTER.");
-  }
+  await handleCaptcha(page);
 
   // Account restriction
   const warningText = await page.locator('[data-testid="warning-message"], .jobsearch-Infoshield').textContent().catch(() => "");
