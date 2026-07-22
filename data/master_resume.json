@@ -1,0 +1,85 @@
+{
+  "personal": {
+    "name": "Ana Bill",
+    "email": "anabilofficial@gmail.com",
+    "location": "Toronto, ON, Canada",
+    "work_authorization": "Authorized to work in Canada",
+    "linkedin": "",
+    "phone": ""
+  },
+  "education": [
+    {
+      "degree": "Bachelor's",
+      "institution": "Future University in Egypt",
+      "field": "",
+      "graduation_year": null
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Driving Licence",
+      "issuer": "",
+      "year": null
+    }
+  ],
+  "skills": {
+    "platforms_tools": [
+      "Shopify",
+      "Klaviyo",
+      "Google Analytics",
+      "Google Ads",
+      "Facebook Advertising",
+      "Microsoft Excel"
+    ],
+    "marketing_ecommerce": [
+      "Digital marketing",
+      "Media Buying",
+      "E-commerce",
+      "SEO",
+      "Marketing automation",
+      "Multivariate testing",
+      "Conversion rate optimization (CRO)"
+    ],
+    "soft_skills": [
+      "Analysis skills",
+      "Account management",
+      "Collaboration",
+      "Cross-functional collaboration",
+      "Customer service",
+      "Time management",
+      "Process improvement",
+      "Management",
+      "Leadership",
+      "Accountability",
+      "Attention to detail",
+      "Organizational skills",
+      "Communication skills"
+    ],
+    "languages": [
+      "English"
+    ]
+  },
+  "experience": [],
+  "preferred_titles": [
+    "Shopify Manager",
+    "Business Analyst",
+    "Ecommerce Specialist",
+    "Media Buyer",
+    "Ecommerce Manager",
+    "Digital Marketing Manager",
+    "Performance Marketing Manager",
+    "Ecommerce Coordinator",
+    "Paid Media Specialist"
+  ],
+  "salary": {
+    "minimum_hourly_cad": 30,
+    "minimum_annual_cad": 62400
+  },
+  "shift_preferences": [
+    "Monday To Friday",
+    "Weekend Availability",
+    "Holidays"
+  ],
+  "willing_to_relocate": true,
+  "years_of_experience": null
+}
