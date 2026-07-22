@@ -311,10 +311,15 @@ async function answerScreeningQuestions(page, job) {
 // ─── Multi-frame helpers ──────────────────────────────────────────────────────
 
 function allFrames(page) {
-  return page.frames ? page.frames() : [page];
+  try {
+    return page.frames ? page.frames() : [page];
+  } catch (_) {
+    return [];
+  }
 }
 
 async function fullDiagnostic(page) {
+  try {
   console.log("\n   === PAGE DIAGNOSTIC ===");
   const frames = allFrames(page);
   console.log(`   Frames loaded (${frames.length}):`);
@@ -348,6 +353,9 @@ async function fullDiagnostic(page) {
     } catch (_) {}
   }
   console.log("   === END DIAGNOSTIC ===\n");
+  } catch (err) {
+    console.log(`   Diagnostic skipped (${err.message.slice(0, 60)})`);
+  }
 }
 
 async function findNextOrSubmitAllFrames(page) {
@@ -499,6 +507,43 @@ async function applyToJob(page, job) {
   return await handleEasyApply(applyPage, job);
 }
 
+// ─── Browser launch / login helpers ──────────────────────────────────────────
+
+const BROWSER_CRASH_RE = /Target page|Target closed|browser has been closed|Session closed|Connection closed/i;
+
+async function launchBrowser() {
+  const opts = {
+    headless: false,
+    args: ["--start-maximized", "--disable-blink-features=AutomationControlled"],
+    slowMo: 50,
+  };
+  if (CHROMIUM_PATH) opts.executablePath = CHROMIUM_PATH;
+  const browser = await chromium.launch(opts);
+  const context = await browser.newContext({
+    storageState: fs.existsSync(path.join(SESSION_DIR, "state.json"))
+      ? path.join(SESSION_DIR, "state.json")
+      : undefined,
+    viewport: null,
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+  });
+  const page = await context.newPage();
+  return { browser, context, page };
+}
+
+async function ensureLoggedIn(page, context) {
+  await page.goto("https://ca.indeed.com/account/login", { waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(2000);
+  if (await page.locator('input[type="password"]').count() > 0) {
+    await pauseForHuman(page, "Please log in to Indeed in the browser window, then press ENTER here.");
+  }
+  await context.storageState({ path: path.join(SESSION_DIR, "state.json") });
+  console.log("✓ Session saved.");
+}
+
+async function isBrowserAlive(page) {
+  try { await page.title(); return true; } catch (_) { return false; }
+}
+
 // ─── Entry point ─────────────────────────────────────────────────────────────
 
 async function main() {
@@ -515,39 +560,10 @@ async function main() {
     console.log("No jobs with status=ready found in tracker.csv. Nothing to do.");
     return;
   }
-
   console.log(`Found ${readyJobs.length} ready application(s). Will process up to ${SESSION_LIMIT}.\n`);
 
-  // Launch browser (headed, persistent session so login survives)
-  const launchOptions = {
-    headless: false,
-    args: ["--start-maximized", "--disable-blink-features=AutomationControlled"],
-    slowMo: 50,
-  };
-  if (CHROMIUM_PATH) launchOptions.executablePath = CHROMIUM_PATH;
-  const browser = await chromium.launch(launchOptions);
-
-  const context = await browser.newContext({
-    storageState: fs.existsSync(path.join(SESSION_DIR, "state.json"))
-      ? path.join(SESSION_DIR, "state.json")
-      : undefined,
-    viewport: null,
-    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-  });
-
-  const page = await context.newPage();
-
-  // Check Indeed login status
-  await page.goto("https://ca.indeed.com/account/login", { waitUntil: "domcontentloaded" });
-  await page.waitForTimeout(2000);
-
-  if (await page.locator('input[type="password"]').count() > 0) {
-    await pauseForHuman(page, "Please log in to Indeed in the browser window, then press ENTER here.");
-  }
-
-  // Save session after login
-  await context.storageState({ path: path.join(SESSION_DIR, "state.json") });
-  console.log("✓ Session saved. Starting applications...");
+  let { browser, context, page } = await launchBrowser();
+  await ensureLoggedIn(page, context);
 
   let submitted = 0;
   let failed = 0;
@@ -558,10 +574,17 @@ async function main() {
       break;
     }
 
+    // Auto-relaunch if browser died
+    if (!(await isBrowserAlive(page))) {
+      console.log("\n🔄  Browser closed — relaunching...");
+      try { await browser.close(); } catch (_) {}
+      ({ browser, context, page } = await launchBrowser());
+      await ensureLoggedIn(page, context);
+    }
+
     try {
       const result = await applyToJob(page, job);
 
-      // Update tracker row
       const idx = rows.findIndex((r) => r.url === job.url);
       if (idx !== -1) {
         rows[idx].status = result === "applied" ? "applied" : result;
@@ -572,9 +595,7 @@ async function main() {
       if (result === "applied") {
         submitted++;
         console.log(`\n✅  [${submitted}/${SESSION_LIMIT}] ${job.company} — ${job.title}: SUBMITTED`);
-        // Save session after each success
-        await context.storageState({ path: path.join(SESSION_DIR, "state.json") });
-        // Natural pause between applications (skip after last one)
+        try { await context.storageState({ path: path.join(SESSION_DIR, "state.json") }); } catch (_) {}
         if (submitted < SESSION_LIMIT && readyJobs.indexOf(job) < readyJobs.length - 1) {
           await naturalDelay();
         }
@@ -582,26 +603,30 @@ async function main() {
         console.log(`\n⏭️   ${job.company} — ${job.title}: ${result}`);
       }
     } catch (err) {
-      console.error(`\n❌  Error on ${job.company}: ${err.message}`);
-      const idx = rows.findIndex((r) => r.url === job.url);
-      if (idx !== -1) {
-        rows[idx].status = "failed";
-        rows[idx].notes = `Error: ${err.message}`;
+      if (BROWSER_CRASH_RE.test(err.message)) {
+        // Browser crashed — don't mark as failed; next loop iteration will relaunch
+        console.error(`\n⚠️  Browser crash on ${job.company} — will retry next run (status stays 'ready')`);
+      } else {
+        console.error(`\n❌  Error on ${job.company}: ${err.message}`);
+        const idx = rows.findIndex((r) => r.url === job.url);
+        if (idx !== -1) {
+          rows[idx].status = "failed";
+          rows[idx].notes = `Error: ${err.message.slice(0, 120)}`;
+        }
+        saveCSV(rows);
+        failed++;
       }
-      saveCSV(rows);
-      failed++;
     }
   }
 
-  // Final session save
-  await context.storageState({ path: path.join(SESSION_DIR, "state.json") });
-  await browser.close();
+  try { await context.storageState({ path: path.join(SESSION_DIR, "state.json") }); } catch (_) {}
+  try { await browser.close(); } catch (_) {}
 
   console.log(`\n${"─".repeat(50)}`);
   console.log(`Session complete.`);
   console.log(`  Submitted: ${submitted}`);
   console.log(`  Failed:    ${failed}`);
-  console.log(`  Tracker updated: ${TRACKER}`);
+  console.log(`  Tracker:   ${TRACKER}`);
 }
 
 main().catch((err) => {
