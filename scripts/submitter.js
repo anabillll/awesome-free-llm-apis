@@ -482,33 +482,56 @@ async function clickApplyButton(page) {
   return false;
 }
 
-async function findNextOrSubmit(page) {
-  // Submit first (so if both visible, we prefer to finish)
-  const submitBtn = await findVisible(page, [
-    'button[data-testid="ia-submitButton"]',
-    'button[data-testid="form-card-submit-button"]',
-    'button[data-testid*="submit" i]',
-    'button[aria-label="Submit your application"]',
-    'button[aria-label*="Submit" i]',
-    'button:has-text("Submit application")',
-    'button:has-text("Submit")',
-  ]);
-  if (submitBtn) return { type: "submit", btn: submitBtn };
+async function findNextOrSubmit(frame) {
+  // Use DOM evaluation — finds any visible button regardless of selector changes
+  const SUBMIT_WORDS = ["submit", "send application", "finish", "complete application"];
+  const NEXT_WORDS   = ["continue", "next", "review", "apply now", "proceed"];
 
-  const nextBtn = await findVisible(page, [
-    'button[data-testid="ia-continueButton"]',
-    'button[data-testid="form-card-continue-button"]',
-    'button[data-testid="ContinueButton"]',
-    'button[data-testid*="continue" i]',
-    'button[aria-label="Continue to next step"]',
-    'button[aria-label*="continue" i]',
-    'button:has-text("Continue")',
-    'button:has-text("Next")',
-    'button:has-text("Review your application")',
-    'button:has-text("Apply now")',
-  ]);
-  if (nextBtn) return { type: "next", btn: nextBtn };
+  let found = null;
+  try {
+    found = await frame.evaluate(({ submitWords, nextWords }) => {
+      const els = Array.from(document.querySelectorAll(
+        'button, [role="button"], input[type="submit"], input[type="button"]'
+      ));
+      for (const el of els) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) continue;
+        const style = window.getComputedStyle(el);
+        if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") continue;
+        const text = (el.textContent || el.value || el.getAttribute("aria-label") || "")
+          .trim().toLowerCase().replace(/\s+/g, " ");
+        const ariaBusy = el.getAttribute("aria-busy");
+        if (ariaBusy === "true") continue; // loading spinner — skip
 
+        // Check data-testid for submit/continue keywords (more reliable than text)
+        const testId = (el.getAttribute("data-testid") || "").toLowerCase();
+        if (/submit|ia-submit|form-submit/.test(testId)) return { kind: "submit", text: el.textContent.trim() };
+        if (/continue|ia-continue|next|proceed/.test(testId)) return { kind: "next", text: el.textContent.trim() };
+
+        for (const w of submitWords) { if (text.includes(w)) return { kind: "submit", text: el.textContent.trim() }; }
+        for (const w of nextWords)   { if (text.includes(w)) return { kind: "next",   text: el.textContent.trim() }; }
+      }
+      return null;
+    }, { submitWords: SUBMIT_WORDS, nextWords: NEXT_WORDS });
+  } catch (_) { return null; }
+
+  if (!found) return null;
+
+  // Now locate it in Playwright so we can click it
+  const text = found.text.trim().slice(0, 50);
+  // Try a few locator strategies in order
+  const strategies = [
+    () => frame.locator(`button:has-text("${text}")`).first(),
+    () => frame.locator(`[role="button"]:has-text("${text}")`).first(),
+    () => frame.locator(`input[value="${text}"]`).first(),
+    () => frame.locator(`button`).filter({ hasText: text.slice(0, 20) }).first(),
+  ];
+  for (const strat of strategies) {
+    try {
+      const el = strat();
+      if (await el.count() > 0) return { type: found.kind, btn: el };
+    } catch (_) {}
+  }
   return null;
 }
 
@@ -811,15 +834,35 @@ async function handleEasyApply(applyPage, job) {
     await answerQuestionsAllFrames(applyPage, job);
     await fillFormAllFrames(applyPage, job);
 
+    // Give the page a moment to finish rendering before hunting for buttons
+    await applyPage.waitForTimeout(800);
+
     const action = await findNextOrSubmitAllFrames(applyPage);
 
     if (!action) {
-      // Scroll and retry once
-      try { await applyPage.keyboard.press("End"); } catch (_) {}
-      await applyPage.waitForTimeout(800);
+      // Scroll to bottom and wait — button may be below the fold
+      try {
+        await applyPage.keyboard.press("End");
+        for (const f of allFrames(applyPage)) {
+          try { await f.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); } catch (_) {}
+        }
+      } catch (_) {}
+      await applyPage.waitForTimeout(1500);
       const retried = await findNextOrSubmitAllFrames(applyPage);
       if (!retried) {
-        console.log("   ⚠️  Couldn't find Next/Submit button after scroll — skipping this job.");
+        // Last resort: dump all visible buttons to console for debugging
+        try {
+          for (const f of allFrames(applyPage)) {
+            const btns = await f.evaluate(() =>
+              Array.from(document.querySelectorAll("button, [role='button']"))
+                .filter(b => { const r = b.getBoundingClientRect(); return r.width > 0 && r.height > 0; })
+                .map(b => b.textContent.trim().slice(0, 60))
+                .filter(Boolean)
+            ).catch(() => []);
+            if (btns.length) console.log(`   Visible buttons in frame: ${btns.join(" | ")}`);
+          }
+        } catch (_) {}
+        console.log("   ⚠️  Couldn't find Next/Submit button — skipping this job.");
         return "skipped";
       }
       if (retried.type === "submit") {
