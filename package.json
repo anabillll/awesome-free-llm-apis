@@ -1,0 +1,17 @@
+{
+  "name": "ecommerce-job-agent",
+  "version": "1.0.0",
+  "description": "Ecommerce job search, tailoring, and submission agent",
+  "scripts": {
+    "submit": "node scripts/submitter.js",
+    "submit:dry": "node scripts/submitter.js --dry-run",
+    "generate": "node scripts/generate_application.js",
+    "agent": "node scripts/agent.js",
+    "replenish": "node scripts/replenish.js",
+    "replenish:dry": "node scripts/replenish.js --dry-run",
+    "replenish:reset": "node scripts/replenish.js --reset"
+  },
+  "dependencies": {
+    "playwright": "^1.61.1"
+  }
+}

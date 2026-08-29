@@ -1,0 +1,100 @@
+{
+  "target_titles": [
+    "Ecommerce Manager",
+    "Ecommerce Specialist",
+    "Shopify Manager",
+    "Shopify Specialist",
+    "Media Buyer",
+    "Performance Marketing Manager",
+    "Digital Marketing Manager",
+    "Paid Media Specialist",
+    "Ecommerce Coordinator",
+    "Business Analyst",
+    "Ecommerce Analyst",
+    "Marketing Automation Specialist",
+    "CRO Specialist",
+    "Growth Marketing Manager",
+    "Paid Social Specialist",
+    "Facebook Ads Manager",
+    "Google Ads Specialist",
+    "Email Marketing Manager",
+    "Klaviyo Specialist",
+    "DTC Marketing Manager"
+  ],
+  "location_priority": [
+    {
+      "tier": 1,
+      "label": "Fully remote – Canada",
+      "search_location": "remote",
+      "country": "CA"
+    },
+    {
+      "tier": 2,
+      "label": "Fully remote – North America (Canadians eligible)",
+      "search_location": "remote",
+      "country": "US",
+      "note": "Must explicitly allow Canadian applicants or state North America"
+    },
+    {
+      "tier": 3,
+      "label": "Hybrid – Toronto, ON",
+      "search_location": "Toronto, ON",
+      "country": "CA"
+    },
+    {
+      "tier": 4,
+      "label": "On-site – Toronto and commutable areas",
+      "search_location": "Toronto, ON",
+      "country": "CA",
+      "commutable_cities": [
+        "Toronto",
+        "Mississauga",
+        "Brampton",
+        "Markham",
+        "Vaughan",
+        "Richmond Hill",
+        "Oakville",
+        "Burlington",
+        "Scarborough",
+        "North York",
+        "Etobicoke",
+        "Ajax",
+        "Pickering",
+        "Oshawa"
+      ]
+    }
+  ],
+  "salary_minimum_hourly_cad": 30,
+  "salary_minimum_annual_cad": 62400,
+  "session_cap": 20,
+  "auto_exclude_if": [
+    {
+      "condition": "requires_french",
+      "description": "Requires French language fluency or bilingualism"
+    },
+    {
+      "condition": "requires_senior_5plus_years",
+      "description": "Requires 5+ years of experience for a senior/manager title when experience cannot be confirmed"
+    },
+    {
+      "condition": "requires_relocation_outside_canada",
+      "description": "Requires relocation outside of Canada or only accepts US-only workers without Canadian eligibility"
+    },
+    {
+      "condition": "requires_advanced_bi_tools",
+      "description": "Requires advanced Power BI, Tableau, or Looker expertise as a hard requirement"
+    },
+    {
+      "condition": "requires_masters_degree",
+      "description": "Requires a Master's degree or MBA"
+    },
+    {
+      "condition": "requires_coding_engineering",
+      "description": "Requires coding, software development, or engineering skills (Python, SQL, JavaScript beyond basic, etc.)"
+    },
+    {
+      "condition": "requires_us_work_authorization_only",
+      "description": "Explicitly requires US work authorization only (H1B sponsorship context)"
+    }
+  ]
+}
