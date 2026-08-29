@@ -1124,8 +1124,21 @@ async function main() {
       }
     } catch (err) {
       if (BROWSER_CRASH_RE.test(err.message)) {
-        // Browser crashed — don't mark as failed; next loop iteration will relaunch
-        console.error(`\n⚠️  Browser crash on ${job.company} — will retry next run (status stays 'ready')`);
+        // Browser crashed — track crash count; after 3 crashes, mark stale so it's never retried
+        const idx = rows.findIndex((r) => r.url === job.url);
+        if (idx !== -1) {
+          const crashMatch = (rows[idx].notes || "").match(/crashes:(\d+)/);
+          const crashes = crashMatch ? parseInt(crashMatch[1], 10) + 1 : 1;
+          if (crashes >= 3) {
+            rows[idx].status = "stale";
+            rows[idx].notes = ((rows[idx].notes || "").replace(/\s*crashes:\d+/, "") + ` | stale: crashed ${crashes}x`).trim();
+            console.error(`\n⛔  ${job.company} crashed ${crashes} times — marked stale (won't retry).`);
+          } else {
+            rows[idx].notes = ((rows[idx].notes || "").replace(/\s*crashes:\d+/, "") + ` crashes:${crashes}`).trim();
+            console.error(`\n⚠️  Browser crash on ${job.company} (${crashes}/3) — will retry next run.`);
+          }
+          saveCSV(rows);
+        }
       } else {
         console.error(`\n❌  Error on ${job.company}: ${err.message}`);
         const idx = rows.findIndex((r) => r.url === job.url);

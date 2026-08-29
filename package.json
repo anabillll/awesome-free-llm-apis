@@ -8,7 +8,8 @@
     "generate": "node scripts/generate_application.js",
     "agent": "node scripts/agent.js",
     "replenish": "node scripts/replenish.js",
-    "replenish:dry": "node scripts/replenish.js --dry-run"
+    "replenish:dry": "node scripts/replenish.js --dry-run",
+    "replenish:reset": "node scripts/replenish.js --reset"
   },
   "dependencies": {
     "playwright": "^1.61.1"

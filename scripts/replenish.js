@@ -30,6 +30,7 @@ const args = process.argv.slice(2);
 const targetArg = args.indexOf("--target");
 const TARGET = targetArg !== -1 ? parseInt(args[targetArg + 1], 10) : 20;
 const DRY_RUN = args.includes("--dry-run");
+const RESET = args.includes("--reset"); // clears all "ready"/"stale" jobs before searching
 
 // Search queries → Indeed RSS
 const SEARCH_QUERIES = [
@@ -156,12 +157,18 @@ function parseRSS(xml) {
 
     // Parse "Job Title - Company (Location)"
     const dashIdx = rawTitle.lastIndexOf(" - ");
-    if (dashIdx === -1) continue;
-    const jobTitle = rawTitle.slice(0, dashIdx).trim();
-    const rest = rawTitle.slice(dashIdx + 3).trim();
-    const parenIdx = rest.lastIndexOf("(");
-    const company = parenIdx > 0 ? rest.slice(0, parenIdx).trim() : rest;
-    const location = parenIdx > 0 ? rest.slice(parenIdx + 1).replace(")", "").trim() : "";
+    let jobTitle, company, location;
+    if (dashIdx > 0) {
+      jobTitle = rawTitle.slice(0, dashIdx).trim();
+      const rest = rawTitle.slice(dashIdx + 3).trim();
+      const parenIdx = rest.lastIndexOf("(");
+      company = parenIdx > 0 ? rest.slice(0, parenIdx).trim() : rest;
+      location = parenIdx > 0 ? rest.slice(parenIdx + 1).replace(")", "").trim() : "";
+    } else {
+      jobTitle = rawTitle.trim();
+      company = "Unknown";
+      location = "";
+    }
 
     items.push({ title: jobTitle, company, location, snippet, link });
   }
@@ -229,12 +236,19 @@ function classifyTier(location, workType) {
 
 function isTitleRelevant(title) {
   const t = title.toLowerCase();
-  // Must contain at least one relevant keyword
+  // Broad catch-all: any "marketing" role
+  if (/\bmarketing\b/.test(t)) return true;
   const relevant = [
     "ecommerce", "e-commerce", "shopify", "email marketing", "digital marketing",
     "paid media", "paid social", "media buyer", "performance marketing",
     "google ads", "facebook ads", "meta ads", "klaviyo", "growth marketing",
     "marketing manager", "marketing specialist", "marketing coordinator",
+    "marketing analyst", "marketing associate", "marketing lead",
+    "social media manager", "social media specialist", "social media coordinator",
+    "content marketing", "brand manager", "brand marketing",
+    "campaign manager", "campaign specialist",
+    "customer acquisition", "acquisition marketing",
+    "advertising manager", "ads manager", "ads specialist",
     "crm", "retention", "sem", "seo", "ppc", "dtc",
   ];
   return relevant.some((kw) => t.includes(kw));
@@ -296,6 +310,27 @@ async function fetchJobDescription(page, url) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main() {
+  // --reset: mark all "ready" and "stale" rows as "stale" so we start fresh
+  if (RESET && !DRY_RUN) {
+    ensureTrackerExists();
+    const existing = readTracker();
+    let cleared = 0;
+    for (const row of existing) {
+      if (row.status === "ready" || row.status === "stale") {
+        row.status = "stale";
+        cleared++;
+      }
+    }
+    if (cleared > 0) {
+      const headers = ["company","title","url","location","work_type","tier",
+        "apply_method","date_found","date_applied","status","notes","skill_gaps"];
+      const lines = [headers.join(",")];
+      for (const row of existing) lines.push(headers.map((h) => csvEsc(row[h] ?? "")).join(","));
+      fs.writeFileSync(TRACKER, lines.join("\n") + "\n");
+      console.log(`🗑️  Reset: marked ${cleared} ready/stale jobs as stale — starting fresh.\n`);
+    }
+  }
+
   const readyNow = countReady();
   console.log(`\n🔍 Replenish — ${readyNow} ready jobs in tracker, target: ${TARGET}`);
 
